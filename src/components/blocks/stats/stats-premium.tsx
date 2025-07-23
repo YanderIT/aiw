@@ -224,11 +224,11 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
         transition-all duration-300 hover:shadow-lg
         ${compact ? 'p-6' : 'p-8'}
         ${stat.highlight ? 'md:scale-105' : ''}
-        ${stat.color === 'red' ? 'bg-red-50/50 dark:bg-red-950/10 hover:bg-red-50 dark:hover:bg-red-950/20 hover:border-red-200 dark:hover:border-red-900 hover:shadow-red-100/50 dark:hover:shadow-red-900/20' :
-          stat.color === 'blue' ? 'bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-blue-100/50 dark:hover:shadow-blue-900/20' :
-          stat.color === 'purple' ? 'bg-purple-50/50 dark:bg-purple-950/10 hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:border-purple-200 dark:hover:border-purple-900 hover:shadow-purple-100/50 dark:hover:shadow-purple-900/20' :
-          stat.color === 'orange' ? 'bg-orange-50/50 dark:bg-orange-950/10 hover:bg-orange-50 dark:hover:bg-orange-950/20 hover:border-orange-200 dark:hover:border-orange-900 hover:shadow-orange-100/50 dark:hover:shadow-orange-900/20' :
-          'bg-green-50/50 dark:bg-green-950/10 hover:bg-green-50 dark:hover:bg-green-950/20 hover:border-green-200 dark:hover:border-green-900 hover:shadow-green-100/50 dark:hover:shadow-green-900/20'}
+        ${stat.color === 'red' ? 'bg-gradient-to-br from-red-50 to-red-100 hover:border-red-300' :
+          stat.color === 'blue' ? 'bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-300' :
+          stat.color === 'purple' ? 'bg-gradient-to-br from-purple-50 to-purple-100 hover:border-purple-300' :
+          stat.color === 'orange' ? 'bg-gradient-to-br from-orange-50 to-orange-100 hover:border-orange-300' :
+          'bg-gradient-to-br from-green-50 to-green-100 hover:border-green-300'}
         group
       `}>
         {/* Subtle Pattern on Hover */}
@@ -242,11 +242,11 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
           <motion.div
             className={`
               inline-flex items-center justify-center w-10 h-10 rounded-lg mb-4
-              ${stat.color === 'red' ? 'text-red-600 dark:text-red-500' :
-                stat.color === 'blue' ? 'text-blue-600 dark:text-blue-500' :
-                stat.color === 'purple' ? 'text-purple-600 dark:text-purple-500' :
-                stat.color === 'orange' ? 'text-orange-600 dark:text-orange-500' :
-                'text-green-600 dark:text-green-500'}
+              ${stat.color === 'red' ? 'text-red-600' :
+                stat.color === 'blue' ? 'text-blue-600' :
+                stat.color === 'purple' ? 'text-purple-600' :
+                stat.color === 'orange' ? 'text-orange-600' :
+                'text-green-600'}
             `}
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.2 }}
@@ -287,9 +287,9 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/20">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-100">
               <div className="w-1 h-1 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-700 dark:text-red-400">热门</span>
+              <span className="text-xs font-medium text-red-700">热门</span>
             </div>
           </motion.div>
         )}

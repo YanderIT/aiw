@@ -74,7 +74,7 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
           <div className="absolute top-1/2 left-1/2 -translate-x-[175%] -translate-y-1/2 w-[80%] h-[80%] max-w-4xl">
             <spline-viewer 
               url="https://prod.spline.design/JdZgoBYW5zhBLimi/scene.splinecode"
-              style={{ width: '250%', height: '100%' }}
+              className="w-[250%] h-[180%] 2xl:h-full"
             />
           </div>
         </motion.div>
@@ -90,10 +90,11 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
             <div className="space-y-6">
               <h1 
                 ref={titleRef}
-                className="text-5xl lg:text-7xl xl:text-8xl font-extrabold leading-tight text-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold leading-tight text-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
                 style={{ visibility: "hidden" }}
               >
-                为留学申请打造的 AI 工作空间
+                <span className="block">为留学申请打造的</span>
+                <span className="block">AI 工作空间</span>
               </h1>
               
               <motion.p

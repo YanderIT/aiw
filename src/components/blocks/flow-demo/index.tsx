@@ -219,7 +219,7 @@ function FlowDemo() {
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
                 
                 {/* Content container */}
-                <div className="relative" style={{ height: '35vh' }}>
+                <div className="relative h-[75vh] 2xl:h-[35vh]">
                   {/* Inner sparkle particles */}
                   <div className="absolute inset-0 overflow-hidden rounded-2xl">
                     <div className="sparkle-1 absolute w-1 h-1 bg-white rounded-full animate-sparkle" style={{ top: '10%', left: '20%' }} />
@@ -256,7 +256,7 @@ function FlowDemo() {
                         <div className="absolute inset-0 rounded-[20px] bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                         
                         {/* Button container with proper alignment */}
-                        <div className="relative flex items-end gap-3 px-3 pb-2 pt-6" style={{ height: '76px' }}>
+                        <div className="relative flex items-end gap-1 px-3 pb-2 pt-6" style={{ height: '76px' }}>
                           {[
                             { icon: FileText, step: 0 },
                             { icon: Edit3, step: 1 },
@@ -298,8 +298,8 @@ function FlowDemo() {
                                   <div className={`
                                     relative overflow-hidden transition-all duration-300
                                     ${activeStep === step 
-                                      ? 'bg-gray-800/90 shadow-2xl rounded-[28px] ring-[1.5px] ring-inset ring-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]' 
-                                      : 'bg-white/5 hover:bg-white/10 rounded-[14px] ring-[1.5px] ring-inset ring-white/15'
+                                      ? 'bg-gray-800/90 shadow-2xl rounded-[28px] ring-[2px] ring-inset ring-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)]' 
+                                      : 'bg-white/5 hover:bg-white/10 rounded-[14px] ring-[2px] ring-inset ring-white/15'
                                     }
                                   `}>
                                     {/* Active state - outer black spread */}
@@ -318,7 +318,7 @@ function FlowDemo() {
                                       relative transition-all duration-300
                                       ${activeStep === step 
                                         ? 'px-6 pt-8 pb-4' 
-                                        : 'px-5 py-4 group-hover/btn:py-[18px]'
+                                        : 'px-5 py-5 group-hover/btn:py-[18px]'
                                       }
                                     `}>
                                   {/* Top highlight for depth */}
@@ -338,7 +338,7 @@ function FlowDemo() {
                                       relative z-10 transition-all duration-300
                                       ${activeStep === step 
                                         ? 'w-7 h-7 text-white transform -translate-y-1' 
-                                        : 'w-5 h-5 text-gray-400 group-hover/btn:text-white'
+                                        : 'w-6 h-6 text-gray-400 group-hover/btn:text-white'
                                       }
                                     `} />
                                   </div>

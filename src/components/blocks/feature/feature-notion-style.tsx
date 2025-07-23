@@ -164,12 +164,12 @@ function FeatureCard({ feature, index, large, wide }: FeatureCardProps) {
         relative overflow-hidden rounded-xl border border-transparent
         transition-all duration-300 hover:shadow-lg
         ${large ? 'h-[400px]' : wide ? 'h-[300px]' : 'h-[350px]'}
-        ${feature.color === 'red' ? 'bg-red-100/50 dark:bg-red-950/20 hover:border-red-300 dark:hover:border-red-800' :
-          feature.color === 'blue' ? 'bg-blue-100/50 dark:bg-blue-950/20   hover:border-blue-300 dark:hover:border-blue-800' :
-          feature.color === 'purple' ? 'bg-purple-50/50 dark:bg-purple-950/20  hover:border-purple-300 dark:hover:border-purple-800' :
-          feature.color === 'orange' ? 'bg-orange-100/50 dark:bg-orange-950/20  hover:border-orange-300 dark:hover:border-orange-800' :
-          feature.color === 'yellow' ? 'bg-yellow-100/50 dark:bg-yellow-950/20  hover:border-yellow-300 dark:hover:border-yellow-800' :
-          'bg-green-100/50 dark:bg-green-950/20  hover:border-green-300 dark:hover:border-green-800'}
+        ${feature.color === 'red' ? 'bg-gradient-to-br from-red-50 to-red-100 hover:border-red-300' :
+          feature.color === 'blue' ? 'bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-300' :
+          feature.color === 'purple' ? 'bg-gradient-to-br from-purple-50 to-purple-100 hover:border-purple-300' :
+          feature.color === 'orange' ? 'bg-gradient-to-br from-orange-50 to-orange-100 hover:border-orange-300' :
+          feature.color === 'yellow' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:border-yellow-300' :
+          'bg-gradient-to-br from-green-50 to-green-100 hover:border-green-300'}
       `}>
         {/* Subtle Pattern on Hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.02] transition-opacity duration-300">
@@ -183,12 +183,12 @@ function FeatureCard({ feature, index, large, wide }: FeatureCardProps) {
             <motion.div
               className={`
                 relative flex items-center justify-center w-10 h-10 rounded-lg
-                ${feature.color === 'red' ? 'text-red-600 dark:text-red-500' :
-                  feature.color === 'blue' ? 'text-blue-600 dark:text-blue-500' :
-                  feature.color === 'purple' ? 'text-purple-600 dark:text-purple-500' :
-                  feature.color === 'orange' ? 'text-orange-600 dark:text-orange-500' :
-                  feature.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-500' :
-                  'text-green-600 dark:text-green-500'}
+                ${feature.color === 'red' ? 'text-red-600  ' :
+                  feature.color === 'blue' ? 'text-blue-600  ' :
+                  feature.color === 'purple' ? 'text-purple-600  ' :
+                  feature.color === 'orange' ? 'text-orange-600  ' :
+                  feature.color === 'yellow' ? 'text-yellow-600  ' :
+                  'text-green-600  '}
               `}
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.2 }}
