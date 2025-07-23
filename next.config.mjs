@@ -43,5 +43,9 @@ const configWithMDX = {
 
 export default withBundleAnalyzer(withNextIntl(withMDX(configWithMDX)));
 
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+// Only initialize OpenNext Cloudflare in development mode
+if (process.env.NODE_ENV === 'development') {
+  import("@opennextjs/cloudflare").then(({ initOpenNextCloudflareForDev }) => {
+    initOpenNextCloudflareForDev();
+  });
+}
