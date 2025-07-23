@@ -20,7 +20,7 @@ import Pricing from "@/components/blocks/pricing";
 import Showcase from "@/components/blocks/showcase";
 import StatsPremium from "@/components/blocks/stats/stats-premium";
 import Testimonial from "@/components/blocks/testimonial";
-
+ 
 export default function LandingPageClient({ page }: { page: any }) {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -156,6 +156,9 @@ export default function LandingPageClient({ page }: { page: any }) {
             </ScrollReveal>
           </motion.div>
         )}
+        
+ 
+         
       </StaggerChildren>
     </SmoothScrollProvider>
   );

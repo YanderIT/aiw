@@ -133,7 +133,34 @@ export default function StatsPremium({ section }: { section: SectionType }) {
 
   return (
     <section id={section.name} className="py-24 relative overflow-hidden">
-      <div className="container">
+      {/* Linear-style Background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02]">
+          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="stats-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M0 40V0h40" fill="none" stroke="currentColor" strokeWidth="0.25" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#stats-grid)" />
+          </svg>
+        </div>
+        
+        {/* Linear-style Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
+        
+        {/* Subtle Light Beams */}
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-[#86f096]/10 to-transparent dark:via-[#86f096]/5" />
+        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-[#3dcd77]/10 to-transparent dark:via-[#3dcd77]/5" />
+        
+        {/* Soft Radial Gradients */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full 
+                        bg-gradient-to-r from-[#86f096]/10 to-[#3dcd77]/10 
+                        blur-[100px] opacity-40 dark:from-[#86f096]/5 dark:to-[#3dcd77]/5" />
+      </div>
+
+      <div className="container relative">
         {/* Header */}
         <motion.div 
           className="text-center mb-16"
@@ -143,43 +170,38 @@ export default function StatsPremium({ section }: { section: SectionType }) {
           viewport={{ once: true }}
         >
           <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.5, type: "spring" }}
+            initial={{ scale: 0.95, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-6"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md 
+                       bg-gradient-to-r from-[#86f096]/10 to-[#3dcd77]/10 
+                       backdrop-blur-sm border border-[#3dcd77]/20 dark:border-[#3dcd77]/10 mb-6"
           >
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">平台数据</span>
+            <TrendingUp className="w-3.5 h-3.5 text-[#3dcd77] dark:text-[#86f096]" />
+            <span className="text-xs font-medium text-[#3dcd77] dark:text-[#86f096]">平台数据</span>
           </motion.div>
           
-          <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             {section.title || "我们的用户遍布世界名校"}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             {section.description || "数据是我们实力最好的证明"}
           </p>
         </motion.div>
 
-        {/* Stats Grid - Premium Layout */}
+        {/* Stats Grid - Linear Layout */}
         <div ref={containerRef} className="relative">
-          {/* Background decoration */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid gap-6 lg:gap-8">
+          <div className="grid gap-4 lg:gap-5">
             {/* First Row - 3 Main Stats */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-4">
               {statsConfig.slice(0, 3).map((stat, index) => (
                 <StatsCard key={index} stat={stat} index={index} isInView={isInView} />
               ))}
             </div>
 
             {/* Second Row - 2 Secondary Stats */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4">
               {statsConfig.slice(3, 5).map((stat, index) => (
                 <StatsCard key={index + 3} stat={stat} index={index + 3} isInView={isInView} compact />
               ))}
@@ -206,63 +228,61 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
     <motion.div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
-        duration: 0.6,
-        delay: index * 0.1,
+        duration: 0.5,
+        delay: index * 0.08,
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
       whileHover={{ 
-        y: -2,
+        y: -1,
         transition: { duration: 0.2 }
       }}
       className="group relative"
     >
       <div className={`
-        relative overflow-hidden rounded-xl border border-transparent
-        transition-all duration-300 hover:shadow-lg
-        ${compact ? 'p-6' : 'p-8'}
-        ${stat.highlight ? 'md:scale-105' : ''}
-        ${stat.color === 'red' ? 'bg-gradient-to-br from-red-50 to-red-100 hover:border-red-300' :
-          stat.color === 'blue' ? 'bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-300' :
-          stat.color === 'purple' ? 'bg-gradient-to-br from-purple-50 to-purple-100 hover:border-purple-300' :
-          stat.color === 'orange' ? 'bg-gradient-to-br from-orange-50 to-orange-100 hover:border-orange-300' :
-          'bg-gradient-to-br from-green-50 to-green-100 hover:border-green-300'}
+        relative overflow-hidden rounded-xl
+        transition-all duration-300
+        ${compact ? 'p-6' : 'p-7'}
+        ${stat.highlight ? 'ring-1 ring-gray-200 dark:ring-gray-700' : ''}
+        bg-white dark:bg-gray-900
+        border border-gray-200 dark:border-gray-800
+        shadow-sm
+        hover:shadow-md
+        hover:border-gray-300 dark:hover:border-gray-700
         group
       `}>
-        {/* Subtle Pattern on Hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300">
-          <div className="absolute inset-0 bg-grid-pattern" />
+        {/* Linear-style Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02]">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/3 dark:to-[#3dcd77]/3" />
+        </div>
+
+        {/* Subtle Hover Gradient */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/3 dark:via-transparent dark:to-[#3dcd77]/3" />
         </div>
 
         {/* Content */}
         <div className="relative">
           {/* Icon */}
-          <motion.div
-            className={`
-              inline-flex items-center justify-center w-10 h-10 rounded-lg mb-4
-              ${stat.color === 'red' ? 'text-red-600' :
-                stat.color === 'blue' ? 'text-blue-600' :
-                stat.color === 'purple' ? 'text-purple-600' :
-                stat.color === 'orange' ? 'text-orange-600' :
-                'text-green-600'}
-            `}
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <IconComponent className="w-5 h-5" />
-          </motion.div>
+          <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-4
+                         bg-gradient-to-br from-[#86f096]/10 to-[#3dcd77]/10 dark:from-[#86f096]/5 dark:to-[#3dcd77]/5
+                         border border-[#3dcd77]/20 dark:border-[#3dcd77]/10
+                         group-hover:from-[#86f096]/20 group-hover:to-[#3dcd77]/20 dark:group-hover:from-[#86f096]/10 dark:group-hover:to-[#3dcd77]/10
+                         transition-all duration-200">
+            <IconComponent className="w-4 h-4 text-[#027c50]" />
+          </div>
 
           {/* Title */}
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
             {stat.title}
           </h3>
 
           {/* Number */}
           <div className={`
-            font-bold text-foreground mb-2
-            ${stat.small ? 'text-3xl lg:text-4xl' : 'text-4xl lg:text-5xl'}
+            font-semibold text-gray-900 dark:text-gray-100 mb-1
+            ${stat.small ? 'text-2xl lg:text-3xl' : 'text-3xl lg:text-4xl'}
           `}>
             <AnimatedCounter 
               value={stat.value} 
@@ -274,25 +294,27 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
           </div>
 
           {/* Unit */}
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500 dark:text-gray-500">
             {stat.unit}
           </p>
         </div>
 
-        {/* Highlight Badge */}
+        {/* Linear-style Highlight Indicator */}
         {stat.highlight && (
           <motion.div 
-            className="absolute top-4 right-4"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
+            className="absolute top-0 left-0 w-full h-0.5"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
           >
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-100">
-              <div className="w-1 h-1 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-700">热门</span>
-            </div>
+            <div className="h-full bg-gradient-to-r from-transparent via-[#3dcd77] to-transparent dark:via-[#86f096]" />
           </motion.div>
         )}
+
+        {/* Subtle Corner Accent */}
+        <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-[#86f096]/10 to-transparent dark:from-[#3dcd77]/10" />
+        </div>
       </div>
     </motion.div>
   );
