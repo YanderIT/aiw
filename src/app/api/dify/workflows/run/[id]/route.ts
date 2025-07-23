@@ -4,10 +4,10 @@ import { difyService, DifyFunctionType } from '@/services/dify';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { searchParams } = new URL(req.url);
     const functionType = (searchParams.get('function_type') || 'default') as DifyFunctionType;
 
