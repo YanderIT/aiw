@@ -184,7 +184,7 @@ export default function StatsCircular({ section }: { section: SectionType }) {
           animate={{ opacity: 0.5 }}
           transition={{ duration: 2 }}
         >
-          {[...Array(5)].map((_, i) => (
+          {[...Array(5)].map((_: unknown, i: number) => (
             <motion.div
               key={i}
               className="absolute rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20"

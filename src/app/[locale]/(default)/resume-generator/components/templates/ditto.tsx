@@ -268,7 +268,7 @@ const Sidebar = ({ resume, theme, layoutConfiguration }: {
               {sections.languages?.items?.map((item) => (
                 <div key={item.id}>
                   {item.name === 'Other Languages' && item.description ? (
-                    item.description.split(',').map((lang, index) => (
+                    item.description.split(',').map((lang: string, index: number) => (
                       <div key={index} className="mb-1">
                         <span className="font-bold" style={{ fontSize: '16px', color: '#333333' }}>{lang.trim()}</span>
                       </div>

@@ -192,9 +192,9 @@ export const ThemeColorPicker: React.FC<ThemeColorPickerProps> = ({
                   {selectedColorScale && (
                     <div className="flex gap-1">
                       {Object.entries(selectedColorScale)
-                        .filter(([scale]) => Math.abs(parseInt(scale) - parseInt(colorScale)) <= 100)
+                        .filter(([scale]: [string, any]) => Math.abs(parseInt(scale) - parseInt(colorScale)) <= 100)
                         .slice(0, 3)
-                        .map(([scale, color]) => (
+                        .map(([scale, color]: [string, any]) => (
                           <div
                             key={scale}
                             className="w-4 h-4 rounded-full border border-white shadow-sm"

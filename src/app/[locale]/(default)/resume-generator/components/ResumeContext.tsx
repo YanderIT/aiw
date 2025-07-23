@@ -477,7 +477,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const removeWorkExperience = (index: number) => {
     setData(prev => ({
       ...prev,
-      workExperience: prev.workExperience.filter((_, i) => i !== index)
+      workExperience: prev.workExperience.filter((_: WorkExperienceData, i: number) => i !== index)
     }));
   };
 
@@ -510,7 +510,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const removeResearch = (index: number) => {
     setData(prev => ({
       ...prev,
-      research: prev.research.filter((_, i) => i !== index)
+      research: prev.research.filter((_: ResearchData, i: number) => i !== index)
     }));
   };
 
@@ -542,7 +542,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const removeActivity = (index: number) => {
     setData(prev => ({
       ...prev,
-      activities: prev.activities.filter((_, i) => i !== index)
+      activities: prev.activities.filter((_: ActivitiesData, i: number) => i !== index)
     }));
   };
 
@@ -573,7 +573,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const removeAward = (index: number) => {
     setData(prev => ({
       ...prev,
-      awards: prev.awards.filter((_, i) => i !== index)
+      awards: prev.awards.filter((_: AwardsData, i: number) => i !== index)
     }));
   };
 
@@ -622,7 +622,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
     switch (moduleId) {
       case 'header':
-        Object.entries(requiredFields).forEach(([key, label]) => {
+        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
           if (!data.header[key as keyof HeaderData]?.trim()) {
             missing.push(label);
           }
@@ -630,7 +630,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         break;
 
       case 'education':
-        Object.entries(requiredFields).forEach(([key, label]) => {
+        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
           if (!data.education[key as keyof EducationData]?.trim()) {
             missing.push(label);
           }
@@ -643,7 +643,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         } else {
           // 检查第一个工作经历的必填字段
           const firstExp = data.workExperience[0];
-          Object.entries(requiredFields).forEach(([key, label]) => {
+          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
             if (!firstExp[key as keyof WorkExperienceData]?.trim()) {
               missing.push(label);
             }
@@ -657,7 +657,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         } else {
           // 检查第一个研究项目的必填字段
           const firstResearch = data.research[0];
-          Object.entries(requiredFields).forEach(([key, label]) => {
+          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
             if (!firstResearch[key as keyof ResearchData]?.trim()) {
               missing.push(label);
             }
@@ -671,7 +671,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         } else {
           // 检查第一个活动的必填字段
           const firstActivity = data.activities[0];
-          Object.entries(requiredFields).forEach(([key, label]) => {
+          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
             if (!firstActivity[key as keyof ActivitiesData]?.trim()) {
               missing.push(label);
             }
@@ -685,7 +685,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         } else {
           // 检查第一个奖项的必填字段
           const firstAward = data.awards[0];
-          Object.entries(requiredFields).forEach(([key, label]) => {
+          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
             if (!firstAward[key as keyof AwardsData]?.trim()) {
               missing.push(label);
             }
@@ -694,7 +694,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         break;
 
       case 'skillsLanguage':
-        Object.entries(requiredFields).forEach(([key, label]) => {
+        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
           if (!data.skillsLanguage[key as keyof SkillsLanguageData]?.trim()) {
             missing.push(label);
           }

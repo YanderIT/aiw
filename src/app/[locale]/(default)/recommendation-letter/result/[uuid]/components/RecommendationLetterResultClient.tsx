@@ -1014,7 +1014,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                     {/* 如果开启了修改功能，显示可编辑的段落 */}
                     {!(serverRevisionStatus !== null ? serverRevisionStatus : hasUsedFreeRevision()) && generationState.generatedContent ? (
                       <div className="space-y-4">
-                        {displayContent.split('\n\n').map((paragraph, index) => (
+                        {displayContent.split('\n\n').map((paragraph: string, index: number) => (
                           <ParagraphRevision
                             key={index}
                             paragraph={paragraph}

@@ -340,7 +340,7 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     if (typeof moduleData !== 'object' || moduleData === null || moduleId === 'moduleSelection') return [];
 
     const missing: string[] = [];
-    Object.entries(requiredFields).forEach(([field, label]) => {
+    Object.entries(requiredFields).forEach(([field, label]: [string, string]) => {
       const value = (moduleData as any)[field];
       if (typeof value !== 'string' || value.trim() === '') {
         missing.push(label);

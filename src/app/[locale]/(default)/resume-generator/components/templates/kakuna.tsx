@@ -364,7 +364,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
               {sections.languages?.items?.map((item) => (
                 <div key={item.id}>
                   {item.name === 'Other Languages' && item.description ? (
-                    item.description.split(',').map((lang, index) => (
+                    item.description.split(',').map((lang: string, index: number) => (
                       <span key={index} className="inline-block mr-3 mb-1">
                         <span className="font-bold text-xl">{lang.trim()}</span>
                       </span>

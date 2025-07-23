@@ -66,7 +66,7 @@ export default function DataCharts({
     }
   }, [isMobile]);
 
-  const chartConfig = fields.reduce((acc, field) => {
+  const chartConfig = fields.reduce((acc: ChartConfig, field: typeof fields[0]) => {
     acc[field.key] = {
       label: field.label,
       color: field.color || "var(--primary)",
@@ -74,7 +74,7 @@ export default function DataCharts({
     return acc;
   }, {} as ChartConfig);
 
-  const filteredData = data.filter((item) => {
+  const filteredData = data.filter((item: typeof data[0]) => {
     const date = new Date(item.date);
     const referenceDate = new Date(data[data.length - 1].date);
     let daysToSubtract = 90;

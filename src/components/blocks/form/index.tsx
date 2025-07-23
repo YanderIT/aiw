@@ -116,7 +116,7 @@ export default function ({
 
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
+      Object.entries(data).forEach(([key, value]: [string, string]) => {
         formData.append(key, value);
       });
 
