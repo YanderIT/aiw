@@ -120,14 +120,14 @@ export const CompactThemeColorPicker: React.FC<CompactThemeColorPickerProps> = (
             {/* 当前选中的颜色 */}
             <div 
               className="w-8 h-8 rounded-full border-2 border-white shadow-md ring-2 ring-blue-200"
-              style={{ backgroundColor: COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as keyof typeof COLOR_SCALES['blue']] }}
+              style={{ backgroundColor: COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as unknown as keyof typeof COLOR_SCALES['blue']] }}
             />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-900">
                 {currentFamilyData?.displayName} {currentColorScale}
               </span>
               <span className="text-xs text-gray-600">
-                {COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as keyof typeof COLOR_SCALES['blue']]?.toUpperCase()}
+                {COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as unknown as keyof typeof COLOR_SCALES['blue']]?.toUpperCase()}
               </span>
             </div>
           </div>

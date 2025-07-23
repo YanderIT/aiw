@@ -35,28 +35,38 @@ import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
+import { GlobalLoading } from "@/components/ui/loading";
+import { useState } from "react";
 
 export default function Header({ header }: { header: HeaderType }) {
   const { data: session } = useSession();
   const { setShowSignModal } = useAppContext();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   if (header.disabled) {
     return null;
   }
 
-  const handleCreationCenterClick = (e: React.MouseEvent) => {
+  const handleCreationCenterClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!session) {
       setShowSignModal(true);
     } else {
+      setIsLoading(true);
+      // 添加一个小延迟让 loading 动画显示
+      await new Promise(resolve => setTimeout(resolve, 300));
       router.push("/creation-center");
+      // 页面加载完成后，loading 会自动消失
+      setTimeout(() => setIsLoading(false), 1500);
     }
   };
 
   return (
-    <section className="py-3">
-      <div className="container">
+    <>
+      <GlobalLoading isVisible={isLoading} />
+      <section className="py-3">
+        <div className="container">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <Link
@@ -355,5 +365,6 @@ export default function Header({ header }: { header: HeaderType }) {
         </div>
       </div>
     </section>
+    </>
   );
 }

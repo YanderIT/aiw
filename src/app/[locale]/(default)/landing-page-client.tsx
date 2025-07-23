@@ -14,7 +14,6 @@ import Feature1Enhanced from "@/components/blocks/feature1/feature1-enhanced";
 import Feature2 from "@/components/blocks/feature2";
 import Feature3 from "@/components/blocks/feature3";
 import FlowDemo from "@/components/blocks/flow-demo";
-import HeroEnhanced from "@/components/blocks/hero/hero-enhanced";
 import HeroSpline from "@/components/blocks/hero/hero-spline";
 import HeroSplineCentered from "@/components/blocks/hero/hero-spline-centered";
 import Pricing from "@/components/blocks/pricing";

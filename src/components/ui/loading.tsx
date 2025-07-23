@@ -1,8 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import Script from 'next/script';
+
+// Declare the custom element type for Spline viewer
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'spline-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        url?: string;
+      }, HTMLElement>;
+    }
+  }
+}
 
 interface LoadingProps {
   className?: string;
@@ -76,16 +88,24 @@ export function GlobalLoading({ isVisible }: { isVisible: boolean }) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-300">
-      {/* 渐变背景遮罩 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/98 via-background/95 to-background/98 backdrop-blur-lg" />
-      
-      {/* 背景装饰圆圈 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/6 w-32 h-32 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/6 w-24 h-24 bg-gradient-to-l from-primary/8 to-transparent rounded-full blur-lg animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-primary/3 to-transparent rounded-full blur-3xl animate-pulse delay-500" />
-      </div>
+    <>
+      <Script
+        type="module"
+        src="https://unpkg.com/@splinetool/viewer@1.10.35/build/spline-viewer.js"
+        strategy="lazyOnload"
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-300">
+        {/* Spline 3D 背景 */}
+        <div className="absolute inset-0 w-full h-full">
+          <spline-viewer 
+            url="https://prod.spline.design/YFEMfsdvjo6yr8Tu/scene.splinecode"
+            className="w-full h-full"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+        
+        {/* 渐变背景遮罩 - 确保内容可见 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/70 to-background/80 backdrop-blur-sm" />
       
       {/* Loading卡片 */}
       <div className="relative z-10 animate-in zoom-in-95 duration-500 delay-100">
@@ -112,5 +132,6 @@ export function GlobalLoading({ isVisible }: { isVisible: boolean }) {
         <div className="absolute top-2/3 right-1/6 w-2 h-2 bg-primary/25 rounded-full animate-bounce delay-800" style={{animationDuration: "3.8s"}} />
       </div>
     </div>
+    </>
   );
 } 

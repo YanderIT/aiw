@@ -126,7 +126,9 @@ const DraggableModuleItem = ({
 
   return (
     <div
-      ref={(node) => drag(drop(node))}
+      ref={(node) => {
+        drag(drop(node));
+      }}
       className={`
         flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm
         cursor-move transition-all duration-200 hover:shadow-md

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { insertDocument, updateDocument, findDocumentByUuid, DocumentType } from "@/models/document";
 import { findUserByEmail } from "@/models/user";
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +21,8 @@ export async function POST(request: Request) {
 
     // Create initial document with empty content
     const document = await insertDocument({
-      user_uuid: user.uuid,
+      uuid: uuidv4(),
+      user_uuid: user.uuid!,
       document_type: document_type as DocumentType,
       title,
       form_data,

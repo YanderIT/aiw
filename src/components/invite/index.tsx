@@ -84,11 +84,16 @@ export default function Invite({ summary }: { summary: any }) {
               <span className="text-3xl font-bold">
                 {user.invite_code || "NOT SET"}
               </span>
-              <Icon
-                name="RiEditLine"
-                className="text-primary text-xl cursor-pointer"
+              <button
                 onClick={() => setOpen(true)}
-              />
+                className="p-0 border-0 bg-transparent"
+                type="button"
+              >
+                <Icon
+                  name="RiEditLine"
+                  className="text-primary text-xl cursor-pointer"
+                />
+              </button>
             </div>
             {user.invite_code && (
               <CopyToClipboard

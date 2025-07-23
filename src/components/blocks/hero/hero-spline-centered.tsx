@@ -32,17 +32,19 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
 
       const { words } = splitText(titleRef.current);
 
-      // Animate the words
-      animate(
-        words,
-        { opacity: [0, 1], y: [20, 0], filter: ["blur(10px)", "blur(0px)"] },
-        {
-          type: "spring",
-          duration: 1.5,
-          bounce: 0,
-          delay: stagger(0.05, { start: 0.2 }),
-        }
-      );
+      // Animate the words with initial delay
+      words.forEach((word, index) => {
+        animate(
+          word,
+          { opacity: [0, 1], y: [20, 0], filter: ["blur(10px)", "blur(0px)"] },
+          {
+            type: "spring",
+            duration: 1.5,
+            bounce: 0,
+            delay: 0.2 + index * 0.05, // 0.2s initial delay + stagger
+          }
+        );
+      });
     });
   }, []);
 

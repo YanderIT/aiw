@@ -421,7 +421,6 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
             name: 'English',
             description: data.skillsLanguage.english_level,
             level: 0,
-            keywords: [],
             visible: true
           }] : []),
           ...(data.skillsLanguage.native_language ? [{
@@ -429,7 +428,6 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
             name: data.skillsLanguage.native_language,
             description: 'Native',
             level: 5,
-            keywords: [],
             visible: true
           }] : []),
           ...(data.skillsLanguage.other_languages ? [{
@@ -437,11 +435,10 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
             name: 'Other Languages',
             description: data.skillsLanguage.other_languages,
             level: 0,
-            keywords: [],
             visible: true
           }] : [])
         ],
-        visible: data.moduleSelection.skillsLanguage && (data.skillsLanguage.english_level || data.skillsLanguage.native_language || data.skillsLanguage.other_languages),
+        visible: data.moduleSelection.skillsLanguage && !!(data.skillsLanguage.english_level || data.skillsLanguage.native_language || data.skillsLanguage.other_languages),
         columns: 1
       },
       certifications: {

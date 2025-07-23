@@ -90,7 +90,7 @@ export default function Hero({ hero }: { hero: HeroType }) {
                       href={item.url as any}
                       target={item.target || ""}
                       className="flex items-center"
-                      onClick={(e) => handleButtonClick(e, item.url)}
+                      onClick={(e) => handleButtonClick(e, item.url || '')}
                     >
                       <Button
                         className="w-full"
