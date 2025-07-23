@@ -408,7 +408,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
           </Section>
         );
       case 'projects':
-        const projectsSection = sections.projects || sections.research;
+        const projectsSection = sections.projects;
         return (
           <Section section={projectsSection} title="Projects">
             {projectsSection?.items?.map((item) => (
