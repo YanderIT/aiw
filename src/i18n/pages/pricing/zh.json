@@ -1,0 +1,145 @@
+{
+  "pricing": {
+    "name": "pricing",
+    "label": "定价",
+    "title": "定价",
+    "description": "选择适合您的AI学术服务套餐，助力您的学术申请之路。",
+    "groups": [],
+    "items": [
+      {
+        "title": "分享有礼",
+        "description": "一人分享，多人受益；分享您的邀请码给更多用户，以获取积分奖励。",
+        "features_title": "支持功能",
+        "features": [
+          "选校",
+          "个人陈述", 
+          "自动筛选",
+          "实习信",
+          "简历",
+          "基于AI的中文工具整理服务",
+          "专家调色（含去AI化）",
+          "一对一留学咨询",
+          "专家定制服务"
+        ],
+        "interval": "one-time",
+        "amount": 0,
+        "cn_amount": 0,
+        "currency": "USD",
+        "price": "$0",
+        "unit": "/50积分",
+        "is_featured": false,
+        "tip": "",
+        "button": {
+          "title": "立即分享",
+          "url": "/#pricing",
+          "icon": "RiShareFill"
+        },
+        "product_id": "free",
+        "product_name": "分享有礼套餐",
+        "credits": 50,
+        "valid_months": 1
+      },
+      {
+        "title": "基础",
+        "description": "适合需要基础一些内容的申请资料的用户，以及想要赚点零花钱的用户",
+        "label": "推荐",
+        "features_title": "支持功能",
+        "features": [
+          "选校",
+          "个人陈述",
+          "自动筛选", 
+          "实习信",
+          "简历",
+          "基于AI的中文工具整理服务",
+          "专家调色（含去AI化）",
+          "一对一留学咨询",
+          "专家定制服务"
+        ],
+        "interval": "one-time",
+        "amount": 1000,
+        "cn_amount": 10000,
+        "currency": "USD",
+        "price": "$10",
+        "unit": "/100积分起",
+        "is_featured": true,
+        "tip": "",
+        "button": {
+          "title": "立即购买",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "basic",
+        "product_name": "基础套餐",
+        "credits": 100,
+        "valid_months": 3
+      },
+      {
+        "title": "订阅",
+        "description": "适合需要第3阶以上大学申请的用户，如文书工作室，留学机构等长期有大需求的用户",
+        "label": "超值",
+        "features_title": "支持功能",
+        "features": [
+          "选校",
+          "个人陈述",
+          "自动筛选",
+          "实习信", 
+          "简历",
+          "基于AI的中文工具整理服务",
+          "专家调色（含去AI化）",
+          "一对一留学咨询",
+          "专家定制服务"
+        ],
+        "interval": "monthly",
+        "amount": 9900,
+        "cn_amount": 69900,
+        "currency": "USD",
+        "price": "$99",
+        "unit": "/月（2000积分）起",
+        "is_featured": false,
+        "tip": "",
+        "button": {
+          "title": "立即订阅",
+          "url": "/#pricing",
+          "icon": "RiVipCrownFill"
+        },
+        "product_id": "subscription",
+        "product_name": "订阅套餐",
+        "credits": 2000,
+        "valid_months": 1
+      },
+      {
+        "title": "专家服务",
+        "description": "具体服务信息咨询我们下单",
+        "features_title": "支持功能",
+        "features": [
+          "选校",
+          "个人陈述",
+          "自动筛选",
+          "实习信",
+          "简历", 
+          "基于AI的中文工具整理服务",
+          "专家调色（含去AI化）",
+          "一对一留学咨询",
+          "专家定制服务"
+        ],
+        "interval": "custom",
+        "amount": 0,
+        "cn_amount": 0,
+        "currency": "USD",
+        "price": "",
+        "unit": "我们提供一系列的留学家教服务，里面定制化的留学服务，专业申请过程中的各种管理。",
+        "is_featured": false,
+        "tip": "",
+        "button": {
+          "title": "咨询服务",
+          "url": "/#pricing",
+          "icon": "RiCustomerService2Fill"
+        },
+        "product_id": "expert",
+        "product_name": "专家服务",
+        "credits": 0,
+        "valid_months": 12
+      }
+    ]
+  }
+}
