@@ -42,6 +42,7 @@ function ConfirmationPage() {
   const t = useTranslations();
   const router = useRouter();
   const { 
+    data,
     getConfirmationData, 
     getIncompleteSelections, 
     canGenerate, 
@@ -52,11 +53,41 @@ function ConfirmationPage() {
   } = useResume();
   
   // 处理生成按钮点击
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     // 设置loading状态
     setGenerationLoading(true);
-    // 跳转到结果页面，带上自动生成参数
-    router.push('resume-generator/result?autoGenerate=true');
+    
+    try {
+      // Create a new resume document
+      const response = await fetch('/api/documents/resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resumeData: data,
+          template: data.selectedTemplate,
+          themeColor: data.themeColor,
+          layoutConfiguration: data.layoutConfiguration,
+          moduleSelection: data.moduleSelection
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create resume document');
+      }
+
+      const result = await response.json();
+      
+      if (result.data?.uuid) {
+        // Redirect to edit page with the new document UUID
+        router.push(`resume-generator/edit/${result.data.uuid}`);
+      } else {
+        throw new Error('No document UUID returned');
+      }
+    } catch (error) {
+      console.error('Error creating resume:', error);
+      setGenerationLoading(false);
+      // You might want to show an error toast here
+    }
   };
   
   const confirmationData = getConfirmationData();
@@ -317,8 +348,8 @@ function ResumeGeneratorContent() {
                   
                   return (
                     <div key={module.id} className="group">
-                      <button
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative ${
+                      <div
+                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative cursor-pointer ${
                           activeModule === module.id
                             ? "bg-primary text-primary-foreground shadow-lg"
                             : isSelected
@@ -359,7 +390,7 @@ function ResumeGeneratorContent() {
                             <Square className="w-4 h-4" />
                           )}
                         </button>
-                      </button>
+                      </div>
                     </div>
                   );
                 })}

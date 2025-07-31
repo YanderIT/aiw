@@ -77,7 +77,7 @@ export class Storage {
       key: res.Key,
       filename: res.Key?.split("/").pop(),
       url: process.env.STORAGE_DOMAIN
-        ? `${process.env.STORAGE_DOMAIN}/${res.Key}`
+        ? `https://${process.env.STORAGE_DOMAIN}/${res.Key}`
         : res.Location,
     };
   }

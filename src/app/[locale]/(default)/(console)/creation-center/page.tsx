@@ -1,13 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { getUserInfo } from "@/services/user";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { Icon } from "@/components/icon";
 import Link from "next/link";
+import { CreationToolCard } from "@/components/console/CreationToolCard";
+import { AnimatedDivider } from "@/components/ui/animated-divider";
 
 export default async function CreationCenterPage() {
   const t = await getTranslations();
@@ -36,20 +35,20 @@ export default async function CreationCenterPage() {
     //   category: "featured"
     // },
     {
-      icon: "personal-statement-write",
-      title: "个人陈述撰写",
-      description: "我们提供专业顾问的专业工具，包含文档/推荐信/个人陈述等关键问题",
-      price: 100,
-      category: "featured",
-      url: undefined
-    },
-    {
       icon: "one-on-one-consulting",
       title: "1对1留学咨询",
       description: "您此时此刻的疑惑可能无数人都曾经历过，不妨和过来人聊一聊，我们会根据您的问题匹配最专业对口的老师以确保您有所收获",
       price: null,
       category: "featured",
       url: undefined
+    },
+    {
+      icon: "resume-generate",
+      title: "简历生成",
+      description: "AI智能简历生成器，根据您的个人信息、教育背景、工作经验等自动生成专业的简历模板，支持多种格式导出",
+      price: 80,
+      category: "resume",
+      url: "/resume-generator"
     }
   ];
 
@@ -142,7 +141,7 @@ export default async function CreationCenterPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-card">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-foreground mb-2">
@@ -162,24 +161,14 @@ export default async function CreationCenterPage() {
             </div> */}
           </div>
         </div>
+        
+        {/* Animated Divider */}
+        <AnimatedDivider className="mb-0" height="2px" />
       </div>
 
       {/* Navigation Categories */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap justify-center gap-6">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={category.active ? "default" : "ghost"}
-                className={category.active ? "bg-primary text-primary-foreground" : ""}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+       
+
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -188,41 +177,15 @@ export default async function CreationCenterPage() {
           <h2 className="text-2xl font-bold text-foreground mb-6">精选</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featuredTools.map((tool, index) => (
-              tool.url ? (
-                <Link key={index} href={tool.url}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-4">
-                        <Icon name={tool.icon} size={48} />
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold">
-                            {tool.title}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {tool.description}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ) : (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <Icon name={tool.icon} size={48} />
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold">
-                          {tool.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          {tool.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              )
+              <CreationToolCard
+                key={index}
+                icon={tool.icon}
+                title={tool.title}
+                description={tool.description}
+                price={tool.price}
+                url={tool.url}
+                index={index}
+              />
             ))}
           </div>
         </div>
@@ -232,55 +195,15 @@ export default async function CreationCenterPage() {
           <h2 className="text-2xl font-bold text-foreground mb-6">陈述文书</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {documentTools.map((tool, index) => (
-              tool.url ? (
-                <Link key={index} href={tool.url}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-4">
-                        <Icon name={tool.icon} size={48} />
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold">
-                            {tool.title}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {tool.description}
-                          </CardDescription>
-                          {tool.price && (
-                            <div className="mt-3">
-                              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                                💰 {tool.price}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ) : (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <Icon name={tool.icon} size={48} />
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold">
-                          {tool.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          {tool.description}
-                        </CardDescription>
-                        {tool.price && (
-                          <div className="mt-3">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary">
-                              💰 {tool.price}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              )
+              <CreationToolCard
+                key={index}
+                icon={tool.icon}
+                title={tool.title}
+                description={tool.description}
+                price={tool.price}
+                url={tool.url}
+                index={index}
+              />
             ))}
           </div>
         </div>
@@ -290,55 +213,15 @@ export default async function CreationCenterPage() {
           <h2 className="text-2xl font-bold text-foreground mb-6">推荐信</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recommendationTools.map((tool, index) => (
-              tool.url ? (
-                <Link key={index} href={tool.url}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-4">
-                        <Icon name={tool.icon} size={48} />
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold">
-                            {tool.title}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {tool.description}
-                          </CardDescription>
-                          {tool.price && (
-                            <div className="mt-3">
-                              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                                💰 {tool.price}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ) : (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <Icon name={tool.icon} size={48} />
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold">
-                          {tool.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          {tool.description}
-                        </CardDescription>
-                        {tool.price && (
-                          <div className="mt-3">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary">
-                              💰 {tool.price}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              )
+              <CreationToolCard
+                key={index}
+                icon={tool.icon}
+                title={tool.title}
+                description={tool.description}
+                price={tool.price}
+                url={tool.url}
+                index={index}
+              />
             ))}
           </div>
         </div>
@@ -348,55 +231,15 @@ export default async function CreationCenterPage() {
           <h2 className="text-2xl font-bold text-foreground mb-6">简历</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {resumeTools.map((tool, index) => (
-              tool.url ? (
-                <Link key={index} href={tool.url}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-4">
-                        <Icon name={tool.icon} size={48} />
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold">
-                            {tool.title}
-                          </CardTitle>
-                          <CardDescription className="mt-2">
-                            {tool.description}
-                          </CardDescription>
-                          {tool.price && (
-                            <div className="mt-3">
-                              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                                💰 {tool.price}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ) : (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <Icon name={tool.icon} size={48} />
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold">
-                          {tool.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                          {tool.description}
-                        </CardDescription>
-                        {tool.price && (
-                          <div className="mt-3">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary">
-                              💰 {tool.price}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              )
+              <CreationToolCard
+                key={index}
+                icon={tool.icon}
+                title={tool.title}
+                description={tool.description}
+                price={tool.price}
+                url={tool.url}
+                index={index}
+              />
             ))}
           </div>
         </div>

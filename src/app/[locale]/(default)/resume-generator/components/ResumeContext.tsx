@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 // 定义所有模块的数据结构
 export interface HeaderData {
@@ -11,6 +11,10 @@ export interface HeaderData {
   phone: string;
   linkedin: string;
   github: string;
+  profilePicture?: {
+    url: string;
+    key: string;
+  };
 }
 
 export interface EducationData {
@@ -175,6 +179,15 @@ interface GenerationState {
   error: string | null;
 }
 
+// 文档管理状态
+interface DocumentState {
+  documentUuid: string | null;
+  lastSavedAt: Date | null;
+  isSaving: boolean;
+  isLoading: boolean;
+  saveError: string | null;
+}
+
 interface ResumeContextType {
   data: ResumeData;
   updateHeaderData: (data: Partial<HeaderData>) => void;
@@ -223,6 +236,11 @@ interface ResumeContextType {
   generationState: GenerationState;
   setGenerationLoading: (loading: boolean) => void;
   setGenerationError: (error: string | null) => void;
+  // 新增：文档管理
+  documentState: DocumentState;
+  saveDocument: () => Promise<void>;
+  loadDocument: (uuid: string) => Promise<void>;
+  setDocumentUuid: (uuid: string | null) => void;
 }
 
 const defaultResumeData: ResumeData = {
@@ -233,7 +251,8 @@ const defaultResumeData: ResumeData = {
     email: '',
     phone: '',
     linkedin: '',
-    github: ''
+    github: '',
+    profilePicture: undefined
   },
   education: {
     school_name: '',
@@ -285,6 +304,13 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     isGenerating: false,
     error: null
   });
+  const [documentState, setDocumentState] = useState<DocumentState>({
+    documentUuid: null,
+    lastSavedAt: null,
+    isSaving: false,
+    isLoading: false,
+    saveError: null
+  });
 
   // 从缓存加载数据
   const loadFromCache = () => {
@@ -327,8 +353,13 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   };
 
   // 组件初始化时加载缓存数据
+  // 但如果在编辑页面，不应该加载缓存
   useEffect(() => {
-    loadFromCache();
+    // 检查 URL 是否包含 /edit/ 路径
+    const isEditPage = typeof window !== 'undefined' && window.location.pathname.includes('/resume-generator/edit/');
+    if (!isEditPage) {
+      loadFromCache();
+    }
   }, []);
 
   // 数据变化时自动保存到缓存
@@ -623,7 +654,10 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     switch (moduleId) {
       case 'header':
         Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          if (!data.header[key as keyof HeaderData]?.trim()) {
+          const value = data.header[key as keyof HeaderData];
+          if (typeof value === 'string' && !value.trim()) {
+            missing.push(label);
+          } else if (!value) {
             missing.push(label);
           }
         });
@@ -631,7 +665,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
       case 'education':
         Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          if (!data.education[key as keyof EducationData]?.trim()) {
+          const value = data.education[key as keyof EducationData];
+          if (typeof value === 'string' && !value.trim()) {
             missing.push(label);
           }
         });
@@ -644,7 +679,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
           // 检查第一个工作经历的必填字段
           const firstExp = data.workExperience[0];
           Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            if (!firstExp[key as keyof WorkExperienceData]?.trim()) {
+            const value = firstExp[key as keyof WorkExperienceData];
+            if (typeof value === 'string' && !value.trim()) {
               missing.push(label);
             }
           });
@@ -658,7 +694,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
           // 检查第一个研究项目的必填字段
           const firstResearch = data.research[0];
           Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            if (!firstResearch[key as keyof ResearchData]?.trim()) {
+            const value = firstResearch[key as keyof ResearchData];
+            if (typeof value === 'string' && !value.trim()) {
               missing.push(label);
             }
           });
@@ -672,7 +709,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
           // 检查第一个活动的必填字段
           const firstActivity = data.activities[0];
           Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            if (!firstActivity[key as keyof ActivitiesData]?.trim()) {
+            const value = firstActivity[key as keyof ActivitiesData];
+            if (typeof value === 'string' && !value.trim()) {
               missing.push(label);
             }
           });
@@ -686,7 +724,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
           // 检查第一个奖项的必填字段
           const firstAward = data.awards[0];
           Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            if (!firstAward[key as keyof AwardsData]?.trim()) {
+            const value = firstAward[key as keyof AwardsData];
+            if (typeof value === 'string' && !value.trim()) {
               missing.push(label);
             }
           });
@@ -695,7 +734,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
       case 'skillsLanguage':
         Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          if (!data.skillsLanguage[key as keyof SkillsLanguageData]?.trim()) {
+          const value = data.skillsLanguage[key as keyof SkillsLanguageData];
+          if (typeof value === 'string' && !value.trim()) {
             missing.push(label);
           }
         });
@@ -797,6 +837,151 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     setGenerationState(prev => ({ ...prev, error }));
   };
 
+  // 文档管理方法
+  const setDocumentUuid = useCallback((uuid: string | null) => {
+    setDocumentState(prev => ({ ...prev, documentUuid: uuid }));
+  }, []);
+
+  const saveDocument = async () => {
+    console.log('[ResumeContext] saveDocument called, documentUuid:', documentState.documentUuid);
+    try {
+      setDocumentState(prev => ({ ...prev, isSaving: true, saveError: null }));
+
+      const payload = {
+        uuid: documentState.documentUuid,
+        resumeData: data,
+        template: data.selectedTemplate,
+        themeColor: data.themeColor,
+        layoutConfiguration: data.layoutConfiguration,
+        moduleSelection: data.moduleSelection,
+        title: data.header.full_name ? `${data.header.full_name}的简历` : '未命名简历'
+      };
+
+      console.log('[ResumeContext] Saving with payload:', payload);
+
+      let response;
+      if (documentState.documentUuid) {
+        // Update existing document
+        console.log('[ResumeContext] Updating existing document');
+        response = await fetch(`/api/documents/resume/${documentState.documentUuid}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // Create new document
+        response = await fetch('/api/documents/resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to save document');
+      }
+
+      const result = await response.json();
+      console.log('[ResumeContext] Save response:', result);
+      
+      if (!documentState.documentUuid && result.data?.uuid) {
+        console.log('[ResumeContext] Setting new document UUID:', result.data.uuid);
+        setDocumentUuid(result.data.uuid);
+      }
+
+      setDocumentState(prev => ({
+        ...prev,
+        isSaving: false,
+        lastSavedAt: new Date(),
+        saveError: null
+      }));
+      console.log('[ResumeContext] Save completed successfully');
+    } catch (error) {
+      console.error('Error saving document:', error);
+      setDocumentState(prev => ({
+        ...prev,
+        isSaving: false,
+        saveError: error instanceof Error ? error.message : 'Failed to save document'
+      }));
+    }
+  };
+
+  const loadDocument = useCallback(async (uuid: string) => {
+    try {
+      setDocumentState(prev => ({ ...prev, isLoading: true, documentUuid: uuid }));
+
+      const response = await fetch(`/api/documents/resume/${uuid}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Document not found');
+        }
+        throw new Error('Failed to load document');
+      }
+
+      const result = await response.json();
+      const document = result.data;
+
+      if (document?.form_data) {
+        // Inline the initialization logic to avoid dependency issues
+        const formData = document.form_data;
+        
+        // Check if the data structure has resumeData nested
+        let resumeData, template, themeColor, layoutConfiguration, moduleSelection;
+        
+        if (formData.resumeData) {
+          resumeData = formData.resumeData;
+          template = formData.template || resumeData.selectedTemplate;
+          themeColor = formData.themeColor || resumeData.themeColor;
+          layoutConfiguration = formData.layoutConfiguration || resumeData.layoutConfiguration;
+          moduleSelection = formData.moduleSelection || resumeData.moduleSelection;
+        } else {
+          ({ resumeData, template, themeColor, layoutConfiguration, moduleSelection } = formData);
+        }
+
+        // Extract the actual resume data fields
+        const extractedData = {
+          header: resumeData.header || defaultResumeData.header,
+          education: resumeData.education || defaultResumeData.education,
+          workExperience: resumeData.workExperience || defaultResumeData.workExperience,
+          research: resumeData.research || defaultResumeData.research,
+          activities: resumeData.activities || defaultResumeData.activities,
+          awards: resumeData.awards || defaultResumeData.awards,
+          skillsLanguage: resumeData.skillsLanguage || defaultResumeData.skillsLanguage,
+          moduleSelection: moduleSelection || resumeData.moduleSelection || defaultResumeData.moduleSelection,
+          selectedTemplate: template || resumeData.selectedTemplate || defaultResumeData.selectedTemplate,
+          themeColor: themeColor || resumeData.themeColor || defaultResumeData.themeColor,
+          layoutConfiguration: layoutConfiguration || resumeData.layoutConfiguration || defaultResumeData.layoutConfiguration
+        };
+
+        // Ensure required modules remain selected
+        REQUIRED_MODULES.forEach(moduleId => {
+          if (extractedData.moduleSelection) {
+            extractedData.moduleSelection[moduleId] = true;
+          }
+        });
+
+        setData(extractedData);
+        setDocumentState(prev => ({ ...prev, documentUuid: document.uuid }));
+      }
+
+      setDocumentState(prev => ({
+        ...prev,
+        isLoading: false,
+        lastSavedAt: document.updated_at ? new Date(document.updated_at) : null
+      }));
+    } catch (error) {
+      console.error('Error loading document:', error);
+      setDocumentState(prev => ({
+        ...prev,
+        isLoading: false,
+        saveError: error instanceof Error ? error.message : 'Failed to load document'
+      }));
+      throw error; // Re-throw to handle in component
+    }
+  }, []);
+
+
   const value: ResumeContextType = {
     data,
     updateHeaderData,
@@ -835,7 +1020,11 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     reorderSidebarSections,
     generationState,
     setGenerationLoading,
-    setGenerationError
+    setGenerationError,
+    documentState,
+    saveDocument,
+    loadDocument,
+    setDocumentUuid
   };
 
   return (

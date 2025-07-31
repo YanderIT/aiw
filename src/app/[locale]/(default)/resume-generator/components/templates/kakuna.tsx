@@ -102,7 +102,7 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
         )}
 
         {basics.customFields?.map((item) => (
-          <div key={item.id} className="flex items-center gap-x-1.5">
+          <div key={item.id} className="flex items-center gap-x-1.5 ml-2">
             {getSocialIcon(item.value, item.name)}
             <a href={item.value} target="_blank" rel="noreferrer noopener nofollow">
               {getSocialDisplayName(item.value, item.name)}

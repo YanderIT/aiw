@@ -1,62 +1,141 @@
-import { getTranslations } from "next-intl/server";
-import { getUserInfo } from "@/services/user";
-import { redirect } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Download, Trash2, FileText, Calendar } from "lucide-react";
+import { Search, Plus, Calendar } from "lucide-react";
+import { DocumentCard } from "@/components/console/DocumentCard";
+import { DocumentListItem } from "@/components/console/DocumentListItem";
+import { Document, DocumentType } from "@/models/document";
+import { formatDocumentDate } from "@/services/document";
+import { toast } from "sonner";
+import { DocumentIcon } from "@/components/console/icons/DocumentIcons";
+import { GridLayoutIcon, ListLayoutIcon } from "@/components/console/icons/LayoutIcons";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-export default async function MyDocumentsPage() {
-  const t = await getTranslations();
-  const userInfo = await getUserInfo();
-  
-  if (!userInfo || !userInfo.email) {
-    redirect("/auth/signin");
-  }
+export default function MyDocumentsPage() {
+  const t = useTranslations();
+  const router = useRouter();
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
+  const [layoutType, setLayoutType] = useState<"grid" | "list">("grid");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Mock data for documents
-  const documents = [
-    {
-      id: 1,
-      title: "测测测测",
-      content: "测测测测撰写身上的微打孔大六大学",
-      date: "26 Jun",
-      category: "个人陈述",
-      wordCount: null,
-      isToday: true
-    },
-    {
-      id: 2,
-      title: "Demo document",
-      content: "The basics. Mispellings and grammatical errors can effect your...",
-      date: "26 Jun",
-      category: "推荐信", 
-      wordCount: 23,
-      isToday: true
-    },
-    {
-      id: 3,
-      title: "学术论文草稿",
-      content: "关于机器学习在自然语言处理中的应用研究...",
-      date: "25 Jun",
-      category: "学术论文",
-      wordCount: 156,
-      isToday: false
-    },
-    {
-      id: 4,
-      title: "求职信模板",
-      content: "尊敬的招聘经理，我对贵公司的软件工程师职位...",
-      date: "24 Jun", 
-      category: "求职信",
-      wordCount: 89,
-      isToday: false
+  // 获取文档列表
+  const fetchDocuments = useCallback(async () => {
+    try {
+      const response = await fetch('/api/documents');
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents');
+      }
+      const data = await response.json();
+      if (data.success) {
+        setDocuments(data.data.documents);
+        setFilteredDocuments(data.data.documents);
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      toast.error("获取文档列表失败");
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, []);
 
-  const todayDocuments = documents.filter(doc => doc.isToday);
-  const olderDocuments = documents.filter(doc => !doc.isToday);
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  // 搜索文档
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = documents.filter(doc => 
+        doc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.content?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredDocuments(filtered);
+    } else {
+      setFilteredDocuments(documents);
+    }
+  }, [searchQuery, documents]);
+
+  // 根据日期分组文档
+  const todayDocuments = filteredDocuments.filter(doc => {
+    const displayDate = formatDocumentDate(doc.created_at || '');
+    return displayDate === '今天';
+  });
+  const olderDocuments = filteredDocuments.filter(doc => {
+    const displayDate = formatDocumentDate(doc.created_at || '');
+    return displayDate !== '今天';
+  });
+
+  // 处理文档点击
+  const handleDocumentClick = (document: Document) => {
+    // 如果是简历文档，跳转到简历编辑页面
+    if (document.document_type === DocumentType.Resume) {
+      router.push(`/resume-generator/edit/${document.uuid}`);
+    } else {
+      router.push(`/my-documents/${document.uuid}`);
+    }
+  };
+
+  // 处理文档下载
+  const handleDocumentDownload = async (document: Document) => {
+    // 这里可以实现文档下载逻辑
+    toast.info("文档下载功能即将上线");
+  };
+
+  // 处理文档删除
+  const handleDocumentDelete = async (uuid: string) => {
+    setDocumentToDelete(uuid);
+    setDeleteDialogOpen(true);
+  };
+
+  // 确认删除文档
+  const confirmDelete = async () => {
+    if (!documentToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/documents/${documentToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // 从列表中移除已删除的文档
+        setDocuments(documents.filter(doc => doc.uuid !== documentToDelete));
+        setFilteredDocuments(filteredDocuments.filter(doc => doc.uuid !== documentToDelete));
+        toast.success("文档已删除");
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error("删除文档失败");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,22 +150,23 @@ export default async function MyDocumentsPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            {/* View Toggle - Hidden on mobile */}
-            <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="p-2">
-                <div className="grid grid-cols-2 gap-1">
-                  <div className="w-2 h-2 bg-muted-foreground"></div>
-                  <div className="w-2 h-2 bg-muted-foreground"></div>
-                  <div className="w-2 h-2 bg-muted-foreground"></div>
-                  <div className="w-2 h-2 bg-muted-foreground"></div>
-                </div>
+            {/* View Toggle */}
+            <div className="flex items-center gap-1">
+              <Button 
+                variant={layoutType === "grid" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="p-2"
+                onClick={() => setLayoutType("grid")}
+              >
+                <GridLayoutIcon className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="p-2">
-                <div className="space-y-1">
-                  <div className="w-4 h-0.5 bg-foreground"></div>
-                  <div className="w-4 h-0.5 bg-foreground"></div>
-                  <div className="w-4 h-0.5 bg-foreground"></div>
-                </div>
+              <Button 
+                variant={layoutType === "list" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="p-2"
+                onClick={() => setLayoutType("list")}
+              >
+                <ListLayoutIcon className="w-4 h-4" />
               </Button>
             </div>
 
@@ -96,134 +176,132 @@ export default async function MyDocumentsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search..."
+                  placeholder="搜索文档..."
                   className="pl-10 pr-4 py-2 w-full sm:w-64"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
-              {/* New Document Button */}
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground whitespace-nowrap">
-                <Plus className="w-4 h-4 mr-2" />
-                New document
-              </Button>
+ 
             </div>
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-muted-foreground">加载中...</p>
+          </div>
+        )}
+
         {/* Today Section */}
-        {todayDocuments.length > 0 && (
+        {!loading && todayDocuments.length > 0 && (
           <div className="mb-6 sm:mb-8">
             <h2 className="text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              Today
+              今天
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              {todayDocuments.map((doc) => (
-                <Card key={doc.id} className="hover:shadow-lg transition-shadow cursor-pointer group p-4 sm:p-6 min-w-0 h-64 sm:h-72 lg:h-80 flex flex-col">
-                  <CardHeader className="pb-4 sm:pb-6 lg:pb-8 flex-1 flex flex-col">
-                    <div className="flex items-start justify-between flex-1">
-                      <div className="flex-1 flex flex-col">
-                        <div className="text-sm sm:text-base text-muted-foreground mb-2 sm:mb-3 lg:mb-4">{doc.date}</div>
-                        <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3 sm:mb-4 lg:mb-6">
-                          {doc.title}
-                        </CardTitle>
-                        <CardDescription className="text-base sm:text-lg line-clamp-3 sm:line-clamp-4 leading-relaxed sm:leading-loose flex-1">
-                          {doc.content}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0 pb-1 sm:pb-2 mt-auto">
-                    <div className="flex items-center justify-between min-w-0">
-                      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-1 min-w-0">
-                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs sm:text-sm lg:text-base text-muted-foreground whitespace-nowrap">{doc.category}</span>
-                        {doc.wordCount && (
-                          <Badge variant="secondary" className="text-xs sm:text-sm lg:text-base bg-primary/10 text-primary rounded-full px-2 py-1 sm:px-3 sm:py-1 lg:px-4 lg:py-2 flex-shrink-0">
-                            {doc.wordCount}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 opacity-0 group-hover:opacity-100 sm:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2 sm:ml-3 lg:ml-4">
-                        <Button variant="ghost" size="sm" className="p-2 sm:p-2 lg:p-3">
-                          <Download className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="p-2 sm:p-2 lg:p-3">
-                          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {layoutType === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {todayDocuments.map((doc) => (
+                  <DocumentCard
+                    key={doc.uuid}
+                    document={doc}
+                    onClick={handleDocumentClick}
+                    onDownload={handleDocumentDownload}
+                    onDelete={handleDocumentDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {todayDocuments.map((doc) => (
+                  <DocumentListItem
+                    key={doc.uuid}
+                    document={doc}
+                    onClick={handleDocumentClick}
+                    onDownload={handleDocumentDownload}
+                    onDelete={handleDocumentDelete}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Older Documents Section */}
-        {olderDocuments.length > 0 && (
+        {!loading && olderDocuments.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-3 sm:mb-4">Recent</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              {olderDocuments.map((doc) => (
-                <Card key={doc.id} className="hover:shadow-lg transition-shadow cursor-pointer group p-4 sm:p-6 min-w-0 h-64 sm:h-72 lg:h-80 flex flex-col">
-                  <CardHeader className="pb-4 sm:pb-6 lg:pb-8 flex-1 flex flex-col">
-                    <div className="flex items-start justify-between flex-1">
-                      <div className="flex-1 flex flex-col">
-                        <div className="text-sm sm:text-base text-muted-foreground mb-2 sm:mb-3 lg:mb-4">{doc.date}</div>
-                        <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3 sm:mb-4 lg:mb-6">
-                          {doc.title}
-                        </CardTitle>
-                        <CardDescription className="text-base sm:text-lg line-clamp-3 sm:line-clamp-4 leading-relaxed sm:leading-loose flex-1">
-                          {doc.content}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0 pb-1 sm:pb-2 mt-auto">
-                    <div className="flex items-center justify-between min-w-0">
-                      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-1 min-w-0">
-                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs sm:text-sm lg:text-base text-muted-foreground whitespace-nowrap">{doc.category}</span>
-                        {doc.wordCount && (
-                          <Badge variant="secondary" className="text-xs sm:text-sm lg:text-base bg-primary/10 text-primary rounded-full px-2 py-1 sm:px-3 sm:py-1 lg:px-4 lg:py-2 flex-shrink-0">
-                            {doc.wordCount}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 opacity-0 group-hover:opacity-100 sm:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2 sm:ml-3 lg:ml-4">
-                        <Button variant="ghost" size="sm" className="p-2 sm:p-2 lg:p-3">
-                          <Download className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="p-2 sm:p-2 lg:p-3">
-                          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {layoutType === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {olderDocuments.map((doc) => (
+                  <DocumentCard
+                    key={doc.uuid}
+                    document={doc}
+                    onClick={handleDocumentClick}
+                    onDownload={handleDocumentDownload}
+                    onDelete={handleDocumentDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {olderDocuments.map((doc) => (
+                  <DocumentListItem
+                    key={doc.uuid}
+                    document={doc}
+                    onClick={handleDocumentClick}
+                    onDownload={handleDocumentDownload}
+                    onDelete={handleDocumentDelete}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Empty State */}
-        {documents.length === 0 && (
+        {!loading && filteredDocuments.length === 0 && (
           <div className="text-center py-8 sm:py-12">
-            <FileText className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">No documents yet</h3>
-            <p className="text-muted-foreground mb-4 sm:mb-6 px-4">Create your first document to get started</p>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Plus className="w-4 h-4 mr-2" />
-              New document
-            </Button>
+            <DocumentIcon className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+              {searchQuery ? "没有找到匹配的文档" : "还没有文档"}
+            </h3>
+            <p className="text-muted-foreground mb-4 sm:mb-6 px-4">
+              {searchQuery ? "尝试其他搜索词" : "创建您的第一个文档开始使用"}
+            </p>
+            {!searchQuery && (
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Plus className="w-4 h-4 mr-2" />
+                新建文档
+              </Button>
+            )}
           </div>
         )}
       </div>
+
+      {/* 删除确认弹窗 */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              您确定要删除这个文档吗？此操作不可恢复。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting ? "删除中..." : "确认删除"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

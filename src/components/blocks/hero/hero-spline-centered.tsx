@@ -95,7 +95,7 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
         {!isSplineLoaded && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <div className="text-muted-foreground animate-pulse">
-              加载 3D 场景中...
+              Hello...
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
+import "./resume-result.css";
 import { 
   CheckCircle, 
   Square, 
@@ -18,7 +19,10 @@ import {
   ArrowLeft,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  Save,
+  Check,
+  AlertCircle
 } from "lucide-react";
 
 
@@ -50,6 +54,7 @@ import { mapToStandardFormat } from "@/lib/resume-field-mapping";
 import { KakunaTemplate } from "../../components/templates/kakuna";
 import { DittoTemplate } from "../../components/templates/ditto";
 import { TemplateSelector } from "../../components/TemplateSelector";
+import { useAutoSaveResume } from "@/hooks/useAutoSaveResume";
 
 
 export interface ResumeModule {
@@ -130,27 +135,27 @@ const DraggableModuleItem = ({
         drag(drop(node));
       }}
       className={`
-        flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm
+        flex items-center justify-between p-2 xl:p-2.5 bg-white rounded-lg border shadow-sm
         cursor-move transition-all duration-200 hover:shadow-md
         ${isDragging ? 'opacity-50' : 'opacity-100'}
         ${area === 'main' ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50'}
       `}
     >
-      <div className="flex items-center gap-2">
-        <GripVertical className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-medium text-gray-700">{title}</span>
+      <div className="flex items-center gap-1.5 xl:gap-2">
+        <GripVertical className="w-3 h-3 xl:w-4 xl:h-4 text-gray-400" />
+        <span className="text-xs xl:text-sm font-medium text-gray-700">{title}</span>
       </div>
       <Button
         size="sm"
         variant="ghost"
         onClick={handleMove}
-        className="p-1 h-6 w-6"
+        className="p-0.5 xl:p-1 h-5 w-5 xl:h-6 xl:w-6"
         title={`移动到 ${targetArea === 'main' ? '主要区域' : '侧边栏'}`}
       >
         {area === 'main' ? (
-          <ArrowRight className="w-3 h-3" />
+          <ArrowRight className="w-2.5 h-2.5 xl:w-3 xl:h-3" />
         ) : (
-          <ArrowLeft className="w-3 h-3" />
+          <ArrowLeft className="w-2.5 h-2.5 xl:w-3 xl:h-3" />
         )}
       </Button>
     </div>
@@ -191,8 +196,12 @@ function ResumeResultContent() {
     moveModuleToMain,
     moveModuleToSidebar,
     reorderMainSections,
-    reorderSidebarSections
+    reorderSidebarSections,
+    documentState
   } = useResume();
+
+  // Use auto-save hook
+  const { isSaving, lastSavedAt, saveError } = useAutoSaveResume();
   
   // 使用 context 中的模板选择，而不是本地 state
   const selectedTemplate = data.selectedTemplate;
@@ -317,14 +326,14 @@ function ResumeResultContent() {
       color: "from-emerald-500 to-teal-600",
       image: "/imgs/templates/ditto.jpg"
     },
-    { 
-      value: "gengar", 
-      label: "Gengar", 
-      subtitle: "创意设计", 
-      description: "独特的创意布局，适合设计类职业",
-      color: "from-purple-500 to-pink-600",
-      image: "/imgs/templates/gengar.jpg"
-    }
+    // { 
+    //   value: "gengar", 
+    //   label: "Gengar", 
+    //   subtitle: "创意设计", 
+    //   description: "独特的创意布局，适合设计类职业",
+    //   color: "from-purple-500 to-pink-600",
+    //   image: "/imgs/templates/gengar.jpg"
+    // }
   ];
 
   const modules: ResumeModule[] = [
@@ -402,6 +411,28 @@ function ResumeResultContent() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Save Status Indicator */}
+              {documentState.documentUuid && (
+                <div className="flex items-center gap-2">
+                  {isSaving ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Save className="w-4 h-4 animate-pulse" />
+                      <span>保存中...</span>
+                    </div>
+                  ) : saveError ? (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>保存失败</span>
+                    </div>
+                  ) : lastSavedAt ? (
+                    <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                      <Check className="w-4 h-4" />
+                      <span>已保存 {new Date(lastSavedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+              
               <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
                 <CheckCircle className="w-3 h-3 mr-1" />
                 模板预览
@@ -411,16 +442,22 @@ function ResumeResultContent() {
         </div>
       </div>
 
-      <div className="w-full max-w-none px-6 py-3">
-        <div className="flex flex-col lg:flex-row gap-4 min-h-[calc(100vh-150px)] w-full">
+      <div className="w-full max-w-none py-3 relative">
+        {/* Scroll indicator for mobile/tablet */}
+        <div className="xl:hidden absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-primary/10 backdrop-blur-sm rounded-full p-2 animate-pulse">
+          <ArrowRight className="w-5 h-5 text-primary" />
+        </div>
+        
+        <div className="overflow-x-auto px-4 md:px-6 custom-scrollbar">
+          <div className="flex flex-col xl:flex-row gap-3 xl:gap-4 min-h-[calc(100vh-150px)] min-w-[1300px] xl:min-w-0">
           
           {/* Left Column - Module Navigation Tabs */}
-          <div className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm h-full lg:h-full min-h-[300px]">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
+          <div className="w-full xl:w-64 2xl:w-72 flex-shrink-0">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-3 xl:p-4 2xl:p-6 shadow-sm h-full xl:h-full min-h-[300px]">
+              <h3 className="font-semibold text-xs xl:text-sm text-muted-foreground uppercase tracking-wide mb-4 xl:mb-6">
                 内容模块
               </h3>
-              <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto">
+              <div className="flex xl:flex-col gap-2 xl:gap-3 overflow-x-auto xl:overflow-x-visible xl:overflow-y-auto">
                 {modules.slice(1).map((module) => { // Skip template selector module
                   const Icon = module.icon;
                   // Map module IDs to context keys
@@ -433,7 +470,7 @@ function ResumeResultContent() {
                   return (
                     <div key={module.id} className="group relative">
                       <button
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative ${
+                        className={`w-full flex items-center gap-2 xl:gap-3 2xl:gap-4 p-3 xl:p-3 2xl:p-4 rounded-lg xl:rounded-xl transition-all duration-200 relative ${
                           activeTab === module.id
                             ? "bg-primary text-primary-foreground shadow-lg"
                             : isSelected
@@ -442,17 +479,20 @@ function ResumeResultContent() {
                         }`}
                         onClick={() => setActiveTab(module.id)}
                       >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <Icon className="w-4 h-4 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 flex-shrink-0" />
                         <div className="flex-1 text-left">
-                          <div className="font-medium text-sm">{module.title}</div>
+                          <div className="font-medium text-xs xl:text-sm">{module.title}</div>
                           {isRequired && (
                             <div className="text-xs text-red-500 font-medium"></div>
                           )}
                         </div>
                         
                         {/* 集成的选择按钮 */}
-                        <button
-                          className={`p-1.5 rounded-lg transition-all duration-200 ${
+                        <div
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          aria-disabled={isRequired}
+                          className={`p-1 xl:p-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
                             isRequired 
                               ? "bg-gray-100 text-red-300 cursor-not-allowed" 
                               : isSelected 
@@ -465,15 +505,14 @@ function ResumeResultContent() {
                               toggleModuleSelection(moduleKey as any);
                             }
                           }}
-                          disabled={isRequired}
                           title={isRequired ? "此模块为必选，无法取消" : undefined}
                         >
                           {isSelected ? (
-                            <CheckSquare className="w-4 h-4" />
+                            <CheckSquare className="w-3 h-3 xl:w-4 xl:h-4" />
                           ) : (
-                            <Square className="w-4 h-4" />
+                            <Square className="w-3 h-3 xl:w-4 xl:h-4" />
                           )}
-                        </button>
+                        </div>
                       </button>
                     </div>
                   );
@@ -483,38 +522,40 @@ function ResumeResultContent() {
           </div>
 
           {/* Middle Column - Module Editing + Resume Preview */}
-          <div className="w-full lg:flex-1 flex flex-col lg:flex-row gap-4">
+          <div className="w-full xl:flex-1 flex flex-col xl:flex-row gap-3 xl:gap-4">
             {/* Module Editing Area */}
-            <div className="w-full lg:w-1/3 lg:min-w-[280px] flex-shrink-0">
+            <div className="w-full xl:w-[360px] 2xl:w-[420px] flex-shrink-0">
               <div className="bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm h-full flex flex-col min-h-[600px]">
                 {/* Active Module Content */}
-                <div className="flex-1 p-4 overflow-y-auto">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 p-3 xl:p-4 2xl:p-5 overflow-y-auto overflow-x-hidden">
+                  <div className="w-full">
+                    <div className="flex items-center gap-2 xl:gap-3 mb-3 xl:mb-4">
                       {currentModule ? (
                         <>
-                          <currentModule.icon className="w-5 h-5 text-primary" />
-                          <h3 className="text-lg font-semibold text-foreground">
+                          <currentModule.icon className="w-4 h-4 xl:w-5 xl:h-5 text-primary" />
+                          <h3 className="text-base xl:text-lg font-semibold text-foreground">
                             {currentModule.title}
                           </h3>
                         </>
                       ) : (
                         <>
-                          <Edit3 className="w-5 h-5 text-primary" />
-                          <h3 className="text-lg font-semibold text-foreground">
+                          <Edit3 className="w-4 h-4 xl:w-5 xl:h-5 text-primary" />
+                          <h3 className="text-base xl:text-lg font-semibold text-foreground">
                             选择模块进行编辑
                           </h3>
                         </>
                       )}
                     </div>
-                    <ActiveComponent />
+                    <div className="text-xs w-full">
+                      <ActiveComponent />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Resume Preview Area */}
-            <div className="w-full lg:flex-1 lg:min-w-[400px] flex-shrink-0">
+            <div className="w-full xl:w-[480px] 2xl:flex-1 flex-shrink-0">
               <div className="bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm h-full flex flex-col min-h-[600px]">
                 {/* Preview Header */}
                 <div className="border-b border-border p-3">
@@ -590,17 +631,25 @@ function ResumeResultContent() {
                     </div>
                   </div>
 
-                  {/* Zoom Controls */}
-                  <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-border p-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleZoomOut}
-                      disabled={zoomLevel <= 0.5}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
+                  {/* Zoom Controls Hint */}
+                  <div className="absolute top-4 right-4">
+                    <div className="text-[10px] text-muted-foreground bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
+                      Ctrl + 滚轮缩放
+                    </div>
+                  </div>
+
+                  {/* Zoom Controls Buttons */}
+                  <div className="absolute bottom-4 right-4">
+                    <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-border p-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleZoomOut}
+                        disabled={zoomLevel <= 0.5}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ZoomOut className="h-4 w-4" />
+                      </Button>
                     
                     <Button
                       size="sm"
@@ -611,15 +660,16 @@ function ResumeResultContent() {
                       {Math.round(zoomLevel * 100)}%
                     </Button>
                     
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleZoomIn}
-                      disabled={zoomLevel >= 2}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleZoomIn}
+                        disabled={zoomLevel >= 2}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ZoomIn className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -627,18 +677,18 @@ function ResumeResultContent() {
           </div>
 
           {/* Right Column - Template & Color Selection */}
-          <div className="w-full lg:w-[15%] lg:min-w-[280px] xl:min-w-[340px] flex-shrink-0">
+          <div className="w-full xl:w-[280px] 2xl:w-[340px] flex-shrink-0">
             <div className="bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm h-full flex flex-col min-h-[500px]">
               {/* Template Selection Section */}
-              <div className="border-b border-border p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="border-b border-border p-3 xl:p-4 2xl:p-5">
+                <div className="flex items-center gap-2 xl:gap-3 mb-3 xl:mb-4">
+                  <div className="w-5 h-5 xl:w-6 xl:h-6 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Layout className="w-3 h-3 text-primary" />
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground">选择模板</h3>
+                  <h3 className="text-xs xl:text-sm font-semibold text-foreground">选择模板</h3>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-2 xl:gap-3">
                   {templateOptions.map((template) => (
                     <div
                       key={template.value}
@@ -670,12 +720,12 @@ function ResumeResultContent() {
                       </div>
 
                       {/* Template Info */}
-                      <div className="p-2 bg-white border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${template.color}`}></div>
+                      <div className="p-1.5 xl:p-2 bg-white border-t border-border">
+                        <div className="flex items-center gap-1 xl:gap-2">
+                          <div className={`w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-gradient-to-br ${template.color}`}></div>
                           <div className="flex-1">
-                            <h4 className="font-semibold text-sm text-foreground">{template.label}</h4>
-                            <p className="text-xs text-muted-foreground">{template.subtitle}</p>
+                            <h4 className="font-semibold text-xs xl:text-sm text-foreground">{template.label}</h4>
+                            <p className="text-[10px] xl:text-xs text-muted-foreground">{template.subtitle}</p>
                           </div>
                         </div>
                       </div>
@@ -685,21 +735,21 @@ function ResumeResultContent() {
               </div>
 
               {/* Layout Management Section */}
-              <div className="border-b border-border p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="border-b border-border p-3 xl:p-4 2xl:p-5">
+                <div className="flex items-center gap-2 xl:gap-3 mb-3 xl:mb-4">
+                  <div className="w-5 h-5 xl:w-6 xl:h-6 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Layout className="w-3 h-3 text-primary" />
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground">布局管理</h3>
+                  <h3 className="text-xs xl:text-sm font-semibold text-foreground">布局管理</h3>
                 </div>
                 
                 <div className="space-y-4">
                   {/* Main Content Area */}
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 rounded bg-blue-500"></div>
-                      <h4 className="text-sm font-medium text-foreground">主要内容</h4>
-                      <span className="text-xs text-muted-foreground">({data.layoutConfiguration.mainSections.length}个模块)</span>
+                    <div className="flex items-center gap-2 mb-2 xl:mb-3">
+                      <div className="w-2.5 h-2.5 xl:w-3 xl:h-3 rounded bg-blue-500"></div>
+                      <h4 className="text-xs xl:text-sm font-medium text-foreground">主要内容</h4>
+                      <span className="text-[10px] xl:text-xs text-muted-foreground">({data.layoutConfiguration.mainSections.length}个模块)</span>
                     </div>
                     <div className="space-y-2">
                       {data.layoutConfiguration.mainSections.map((moduleId, index) => (
@@ -719,10 +769,10 @@ function ResumeResultContent() {
 
                   {/* Sidebar Area */}
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 rounded bg-green-500"></div>
-                      <h4 className="text-sm font-medium text-foreground">侧边栏</h4>
-                      <span className="text-xs text-muted-foreground">({data.layoutConfiguration.sidebarSections.length}个模块)</span>
+                    <div className="flex items-center gap-2 mb-2 xl:mb-3">
+                      <div className="w-2.5 h-2.5 xl:w-3 xl:h-3 rounded bg-green-500"></div>
+                      <h4 className="text-xs xl:text-sm font-medium text-foreground">侧边栏</h4>
+                      <span className="text-[10px] xl:text-xs text-muted-foreground">({data.layoutConfiguration.sidebarSections.length}个模块)</span>
                     </div>
                     <div className="space-y-2">
                       {data.layoutConfiguration.sidebarSections.map((moduleId, index) => (
@@ -743,13 +793,13 @@ function ResumeResultContent() {
               </div>
 
               {/* Color Selection Section */}
-              <div className="flex-1 p-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full" 
+              <div className="flex-1 p-3 xl:p-4 2xl:p-5 overflow-y-auto">
+                <div className="flex items-center gap-2 xl:gap-3 mb-3 xl:mb-4">
+                  <div className="w-5 h-5 xl:w-6 xl:h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 xl:w-3 xl:h-3 rounded-full" 
                          style={{ backgroundColor: data.themeColor.includes('-') ? getColorFromScale(data.themeColor) : getThemeColor(data.themeColor).primary }} />
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground">主题颜色</h3>
+                  <h3 className="text-xs xl:text-sm font-semibold text-foreground">主题颜色</h3>
                 </div>
                 
                 <CompactThemeColorPicker 
@@ -762,6 +812,7 @@ function ResumeResultContent() {
             </div>
           </div>
 
+          </div>
         </div>
       </div>
       </div>
@@ -770,9 +821,5 @@ function ResumeResultContent() {
 }
 
 export default function ResumeResultClient() {
-  return (
-    <ResumeProvider>
-      <ResumeResultContent />
-    </ResumeProvider>
-  );
+  return <ResumeResultContent />;
 } 

@@ -26,6 +26,7 @@ import FinalRecommendationIcon from "./icons/FinalRecommendationIcon";
 
 // Import Dify Hook
 import { useDify } from '@/hooks/useDify';
+import { apiRequest } from '@/lib/api-client';
 
 export interface RecommendationLetterModule {
   id: string;
@@ -88,7 +89,7 @@ function ConfirmationPage() {
       
       // 先创建文档记录
       const selectedData = getSelectedData();
-      const response = await fetch('/api/documents', {
+      const { data: document } = await apiRequest('/api/documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,11 +102,9 @@ function ConfirmationPage() {
         }),
       });
 
-      if (!response.ok) {
+      if (!document) {
         throw new Error('Failed to create document');
       }
-
-      const { data: document } = await response.json();
       
       // 跳转到结果页面，带上文档ID
       router.push(`/${locale}/recommendation-letter/result/${document.uuid}?autoGenerate=true`);

@@ -15,7 +15,11 @@ export async function GET(
 
     const user = await findUserByEmail(session.user.email);
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      console.error("User not found for email:", session.user.email, "- forcing re-authentication");
+      return NextResponse.json({ 
+        error: "Session expired, please sign in again",
+        code: "SESSION_EXPIRED"
+      }, { status: 401 });
     }
 
     const { uuid } = await params;

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
 interface ReviseParams {
-  revise_type: number; // 0代表保持原本，1代表扩写，2代表缩写
+  revise_type: string; // "0"代表保持原本，"1"代表扩写，"2"代表缩写
   style: string; // 风格要求
-  original_word_count: number; // 原字数
+  original_word_count: string; // 原字数
   word_count: string; // 字数要求
   detail: string; // 补充修改方向
   original_context: string; // 原文
-  whole: number; // 0代表整篇，1代表段落
+  whole: string; // "0"代表整篇，"1"代表段落
   language: string; // 语言设置
 }
 

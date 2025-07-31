@@ -98,9 +98,9 @@ export function GlobalLoading({ isVisible }: { isVisible: boolean }) {
         {/* Spline 3D 背景 */}
         <div className="absolute inset-0 w-full h-full">
           <spline-viewer 
-            url="https://prod.spline.design/YFEMfsdvjo6yr8Tu/scene.splinecode"
+            url="https://prod.spline.design/JdZgoBYW5zhBLimi/scene.splinecode"
             className="w-full h-full"
-            style={{ width: '100%', height: '100%' }}
+            style={{ width: '70%', height: '100%' }}
           />
         </div>
         

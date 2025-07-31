@@ -257,11 +257,11 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
         }] : [])
       ],
       picture: {
-        url: '',
+        url: data.header.profilePicture?.url || '',
         size: 64,
         aspectRatio: 1,
         borderRadius: 0,
-        effects: { hidden: true, border: false, grayscale: false }
+        effects: { hidden: !data.header.profilePicture, border: false, grayscale: false }
       }
     },
     sections: {

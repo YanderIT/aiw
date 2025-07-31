@@ -5,6 +5,13 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { 
   CheckCircle, 
@@ -373,7 +380,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
             uuid: documentUuid,
             content: generatedContent,
             ai_workflow_id: (result as any).workflow_run_id,
-            word_count: generatedContent.length
+            word_count: generatedContent.length.toString()
           }),
         });
 
@@ -621,13 +628,13 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       
       // 调用 DIFY API 进行全文重写
       const params = {
-        revise_type: settings.wordControl === 'keep' ? 0 : (settings.wordControl === 'expand' ? 1 : 2),
+        revise_type: (settings.wordControl === 'keep' ? 0 : (settings.wordControl === 'expand' ? 1 : 2)).toString(),
         style: styleLabels.join(';'), // 使用分号拼接中文标签
-        original_word_count: displayContent.length,
-        word_count: settings.targetWordCount || displayContent.length.toString(),
+        original_word_count: displayContent.length.toString(),
+        word_count: (settings.targetWordCount || displayContent.length).toString(),
         detail: settings.direction || '',
         original_context: displayContent,
-        whole: 0, // 整篇重写
+        whole: '0', // 整篇重写
         language: selectedData.language || 'zh' // 添加语言参数
       };
       
@@ -786,13 +793,13 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-6 h-[calc(100vh-200px)]">
+      <div className="max-w-[1800px] mx-auto px-4 lg:px-6 py-4 lg:py-6">
+        <div className="grid grid-cols-12 gap-4 lg:gap-6 h-[calc(100vh-200px)]">
           
           {/* Left Sidebar - Module Navigation (Read-only) */}
-          <div className="col-span-2">
-            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-4 shadow-sm h-full">
-              <h3 className="font-semibold text-base text-muted-foreground uppercase tracking-wide mb-4">
+          <div className="col-span-2 lg:col-span-3 xl:col-span-2">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-3 lg:p-4 shadow-sm h-full">
+              <h3 className="font-semibold text-sm lg:text-base text-muted-foreground uppercase tracking-wide mb-3 lg:mb-4">
                 内容模块
               </h3>
               <div className="space-y-2">
@@ -805,28 +812,28 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                   return (
                     <div key={module.id} className="group">
                       <button
-                        className={`w-full flex items-center gap-3 p-4 rounded-lg transition-all duration-200 ${
+                        className={`w-full flex items-center gap-2 lg:gap-2.5 xl:gap-3 p-2.5 lg:p-3 xl:p-4 rounded-lg transition-all duration-200 ${
                           isActive 
                             ? "bg-primary/10 border-2 border-primary" 
                             : "bg-muted/30 hover:bg-muted/50"
                         }`}
                         onClick={() => setActiveTab(module.id)}
                       >
-                        <div className={`p-2 rounded ${
+                        <div className={`p-1.5 lg:p-2 rounded ${
                           isSelected 
                             ? "text-primary" 
                             : "text-muted-foreground"
                         }`}>
                           {isSelected ? (
-                            <CheckSquare className="w-5 h-5" />
+                            <CheckSquare className="w-4 h-4 lg:w-5 lg:h-5" />
                           ) : (
-                            <Square className="w-5 h-5" />
+                            <Square className="w-4 h-4 lg:w-5 lg:h-5" />
                           )}
                         </div>
-                        <Icon className={`w-5 h-5 flex-shrink-0 ${
+                        <Icon className={`w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0 ${
                           isActive ? "text-primary" : "text-muted-foreground"
                         }`} />
-                        <span className={`text-base font-medium flex-1 text-left ${
+                        <span className={`text-xs lg:text-sm xl:text-base font-medium flex-1 text-left whitespace-nowrap ${
                           isActive ? "text-primary" : "text-foreground"
                         }`}>
                           {module.title}
@@ -838,8 +845,8 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
               </div>
               
               {/* 提示信息 */}
-              <div className="mt-6 p-3 bg-muted/30 rounded-lg">
-                <p className="text-sm text-muted-foreground">
+              <div className="mt-4 lg:mt-6 p-2.5 lg:p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs lg:text-sm text-muted-foreground">
                   点击模块名称查看对应内容
                 </p>
               </div>
@@ -847,7 +854,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
           </div>
 
           {/* Middle Section - Form Content */}
-          <div className="col-span-4">
+          <div className="col-span-4 lg:col-span-3 xl:col-span-4">
             <div className="bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm h-full flex flex-col">
               {/* Active Module Content (Read-only view) */}
               <div className="flex-1 p-6 overflow-y-auto">
@@ -916,24 +923,28 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Edit3 className="w-6 h-6 text-primary" />
-                    <h3 className="text-xl font-semibold text-foreground">生成的推荐信</h3>
+                    <h3 className="text-xl font-semibold text-foreground">生成结果</h3>
                     
                     {/* 版本切换器 */}
                     {dbVersions.length > 1 && (
                       <div className="flex items-center gap-2 ml-4">
                         <Label className="text-sm text-muted-foreground">版本：</Label>
-                        <select
+                        <Select
                           value={currentDbVersionId || ''}
-                          onChange={(e) => setCurrentDbVersionId(e.target.value)}
-                          className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+                          onValueChange={(value) => setCurrentDbVersionId(value)}
                           disabled={isLoadingVersions}
                         >
-                          {dbVersions.map((version) => (
-                            <option key={version.uuid} value={version.uuid}>
-                              {version.version_type === 'original' ? '原始版本' : `修改版本 ${version.revision_count}`}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger className="w-[180px] h-9">
+                            <SelectValue placeholder="选择版本" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {dbVersions.map((version) => (
+                              <SelectItem key={version.uuid} value={version.uuid}>
+                                {version.version_type === 'original' ? '原始版本' : `修改版本 ${version.revision_count}`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         {dbVersions.length > 1 && (
                           <Button
                             variant="ghost"

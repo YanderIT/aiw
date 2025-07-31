@@ -7,9 +7,9 @@ export const localeNames: any = {
   zh: "中文",
 };
 
-export const defaultLocale = "en";
+export const defaultLocale = "zh";
 
 export const localePrefix = "as-needed";
 
 export const localeDetection =
-  process.env.NEXT_PUBLIC_LOCALE_DETECTION === "true";
+  process.env.NEXT_PUBLIC_LOCALE_DETECTION === "false";

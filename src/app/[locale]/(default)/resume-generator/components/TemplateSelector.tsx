@@ -22,12 +22,12 @@ export const TemplateSelector = () => {
       description: "Modern sidebar design with contact info and skills on the left",
       preview: "📋 Professional two-column layout with sidebar emphasis"
     },
-    { 
-      id: "gengar", 
-      name: "Gengar", 
-      description: "Elegant design with accent colors and modern typography",
-      preview: "✨ Coming soon - Modern colorful design"
-    },
+    // { 
+    //   id: "gengar", 
+    //   name: "Gengar", 
+    //   description: "Elegant design with accent colors and modern typography",
+    //   preview: "✨ Coming soon - Modern colorful design"
+    // },
   ];
 
   return (

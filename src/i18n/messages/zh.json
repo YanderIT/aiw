@@ -37,7 +37,33 @@
     }
   },
   "my_documents": {
-    "title": "我的文档"
+    "title": "我的文档",
+    "manage_all_documents": "管理您的所有文档",
+    "search_placeholder": "搜索文档...",
+    "new_document": "新建文档",
+    "today": "今天",
+    "recent": "最近",
+    "no_documents": "还没有文档",
+    "no_documents_found": "没有找到匹配的文档",
+    "create_first_document": "创建您的第一个文档开始使用",
+    "try_different_search": "尝试其他搜索词",
+    "loading": "加载中...",
+    "download_coming_soon": "文档下载功能即将上线",
+    "delete_coming_soon": "文档删除功能即将上线",
+    "preview": {
+      "back_to_list": "返回文档列表",
+      "copy": "复制",
+      "download": "下载",
+      "unnamed_document": "未命名文档",
+      "copied_to_clipboard": "已复制到剪贴板",
+      "copy_failed": "复制失败",
+      "download_success": "下载成功",
+      "loading": "加载中...",
+      "load_failed": "无法加载文档",
+      "document_not_found": "文档不存在",
+      "resume_preview_coming": "简历预览功能开发中",
+      "resume_preview_desc": "简历文档的预览功能正在开发中，敬请期待"
+    }
   },
   "sign_modal": {
     "title": "登录或注册",

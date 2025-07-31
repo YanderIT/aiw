@@ -95,6 +95,7 @@
     "moment": "^2.30.1",
     "motion": "^12.23.6",
     "motion-plus": "^1.5.0",
+    "nanoid": "^5.1.5",
     "next": "15.2.3",
     "next-auth": "5.0.0-beta.25",
     "next-intl": "^4.1.0",
