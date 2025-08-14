@@ -31,6 +31,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     }
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    console.log("🚀 ~ ThemeProvider ~ mediaQuery:", mediaQuery)
     setTheme(mediaQuery.matches ? "dark" : "light");
 
     const handleChange = () => {

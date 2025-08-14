@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 
 // 定义所有模块的数据结构
 export interface HeaderData {
@@ -93,7 +100,7 @@ export interface LayoutConfiguration {
 }
 
 // 新增：定义必选模块
-const REQUIRED_MODULES = ['header', 'education'] as const;
+const REQUIRED_MODULES = ["header", "education"] as const;
 
 export interface ResumeData {
   header: HeaderData;
@@ -126,58 +133,58 @@ export interface ConfirmationItem {
 // 新增：定义每个模块的必填字段
 const REQUIRED_FIELDS = {
   header: {
-    full_name: '姓名',
-    city: '城市',
-    country: '国家',
-    email: '邮箱',
-    phone: '电话'
+    full_name: "姓名",
+    city: "城市",
+    country: "国家",
+    email: "邮箱",
+    phone: "电话",
   },
   education: {
-    school_name: '学校名称',
-    edu_city: '学校城市',
-    edu_country: '学校国家',
-    degree: '学位',
-    edu_start_date: '开始日期',
-    edu_end_date: '结束日期',
-    gpa_or_rank: 'GPA/排名'
+    school_name: "学校名称",
+    edu_city: "学校城市",
+    edu_country: "学校国家",
+    degree: "学位",
+    edu_start_date: "开始日期",
+    edu_end_date: "结束日期",
+    gpa_or_rank: "GPA/排名",
   },
   workExperience: {
-    company: '公司名称',
-    job_title: '职位',
-    work_start_date: '开始日期',
-    work_end_date: '结束日期',
-    responsibilities: '工作内容'
+    company: "公司名称",
+    job_title: "职位",
+    work_start_date: "开始日期",
+    work_end_date: "结束日期",
+    responsibilities: "工作内容",
   },
   research: {
-    project_title: '项目标题',
-    res_start_date: '开始日期',
-    res_end_date: '结束日期',
-    project_background: '项目背景',
-    your_contributions: '个人贡献'
+    project_title: "项目标题",
+    res_start_date: "开始日期",
+    res_end_date: "结束日期",
+    project_background: "项目背景",
+    your_contributions: "个人贡献",
   },
   activities: {
-    activity_name: '活动名称',
-    role: '担任角色',
-    act_start_date: '开始日期',
-    act_end_date: '结束日期',
-    description: '活动描述'
+    activity_name: "活动名称",
+    role: "担任角色",
+    act_start_date: "开始日期",
+    act_end_date: "结束日期",
+    description: "活动描述",
   },
   awards: {
-    award_name: '奖项名称',
-    award_year: '获奖年份'
+    award_name: "奖项名称",
+    award_year: "获奖年份",
   },
   skillsLanguage: {
-    skills: '技能',
-    english_level: '英语水平',
-    native_language: '母语'
-  }
+    skills: "技能",
+    english_level: "英语水平",
+    native_language: "母语",
+  },
 } as const;
 
 // 生成状态
 interface GenerationState {
   isGenerating: boolean;
   error: string | null;
-  languagePreference: 'English' | 'Chinese'; // 添加语言偏好
+  languagePreference: "English" | "Chinese"; // 添加语言偏好
 }
 
 // 文档管理状态
@@ -194,7 +201,10 @@ interface ResumeContextType {
   isEditMode?: boolean; // 新增：是否在编辑模式
   updateHeaderData: (data: Partial<HeaderData>) => void;
   updateEducationData: (data: Partial<EducationData>) => void;
-  updateWorkExperienceData: (index: number, data: Partial<WorkExperienceData>) => void;
+  updateWorkExperienceData: (
+    index: number,
+    data: Partial<WorkExperienceData>
+  ) => void;
   addWorkExperience: () => void;
   removeWorkExperience: (index: number) => void;
   updateResearchData: (index: number, data: Partial<ResearchData>) => void;
@@ -238,7 +248,7 @@ interface ResumeContextType {
   generationState: GenerationState;
   setGenerationLoading: (loading: boolean) => void;
   setGenerationError: (error: string | null) => void;
-  setLanguagePreference: (language: 'English' | 'Chinese') => void;
+  setLanguagePreference: (language: "English" | "Chinese") => void;
   // 新增：文档管理
   documentState: DocumentState;
   saveDocument: () => Promise<void>;
@@ -248,34 +258,34 @@ interface ResumeContextType {
 
 const defaultResumeData: ResumeData = {
   header: {
-    full_name: '',
-    city: '',
-    country: '',
-    email: '',
-    phone: '',
-    linkedin: '',
-    github: '',
-    profilePicture: undefined
+    full_name: "",
+    city: "",
+    country: "",
+    email: "",
+    phone: "",
+    linkedin: "",
+    github: "",
+    profilePicture: undefined,
   },
   education: {
-    school_name: '',
-    edu_city: '',
-    edu_country: '',
-    degree: '',
-    edu_start_date: '',
-    edu_end_date: '',
-    gpa_or_rank: '',
-    relevant_courses: ''
+    school_name: "",
+    edu_city: "",
+    edu_country: "",
+    degree: "",
+    edu_start_date: "",
+    edu_end_date: "",
+    gpa_or_rank: "",
+    relevant_courses: "",
   },
   workExperience: [],
   research: [],
   activities: [],
   awards: [],
   skillsLanguage: {
-    skills: '',
-    english_level: '',
-    native_language: '',
-    other_languages: ''
+    skills: "",
+    english_level: "",
+    native_language: "",
+    other_languages: "",
   },
   // 默认只选中必填模块
   moduleSelection: {
@@ -285,43 +295,55 @@ const defaultResumeData: ResumeData = {
     research: false,
     activities: false,
     awards: false,
-    skillsLanguage: false
+    skillsLanguage: false,
   },
   // 默认选择 ditto 模板
-  selectedTemplate: 'ditto',
-  themeColor: 'sky-500',
+  selectedTemplate: "ditto",
+  themeColor: "sky-500",
   // 默认布局配置：基于 ditto 模板的结构
   layoutConfiguration: {
-    mainSections: ['experience', 'education', 'research', 'activities'],
-    sidebarSections: ['profiles', 'skills', 'certifications', 'awards', 'languages']
-  }
+    mainSections: ["experience", "education", "research", "activities"],
+    sidebarSections: [
+      "profiles",
+      "skills",
+      "certifications",
+      "awards",
+      "languages",
+    ],
+  },
 };
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
-const CACHE_KEY = 'resume_generator_data';
+const CACHE_KEY = "resume_generator_data";
 
-export function ResumeProvider({ children, isEditMode = false }: { children: ReactNode; isEditMode?: boolean }) {
+export function ResumeProvider({
+  children,
+  isEditMode = false,
+}: {
+  children: ReactNode;
+  isEditMode?: boolean;
+}) {
   const [data, setData] = useState<ResumeData>(defaultResumeData);
   const [generationState, setGenerationState] = useState<GenerationState>({
     isGenerating: false,
     error: null,
-    languagePreference: 'English' // 默认为英文
+    languagePreference: "English", // 默认为英文
   });
   const [documentState, setDocumentState] = useState<DocumentState>({
     documentUuid: null,
     lastSavedAt: null,
     isSaving: false,
     isLoading: false,
-    saveError: null
+    saveError: null,
   });
 
   // 从缓存加载数据
   const loadFromCache = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const cached = localStorage.getItem(CACHE_KEY);
-      const savedLanguage = localStorage.getItem('resume_language_preference');
-      
+      const savedLanguage = localStorage.getItem("resume_language_preference");
+
       if (cached) {
         try {
           const parsedData = JSON.parse(cached);
@@ -333,27 +355,28 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
             parsedData.selectedTemplate = defaultResumeData.selectedTemplate;
           }
           if (!parsedData.layoutConfiguration) {
-            parsedData.layoutConfiguration = defaultResumeData.layoutConfiguration;
+            parsedData.layoutConfiguration =
+              defaultResumeData.layoutConfiguration;
           }
-          
+
           // 确保必选模块始终保持选中状态
-          REQUIRED_MODULES.forEach(moduleId => {
+          REQUIRED_MODULES.forEach((moduleId) => {
             if (parsedData.moduleSelection) {
               parsedData.moduleSelection[moduleId] = true;
             }
           });
-          
+
           setData(parsedData);
         } catch (error) {
-          console.error('加载缓存数据失败:', error);
+          console.error("加载缓存数据失败:", error);
         }
       }
-      
+
       // 恢复语言偏好
       if (savedLanguage) {
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
-          languagePreference: savedLanguage as 'English' | 'Chinese'
+          languagePreference: savedLanguage as "English" | "Chinese",
         }));
       }
     }
@@ -361,7 +384,7 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
 
   // 保存到缓存
   const saveToCache = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     }
   };
@@ -370,7 +393,9 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
   // 但如果在编辑页面，不应该加载缓存
   useEffect(() => {
     // 检查 URL 是否包含 /edit/ 路径
-    const isEditPage = typeof window !== 'undefined' && window.location.pathname.includes('/resume-generator/edit/');
+    const isEditPage =
+      typeof window !== "undefined" &&
+      window.location.pathname.includes("/resume-generator/edit/");
     if (!isEditPage) {
       loadFromCache();
     }
@@ -390,12 +415,16 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
 
   // 修改：模块完成状态现在基于选中状态 + 内容
   const isModuleCompleted = (moduleId: string): boolean => {
-    const moduleKey = moduleId === 'work-experience' ? 'workExperience' : 
-                     moduleId === 'skills-language' ? 'skillsLanguage' : moduleId;
-    
+    const moduleKey =
+      moduleId === "work-experience"
+        ? "workExperience"
+        : moduleId === "skills-language"
+        ? "skillsLanguage"
+        : moduleId;
+
     const isSelected = data.moduleSelection[moduleKey as keyof ModuleSelection];
     const hasContent = hasModuleContent(moduleKey);
-    
+
     // 如果选中了且有内容，则完成
     // 如果没选中，也算完成（因为用户不想包含这部分）
     return !isSelected || (isSelected && hasContent);
@@ -407,13 +436,13 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
     if (REQUIRED_MODULES.includes(moduleId as any)) {
       return;
     }
-    
-    setData(prev => ({
+
+    setData((prev) => ({
       ...prev,
       moduleSelection: {
         ...prev.moduleSelection,
-        [moduleId]: !prev.moduleSelection[moduleId]
-      }
+        [moduleId]: !prev.moduleSelection[moduleId],
+      },
     }));
   };
 
@@ -429,9 +458,18 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
 
   // 获取已完成模块数量（选中且有内容的模块）
   const getCompletedModulesCount = (): number => {
-    const modules = ['header', 'education', 'workExperience', 'research', 'activities', 'awards', 'skillsLanguage'];
-    return modules.filter(moduleId => {
-      const isSelected = data.moduleSelection[moduleId as keyof ModuleSelection];
+    const modules = [
+      "header",
+      "education",
+      "workExperience",
+      "research",
+      "activities",
+      "awards",
+      "skillsLanguage",
+    ];
+    return modules.filter((moduleId) => {
+      const isSelected =
+        data.moduleSelection[moduleId as keyof ModuleSelection];
       const hasContent = hasModuleContent(moduleId);
       return isSelected && hasContent;
     }).length;
@@ -440,199 +478,217 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
   // 新增：获取确认页面数据
   const getConfirmationData = (): ConfirmationItem[] => {
     const modules = [
-      { id: 'header', title: '个人背景' },
-      { id: 'education', title: '教育经历' },
-      { id: 'workExperience', title: '实习/工作经历' },
-      { id: 'research', title: '学术研究兴趣' },
-      { id: 'activities', title: '活动经历' },
-      { id: 'awards', title: '获奖情况' },
-      { id: 'skillsLanguage', title: '技能语言' }
+      { id: "header", title: "个人背景" },
+      { id: "education", title: "教育经历" },
+      { id: "workExperience", title: "实习/工作经历" },
+      { id: "research", title: "学术研究兴趣" },
+      { id: "activities", title: "活动经历" },
+      { id: "awards", title: "获奖情况" },
+      { id: "skillsLanguage", title: "技能语言" },
     ];
 
-    return modules.map(module => {
-      const isChecked = data.moduleSelection[module.id as keyof ModuleSelection];
+    return modules.map((module) => {
+      const isChecked =
+        data.moduleSelection[module.id as keyof ModuleSelection];
       const hasContent = hasModuleContent(module.id);
       const missingFields = getMissingFields(module.id);
-      
+
       return {
         moduleId: module.id,
         title: module.title,
         isChecked,
         hasContent,
         isEmpty: isChecked && !hasContent,
-        missingFields
+        missingFields,
       };
     });
   };
 
   // 新增：获取选中但未填写的模块
   const getIncompleteSelections = (): ConfirmationItem[] => {
-    return getConfirmationData().filter(item => item.isEmpty);
+    return getConfirmationData().filter((item) => item.isEmpty);
   };
 
   // 新增：检查是否可以生成文书
   const canGenerate = (): boolean => {
     const confirmationData = getConfirmationData();
-    const hasSelectedModules = confirmationData.some(item => item.isChecked);
-    const hasIncompleteSelections = confirmationData.some(item => item.isEmpty);
-    
+    const hasSelectedModules = confirmationData.some((item) => item.isChecked);
+    const hasIncompleteSelections = confirmationData.some(
+      (item) => item.isEmpty
+    );
+
     return hasSelectedModules && !hasIncompleteSelections;
   };
 
   // 更新函数保持不变
   const updateHeaderData = (newData: Partial<HeaderData>) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      header: { ...prev.header, ...newData }
+      header: { ...prev.header, ...newData },
     }));
   };
 
   const updateEducationData = (newData: Partial<EducationData>) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      education: { ...prev.education, ...newData }
+      education: { ...prev.education, ...newData },
     }));
   };
 
-  const updateWorkExperienceData = (index: number, newData: Partial<WorkExperienceData>) => {
-    setData(prev => ({
+  const updateWorkExperienceData = (
+    index: number,
+    newData: Partial<WorkExperienceData>
+  ) => {
+    setData((prev) => ({
       ...prev,
-      workExperience: prev.workExperience.map((item, i) => 
+      workExperience: prev.workExperience.map((item, i) =>
         i === index ? { ...item, ...newData } : item
-      )
+      ),
     }));
   };
 
   const addWorkExperience = () => {
     const newExperience: WorkExperienceData = {
-      company: '',
-      job_title: '',
-      work_city: '',
-      work_country: '',
-      work_start_date: '',
-      work_end_date: '',
-      responsibilities: ''
+      company: "",
+      job_title: "",
+      work_city: "",
+      work_country: "",
+      work_start_date: "",
+      work_end_date: "",
+      responsibilities: "",
     };
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      workExperience: [...prev.workExperience, newExperience]
+      workExperience: [...prev.workExperience, newExperience],
     }));
   };
 
   const removeWorkExperience = (index: number) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      workExperience: prev.workExperience.filter((_: WorkExperienceData, i: number) => i !== index)
+      workExperience: prev.workExperience.filter(
+        (_: WorkExperienceData, i: number) => i !== index
+      ),
     }));
   };
 
-  const updateResearchData = (index: number, newData: Partial<ResearchData>) => {
-    setData(prev => ({
+  const updateResearchData = (
+    index: number,
+    newData: Partial<ResearchData>
+  ) => {
+    setData((prev) => ({
       ...prev,
-      research: prev.research.map((item, i) => 
+      research: prev.research.map((item, i) =>
         i === index ? { ...item, ...newData } : item
-      )
+      ),
     }));
   };
 
   const addResearch = () => {
     const newResearch: ResearchData = {
-      project_title: '',
-      lab_or_unit: '',
-      res_start_date: '',
-      res_end_date: '',
-      project_background: '',
-      your_contributions: '',
-      tools_used: '',
-      outcomes: ''
+      project_title: "",
+      lab_or_unit: "",
+      res_start_date: "",
+      res_end_date: "",
+      project_background: "",
+      your_contributions: "",
+      tools_used: "",
+      outcomes: "",
     };
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      research: [...prev.research, newResearch]
+      research: [...prev.research, newResearch],
     }));
   };
 
   const removeResearch = (index: number) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      research: prev.research.filter((_: ResearchData, i: number) => i !== index)
+      research: prev.research.filter(
+        (_: ResearchData, i: number) => i !== index
+      ),
     }));
   };
 
-  const updateActivitiesData = (index: number, newData: Partial<ActivitiesData>) => {
-    setData(prev => ({
+  const updateActivitiesData = (
+    index: number,
+    newData: Partial<ActivitiesData>
+  ) => {
+    setData((prev) => ({
       ...prev,
-      activities: prev.activities.map((item, i) => 
+      activities: prev.activities.map((item, i) =>
         i === index ? { ...item, ...newData } : item
-      )
+      ),
     }));
   };
 
   const addActivity = () => {
     const newActivity: ActivitiesData = {
-      activity_name: '',
-      role: '',
-      act_city: '',
-      act_country: '',
-      act_start_date: '',
-      act_end_date: '',
-      description: ''
+      activity_name: "",
+      role: "",
+      act_city: "",
+      act_country: "",
+      act_start_date: "",
+      act_end_date: "",
+      description: "",
     };
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      activities: [...prev.activities, newActivity]
+      activities: [...prev.activities, newActivity],
     }));
   };
 
   const removeActivity = (index: number) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      activities: prev.activities.filter((_: ActivitiesData, i: number) => i !== index)
+      activities: prev.activities.filter(
+        (_: ActivitiesData, i: number) => i !== index
+      ),
     }));
   };
 
   const updateAwardsData = (index: number, newData: Partial<AwardsData>) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      awards: prev.awards.map((item, i) => 
+      awards: prev.awards.map((item, i) =>
         i === index ? { ...item, ...newData } : item
-      )
+      ),
     }));
   };
 
   const addAward = () => {
     const newAward: AwardsData = {
-      award_name: '',
-      award_year: '',
-      award_issuer: '',
-      award_rank: '',
-      certificate_name: '',
-      certificate_issuer: ''
+      award_name: "",
+      award_year: "",
+      award_issuer: "",
+      award_rank: "",
+      certificate_name: "",
+      certificate_issuer: "",
     };
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      awards: [...prev.awards, newAward]
+      awards: [...prev.awards, newAward],
     }));
   };
 
   const removeAward = (index: number) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      awards: prev.awards.filter((_: AwardsData, i: number) => i !== index)
+      awards: prev.awards.filter((_: AwardsData, i: number) => i !== index),
     }));
   };
 
   const updateSkillsLanguageData = (newData: Partial<SkillsLanguageData>) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      skillsLanguage: { ...prev.skillsLanguage, ...newData }
+      skillsLanguage: { ...prev.skillsLanguage, ...newData },
     }));
   };
 
   // 新增：获取选中模块的数据
   const getSelectedData = () => {
     const selectedData: any = {};
-    
+
     if (data.moduleSelection.header) {
       selectedData.header = data.header;
     }
@@ -654,105 +710,120 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
     if (data.moduleSelection.skillsLanguage) {
       selectedData.skillsLanguage = data.skillsLanguage;
     }
-    
+
     return selectedData;
   };
 
   // 新增：获取缺失字段的方法
   const getMissingFields = (moduleId: string): string[] => {
-    const requiredFields = REQUIRED_FIELDS[moduleId as keyof typeof REQUIRED_FIELDS];
+    const requiredFields =
+      REQUIRED_FIELDS[moduleId as keyof typeof REQUIRED_FIELDS];
     if (!requiredFields) return [];
 
     const missing: string[] = [];
 
     switch (moduleId) {
-      case 'header':
-        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          const value = data.header[key as keyof HeaderData];
-          if (typeof value === 'string' && !value.trim()) {
-            missing.push(label);
-          } else if (!value) {
-            missing.push(label);
+      case "header":
+        Object.entries(requiredFields).forEach(
+          ([key, label]: [string, string]) => {
+            const value = data.header[key as keyof HeaderData];
+            if (typeof value === "string" && !value.trim()) {
+              missing.push(label);
+            } else if (!value) {
+              missing.push(label);
+            }
           }
-        });
+        );
         break;
 
-      case 'education':
-        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          const value = data.education[key as keyof EducationData];
-          if (typeof value === 'string' && !value.trim()) {
-            missing.push(label);
+      case "education":
+        Object.entries(requiredFields).forEach(
+          ([key, label]: [string, string]) => {
+            const value = data.education[key as keyof EducationData];
+            if (typeof value === "string" && !value.trim()) {
+              missing.push(label);
+            }
           }
-        });
+        );
         break;
 
-      case 'workExperience':
+      case "workExperience":
         if (data.workExperience.length === 0) {
-          missing.push('需要至少添加一个工作经历');
+          missing.push("需要至少添加一个工作经历");
         } else {
           // 检查第一个工作经历的必填字段
           const firstExp = data.workExperience[0];
-          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            const value = firstExp[key as keyof WorkExperienceData];
-            if (typeof value === 'string' && !value.trim()) {
-              missing.push(label);
+          Object.entries(requiredFields).forEach(
+            ([key, label]: [string, string]) => {
+              const value = firstExp[key as keyof WorkExperienceData];
+              if (typeof value === "string" && !value.trim()) {
+                missing.push(label);
+              }
             }
-          });
+          );
         }
         break;
 
-      case 'research':
+      case "research":
         if (data.research.length === 0) {
-          missing.push('需要至少添加一个研究项目');
+          missing.push("需要至少添加一个研究项目");
         } else {
           // 检查第一个研究项目的必填字段
           const firstResearch = data.research[0];
-          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            const value = firstResearch[key as keyof ResearchData];
-            if (typeof value === 'string' && !value.trim()) {
-              missing.push(label);
+          Object.entries(requiredFields).forEach(
+            ([key, label]: [string, string]) => {
+              const value = firstResearch[key as keyof ResearchData];
+              if (typeof value === "string" && !value.trim()) {
+                missing.push(label);
+              }
             }
-          });
+          );
         }
         break;
 
-      case 'activities':
+      case "activities":
         if (data.activities.length === 0) {
-          missing.push('需要至少添加一个活动经历');
+          missing.push("需要至少添加一个活动经历");
         } else {
           // 检查第一个活动的必填字段
           const firstActivity = data.activities[0];
-          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            const value = firstActivity[key as keyof ActivitiesData];
-            if (typeof value === 'string' && !value.trim()) {
-              missing.push(label);
+          Object.entries(requiredFields).forEach(
+            ([key, label]: [string, string]) => {
+              const value = firstActivity[key as keyof ActivitiesData];
+              if (typeof value === "string" && !value.trim()) {
+                missing.push(label);
+              }
             }
-          });
+          );
         }
         break;
 
-      case 'awards':
+      case "awards":
         if (data.awards.length === 0) {
-          missing.push('需要至少添加一个奖项');
+          missing.push("需要至少添加一个奖项");
         } else {
           // 检查第一个奖项的必填字段
           const firstAward = data.awards[0];
-          Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-            const value = firstAward[key as keyof AwardsData];
-            if (typeof value === 'string' && !value.trim()) {
-              missing.push(label);
+          Object.entries(requiredFields).forEach(
+            ([key, label]: [string, string]) => {
+              const value = firstAward[key as keyof AwardsData];
+              if (typeof value === "string" && !value.trim()) {
+                missing.push(label);
+              }
             }
-          });
+          );
         }
         break;
 
-      case 'skillsLanguage':
-        Object.entries(requiredFields).forEach(([key, label]: [string, string]) => {
-          const value = data.skillsLanguage[key as keyof SkillsLanguageData];
-          if (typeof value === 'string' && !value.trim()) {
-            missing.push(label);
+      case "skillsLanguage":
+        Object.entries(requiredFields).forEach(
+          ([key, label]: [string, string]) => {
+            const value = data.skillsLanguage[key as keyof SkillsLanguageData];
+            if (typeof value === "string" && !value.trim()) {
+              missing.push(label);
+            }
           }
-        });
+        );
         break;
     }
 
@@ -761,115 +832,126 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
 
   // 更新选中模板的方法
   const updateSelectedTemplate = (template: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      selectedTemplate: template
+      selectedTemplate: template,
     }));
     saveToCache();
   };
 
   // 新增：更新主题颜色的方法
   const updateThemeColor = (themeColor: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      themeColor: themeColor
+      themeColor: themeColor,
     }));
     saveToCache();
   };
 
   // 新增：布局管理相关方法
   const updateLayoutConfiguration = (layout: LayoutConfiguration) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      layoutConfiguration: layout
+      layoutConfiguration: layout,
     }));
     saveToCache();
   };
 
   const moveModuleToMain = (moduleId: string) => {
-    setData(prev => {
+    setData((prev) => {
       const newLayout = { ...prev.layoutConfiguration };
       // 从sidebar中移除
-      newLayout.sidebarSections = newLayout.sidebarSections.filter(id => id !== moduleId);
+      newLayout.sidebarSections = newLayout.sidebarSections.filter(
+        (id) => id !== moduleId
+      );
       // 添加到main末尾
       if (!newLayout.mainSections.includes(moduleId)) {
         newLayout.mainSections.push(moduleId);
       }
       return {
         ...prev,
-        layoutConfiguration: newLayout
+        layoutConfiguration: newLayout,
       };
     });
     saveToCache();
   };
 
   const moveModuleToSidebar = (moduleId: string) => {
-    setData(prev => {
+    setData((prev) => {
       const newLayout = { ...prev.layoutConfiguration };
       // 从main中移除
-      newLayout.mainSections = newLayout.mainSections.filter(id => id !== moduleId);
+      newLayout.mainSections = newLayout.mainSections.filter(
+        (id) => id !== moduleId
+      );
       // 添加到sidebar末尾
       if (!newLayout.sidebarSections.includes(moduleId)) {
         newLayout.sidebarSections.push(moduleId);
       }
       return {
         ...prev,
-        layoutConfiguration: newLayout
+        layoutConfiguration: newLayout,
       };
     });
     saveToCache();
   };
 
   const reorderMainSections = (newOrder: string[]) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
       layoutConfiguration: {
         ...prev.layoutConfiguration,
-        mainSections: newOrder
-      }
+        mainSections: newOrder,
+      },
     }));
     saveToCache();
   };
 
   const reorderSidebarSections = (newOrder: string[]) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
       layoutConfiguration: {
         ...prev.layoutConfiguration,
-        sidebarSections: newOrder
-      }
+        sidebarSections: newOrder,
+      },
     }));
     saveToCache();
   };
 
   // 生成状态管理
   const setGenerationLoading = (loading: boolean) => {
-    setGenerationState(prev => ({ ...prev, isGenerating: loading }));
+    setGenerationState((prev) => ({ ...prev, isGenerating: loading }));
   };
 
   const setGenerationError = (error: string | null) => {
-    setGenerationState(prev => ({ ...prev, error }));
+    setGenerationState((prev) => ({ ...prev, error }));
   };
 
-  const setLanguagePreference = (language: 'English' | 'Chinese') => {
-    setGenerationState(prev => ({ ...prev, languagePreference: language }));
+  const setLanguagePreference = (language: "English" | "Chinese") => {
+    setGenerationState((prev) => ({ ...prev, languagePreference: language }));
     // 同时保存到localStorage
     try {
-      localStorage.setItem('resume_language_preference', language);
+      localStorage.setItem("resume_language_preference", language);
     } catch (error) {
-      console.error('Error saving language preference:', error);
+      console.error("Error saving language preference:", error);
     }
   };
 
   // 文档管理方法
   const setDocumentUuid = useCallback((uuid: string | null) => {
-    setDocumentState(prev => ({ ...prev, documentUuid: uuid }));
+    setDocumentState((prev) => ({ ...prev, documentUuid: uuid }));
   }, []);
 
   const saveDocument = async () => {
-    console.log('[ResumeContext] saveDocument called, documentUuid:', documentState.documentUuid);
+    console.log(
+      "[ResumeContext] saveDocument called, documentUuid:",
+      documentState.documentUuid
+    );
     try {
-      setDocumentState(prev => ({ ...prev, isSaving: true, saveError: null }));
+      setDocumentState((prev) => ({
+        ...prev,
+        isSaving: true,
+        saveError: null,
+      }));
 
       const payload = {
         uuid: documentState.documentUuid,
@@ -878,69 +960,82 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
         themeColor: data.themeColor,
         layoutConfiguration: data.layoutConfiguration,
         moduleSelection: data.moduleSelection,
-        title: data.header.full_name ? `${data.header.full_name}的简历` : '未命名简历'
+        title: data.header.full_name
+          ? `${data.header.full_name}的简历`
+          : "未命名简历",
       };
 
-      console.log('[ResumeContext] Saving with payload:', payload);
+      console.log("[ResumeContext] Saving with payload:", payload);
 
       let response;
       if (documentState.documentUuid) {
         // Update existing document
-        console.log('[ResumeContext] Updating existing document');
-        response = await fetch(`/api/documents/resume/${documentState.documentUuid}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        console.log("[ResumeContext] Updating existing document");
+        response = await fetch(
+          `/api/documents/resume/${documentState.documentUuid}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
       } else {
         // Create new document
-        response = await fetch('/api/documents/resume', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        response = await fetch("/api/documents/resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
       }
 
       if (!response.ok) {
-        throw new Error('Failed to save document');
+        throw new Error("Failed to save document");
       }
 
       const result = await response.json();
-      console.log('[ResumeContext] Save response:', result);
-      
+      console.log("[ResumeContext] Save response:", result);
+
       if (!documentState.documentUuid && result.data?.uuid) {
-        console.log('[ResumeContext] Setting new document UUID:', result.data.uuid);
+        console.log(
+          "[ResumeContext] Setting new document UUID:",
+          result.data.uuid
+        );
         setDocumentUuid(result.data.uuid);
       }
 
-      setDocumentState(prev => ({
+      setDocumentState((prev) => ({
         ...prev,
         isSaving: false,
         lastSavedAt: new Date(),
-        saveError: null
+        saveError: null,
       }));
-      console.log('[ResumeContext] Save completed successfully');
+      console.log("[ResumeContext] Save completed successfully");
     } catch (error) {
-      console.error('Error saving document:', error);
-      setDocumentState(prev => ({
+      console.error("Error saving document:", error);
+      setDocumentState((prev) => ({
         ...prev,
         isSaving: false,
-        saveError: error instanceof Error ? error.message : 'Failed to save document'
+        saveError:
+          error instanceof Error ? error.message : "Failed to save document",
       }));
     }
   };
 
   const loadDocument = useCallback(async (uuid: string) => {
     try {
-      setDocumentState(prev => ({ ...prev, isLoading: true, documentUuid: uuid }));
+      setDocumentState((prev) => ({
+        ...prev,
+        isLoading: true,
+        documentUuid: uuid,
+      }));
 
       const response = await fetch(`/api/documents/resume/${uuid}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Document not found');
+          throw new Error("Document not found");
         }
-        throw new Error('Failed to load document');
+        throw new Error("Failed to load document");
       }
 
       const result = await response.json();
@@ -949,18 +1044,30 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
       if (document?.form_data) {
         // Inline the initialization logic to avoid dependency issues
         const formData = document.form_data;
-        
+
         // Check if the data structure has resumeData nested
-        let resumeData, template, themeColor, layoutConfiguration, moduleSelection;
-        
+        let resumeData,
+          template,
+          themeColor,
+          layoutConfiguration,
+          moduleSelection;
+
         if (formData.resumeData) {
           resumeData = formData.resumeData;
           template = formData.template || resumeData.selectedTemplate;
           themeColor = formData.themeColor || resumeData.themeColor;
-          layoutConfiguration = formData.layoutConfiguration || resumeData.layoutConfiguration;
-          moduleSelection = formData.moduleSelection || resumeData.moduleSelection;
+          layoutConfiguration =
+            formData.layoutConfiguration || resumeData.layoutConfiguration;
+          moduleSelection =
+            formData.moduleSelection || resumeData.moduleSelection;
         } else {
-          ({ resumeData, template, themeColor, layoutConfiguration, moduleSelection } = formData);
+          ({
+            resumeData,
+            template,
+            themeColor,
+            layoutConfiguration,
+            moduleSelection,
+          } = formData);
         }
 
         // Extract the actual resume data fields
@@ -979,32 +1086,32 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
         };
 
         // Ensure required modules remain selected
-        REQUIRED_MODULES.forEach(moduleId => {
+        REQUIRED_MODULES.forEach((moduleId) => {
           if (extractedData.moduleSelection) {
             extractedData.moduleSelection[moduleId] = true;
           }
         });
 
         setData(extractedData);
-        setDocumentState(prev => ({ ...prev, documentUuid: document.uuid }));
+        setDocumentState((prev) => ({ ...prev, documentUuid: document.uuid }));
       }
 
-      setDocumentState(prev => ({
+      setDocumentState((prev) => ({
         ...prev,
         isLoading: false,
-        lastSavedAt: document.updated_at ? new Date(document.updated_at) : null
+        lastSavedAt: document.updated_at ? new Date(document.updated_at) : null,
       }));
     } catch (error) {
-      console.error('Error loading document:', error);
-      setDocumentState(prev => ({
+      console.error("Error loading document:", error);
+      setDocumentState((prev) => ({
         ...prev,
         isLoading: false,
-        saveError: error instanceof Error ? error.message : 'Failed to load document'
+        saveError:
+          error instanceof Error ? error.message : "Failed to load document",
       }));
       throw error; // Re-throw to handle in component
     }
   }, []);
-
 
   const value: ResumeContextType = {
     data,
@@ -1050,20 +1157,18 @@ export function ResumeProvider({ children, isEditMode = false }: { children: Rea
     documentState,
     saveDocument,
     loadDocument,
-    setDocumentUuid
+    setDocumentUuid,
   };
 
   return (
-    <ResumeContext.Provider value={value}>
-      {children}
-    </ResumeContext.Provider>
+    <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>
   );
 }
 
 export function useResume() {
   const context = useContext(ResumeContext);
   if (context === undefined) {
-    throw new Error('useResume must be used within a ResumeProvider');
+    throw new Error("useResume must be used within a ResumeProvider");
   }
   return context;
-} 
+}
