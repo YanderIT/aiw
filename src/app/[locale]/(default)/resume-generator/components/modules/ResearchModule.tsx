@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AITextarea } from "@/components/ui/ai-textarea";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 // import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useResume, ResearchData } from "../ResumeContext";
+import { useResumeAI } from "@/hooks/useResumeAI";
 
 export default function ResearchModule() {
-  const { data, updateResearchData, addResearch, removeResearch } = useResume();
+  const { data, updateResearchData, addResearch, removeResearch, isEditMode } = useResume();
   const researchProjects = data.research;
+  const { generateContent, isGenerating } = useResumeAI();
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
+  const [generatingField, setGeneratingField] = useState<string | null>(null);
 
   const handleInputChange = (index: number, field: keyof ResearchData, value: string) => {
     updateResearchData(index, { [field]: value });
@@ -136,14 +141,39 @@ export default function ResearchModule() {
                 <Label htmlFor={`project_background-${index}`} className="text-xs font-medium text-foreground">
                   研究目标 / 背景简介 <span className="text-destructive">*</span>
                 </Label>
-                <Textarea
-                  id={`project_background-${index}`}
-                  placeholder="请描述研究项目的背景、目标和意义"
-                  value={project.project_background}
-                  onChange={(e) => handleInputChange(index, "project_background", e.target.value)}
-                  className="min-h-[80px] resize-none text-xs"
-                  rows={3}
-                />
+                {isEditMode ? (
+                  <Textarea
+                    id={`project_background-${index}`}
+                    placeholder="请描述研究项目的背景、目标和意义"
+                    value={project.project_background}
+                    onChange={(e) => handleInputChange(index, "project_background", e.target.value)}
+                    className="min-h-[80px] resize-none text-xs"
+                    rows={3}
+                  />
+                ) : (
+                  <AITextarea
+                    id={`project_background-${index}`}
+                    placeholder="请描述研究项目的背景、目标和意义"
+                    value={project.project_background}
+                    onChange={(e) => handleInputChange(index, "project_background", e.target.value)}
+                    className="min-h-[80px] resize-none text-xs"
+                    rows={3}
+                    aiGenerating={isGenerating && generatingIndex === index && generatingField === 'background'}
+                    onAIGenerate={async () => {
+                      // Type 4: Research - Project Background
+                      setGeneratingIndex(index);
+                      setGeneratingField('background');
+                      const context = { research: [project] };
+                      const generatedContent = await generateContent(context, 4);
+                      if (generatedContent) {
+                        handleInputChange(index, "project_background", generatedContent);
+                      }
+                      setGeneratingIndex(null);
+                      setGeneratingField(null);
+                    }}
+                    contextHint={project.project_title}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground">请详细描述研究项目的背景、目标和研究意义</p>
               </div>
 
@@ -152,14 +182,39 @@ export default function ResearchModule() {
                 <Label htmlFor={`your_contributions-${index}`} className="text-xs font-medium text-foreground">
                   你做了什么 <span className="text-destructive">*</span>
                 </Label>
-                <Textarea
-                  id={`your_contributions-${index}`}
-                  placeholder="请用英文描述您在项目中的具体贡献"
-                  value={project.your_contributions}
-                  onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
-                  className="min-h-[100px] resize-none text-xs"
-                  rows={4}
-                />
+                {isEditMode ? (
+                  <Textarea
+                    id={`your_contributions-${index}`}
+                    placeholder="请用英文描述您在项目中的具体贡献"
+                    value={project.your_contributions}
+                    onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                  />
+                ) : (
+                  <AITextarea
+                    id={`your_contributions-${index}`}
+                    placeholder="请用英文描述您在项目中的具体贡献"
+                    value={project.your_contributions}
+                    onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                    aiGenerating={isGenerating && generatingIndex === index && generatingField === 'contributions'}
+                    onAIGenerate={async () => {
+                      // Type 5: Research - Your Contributions
+                      setGeneratingIndex(index);
+                      setGeneratingField('contributions');
+                      const context = { research: [project] };
+                      const generatedContent = await generateContent(context, 5);
+                      if (generatedContent) {
+                        handleInputChange(index, "your_contributions", generatedContent);
+                      }
+                      setGeneratingIndex(null);
+                      setGeneratingField(null);
+                    }}
+                    contextHint={project.project_title}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground">请用英文填写 3-4 条您在项目中的具体贡献，每条以动词开头，用 • 符号分隔</p>
               </div>
 

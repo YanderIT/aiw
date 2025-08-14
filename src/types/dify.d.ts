@@ -1,7 +1,7 @@
 // Dify API 类型定义
 
 // 功能类型定义
-export type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'default';
+export type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'sop' | 'revise-sop' | 'personal-statement' | 'revise-personal-statement' | 'default';
 
 export interface DifyWorkflowRunRequest {
   inputs: Record<string, any>;

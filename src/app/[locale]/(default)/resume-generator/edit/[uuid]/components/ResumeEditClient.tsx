@@ -70,7 +70,7 @@ function ResumeEditContent({ documentUuid }: ResumeEditClientProps) {
 
 export default function ResumeEditClient({ documentUuid }: ResumeEditClientProps) {
   return (
-    <ResumeProvider>
+    <ResumeProvider isEditMode={true}>
       <ResumeEditContent documentUuid={documentUuid} />
     </ResumeProvider>
   );

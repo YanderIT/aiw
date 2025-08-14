@@ -3,9 +3,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug } from "lucide-react";
 import { useRouter } from '@/i18n/navigation';
 import { GlobalLoading } from "@/components/ui/loading";
 
@@ -49,8 +57,17 @@ function ConfirmationPage() {
     toggleModuleSelection, 
     isModuleRequired,
     generationState,
-    setGenerationLoading
+    setGenerationLoading,
+    setLanguagePreference
   } = useResume();
+
+  // 开发调试功能 - 打印整体 JSON
+  const handleDebugPrint = () => {
+    console.log('=== Resume Data JSON ===');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('=== Resume Data Object ===');
+    console.log(data);
+  };
   
   // 处理生成按钮点击
   const handleGenerate = async () => {
@@ -112,6 +129,46 @@ function ConfirmationPage() {
           <h2 className="text-2xl font-semibold text-foreground mb-2">确认文书内容</h2>
           <p className="text-muted-foreground">请确认您要包含在文书中的内容，点击复选框可以切换选择</p>
         </div>
+
+      {/* 开发调试按钮 - 仅在开发环境显示 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="flex justify-center mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDebugPrint}
+            className="bg-yellow-50 dark:bg-yellow-950/30 border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+          >
+            <Bug className="w-4 h-4 mr-2" />
+            打印简历 JSON (开发调试)
+          </Button>
+        </div>
+      )}
+
+      {/* 语言选择器 */}
+      {/* <div className="bg-muted/30 rounded-xl p-6">
+        <div className="flex items-center gap-4">
+          <Globe className="w-5 h-5 text-muted-foreground" />
+          <Label htmlFor="language-select" className="text-base font-medium">
+            简历语言 / Resume Language
+          </Label>
+          <Select
+            value={generationState.languagePreference}
+            onValueChange={(value: 'English' | 'Chinese') => setLanguagePreference(value)}
+          >
+            <SelectTrigger id="language-select" className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="English">English (英文)</SelectItem>
+              <SelectItem value="Chinese">中文 (Chinese)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 ml-9">
+          选择简历的生成语言 / Select the language for the resume
+        </p>
+      </div> */}
 
       {/* 所有模块的可选择列表 */}
       <div className="bg-muted/30 rounded-xl p-6">

@@ -3,13 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AITextarea } from "@/components/ui/ai-textarea";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useResume, EducationData } from "../ResumeContext";
+import { useResumeAI } from "@/hooks/useResumeAI";
 
 export default function EducationModule() {
-  const { data, updateEducationData } = useResume();
+  const { data, updateEducationData, isEditMode } = useResume();
   const formData = data.education;
+  const { generateContent, isGenerating } = useResumeAI();
 
   const handleInputChange = (field: keyof EducationData, value: string) => {
     updateEducationData({ [field]: value });
@@ -135,14 +138,35 @@ export default function EducationModule() {
           <Label htmlFor="relevant_courses" className="text-xs font-medium text-foreground">
             相关课程（可选）
           </Label>
-          <Textarea
-            id="relevant_courses"
-            placeholder="例如：Advanced Statistics, Research Methods, Cognitive Psychology"
-            value={formData.relevant_courses}
-            onChange={(e) => handleInputChange("relevant_courses", e.target.value)}
-            className="min-h-[80px] resize-none text-xs"
-            rows={3}
-          />
+          {isEditMode ? (
+            <Textarea
+              id="relevant_courses"
+              placeholder="例如：Advanced Statistics, Research Methods, Cognitive Psychology"
+              value={formData.relevant_courses}
+              onChange={(e) => handleInputChange("relevant_courses", e.target.value)}
+              className="min-h-[80px] resize-none text-xs"
+              rows={3}
+            />
+          ) : (
+            <AITextarea
+              id="relevant_courses"
+              placeholder="例如：Advanced Statistics, Research Methods, Cognitive Psychology"
+              value={formData.relevant_courses}
+              onChange={(e) => handleInputChange("relevant_courses", e.target.value)}
+              className="min-h-[80px] resize-none text-xs"
+              rows={3}
+              aiGenerating={isGenerating}
+              onAIGenerate={async () => {
+                // Type 0: Education - Relevant Courses
+                const context = { education: formData };
+                const generatedContent = await generateContent(context, 0);
+                if (generatedContent) {
+                  handleInputChange("relevant_courses", generatedContent);
+                }
+              }}
+              contextHint={`${formData.degree} ${formData.school_name}`}
+            />
+          )}
           <p className="text-[10px] text-muted-foreground">请用英文填写 3-5 门相关课程，用逗号分隔</p>
         </div>
       </div>

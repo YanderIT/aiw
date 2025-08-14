@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { MetallicIcon } from "@/components/icons/metallic";
+import { Sparkles } from "lucide-react";
 
 interface CreationToolCardProps {
   icon: string;
@@ -243,7 +244,7 @@ export function CreationToolCard({
                   }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <span className="text-lg">💰</span> 
+                  <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />
                   <span className="font-bold text-green-700 dark:text-green-300 text-base">{price}</span>
                 </motion.div>
               </motion.div>

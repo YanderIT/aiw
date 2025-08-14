@@ -177,6 +177,7 @@ const REQUIRED_FIELDS = {
 interface GenerationState {
   isGenerating: boolean;
   error: string | null;
+  languagePreference: 'English' | 'Chinese'; // 添加语言偏好
 }
 
 // 文档管理状态
@@ -190,6 +191,7 @@ interface DocumentState {
 
 interface ResumeContextType {
   data: ResumeData;
+  isEditMode?: boolean; // 新增：是否在编辑模式
   updateHeaderData: (data: Partial<HeaderData>) => void;
   updateEducationData: (data: Partial<EducationData>) => void;
   updateWorkExperienceData: (index: number, data: Partial<WorkExperienceData>) => void;
@@ -236,6 +238,7 @@ interface ResumeContextType {
   generationState: GenerationState;
   setGenerationLoading: (loading: boolean) => void;
   setGenerationError: (error: string | null) => void;
+  setLanguagePreference: (language: 'English' | 'Chinese') => void;
   // 新增：文档管理
   documentState: DocumentState;
   saveDocument: () => Promise<void>;
@@ -274,15 +277,15 @@ const defaultResumeData: ResumeData = {
     native_language: '',
     other_languages: ''
   },
-  // 默认所有模块都选中
+  // 默认只选中必填模块
   moduleSelection: {
     header: true,
     education: true,
-    workExperience: true,
-    research: true,
-    activities: true,
-    awards: true,
-    skillsLanguage: true
+    workExperience: false,
+    research: false,
+    activities: false,
+    awards: false,
+    skillsLanguage: false
   },
   // 默认选择 ditto 模板
   selectedTemplate: 'ditto',
@@ -298,11 +301,12 @@ const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
 const CACHE_KEY = 'resume_generator_data';
 
-export function ResumeProvider({ children }: { children: ReactNode }) {
+export function ResumeProvider({ children, isEditMode = false }: { children: ReactNode; isEditMode?: boolean }) {
   const [data, setData] = useState<ResumeData>(defaultResumeData);
   const [generationState, setGenerationState] = useState<GenerationState>({
     isGenerating: false,
-    error: null
+    error: null,
+    languagePreference: 'English' // 默认为英文
   });
   const [documentState, setDocumentState] = useState<DocumentState>({
     documentUuid: null,
@@ -316,6 +320,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const loadFromCache = () => {
     if (typeof window !== 'undefined') {
       const cached = localStorage.getItem(CACHE_KEY);
+      const savedLanguage = localStorage.getItem('resume_language_preference');
+      
       if (cached) {
         try {
           const parsedData = JSON.parse(cached);
@@ -341,6 +347,14 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         } catch (error) {
           console.error('加载缓存数据失败:', error);
         }
+      }
+      
+      // 恢复语言偏好
+      if (savedLanguage) {
+        setGenerationState(prev => ({
+          ...prev,
+          languagePreference: savedLanguage as 'English' | 'Chinese'
+        }));
       }
     }
   };
@@ -837,6 +851,16 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     setGenerationState(prev => ({ ...prev, error }));
   };
 
+  const setLanguagePreference = (language: 'English' | 'Chinese') => {
+    setGenerationState(prev => ({ ...prev, languagePreference: language }));
+    // 同时保存到localStorage
+    try {
+      localStorage.setItem('resume_language_preference', language);
+    } catch (error) {
+      console.error('Error saving language preference:', error);
+    }
+  };
+
   // 文档管理方法
   const setDocumentUuid = useCallback((uuid: string | null) => {
     setDocumentState(prev => ({ ...prev, documentUuid: uuid }));
@@ -984,6 +1008,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
   const value: ResumeContextType = {
     data,
+    isEditMode,
     updateHeaderData,
     updateEducationData,
     updateWorkExperienceData,
@@ -1021,6 +1046,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     generationState,
     setGenerationLoading,
     setGenerationError,
+    setLanguagePreference,
     documentState,
     saveDocument,
     loadDocument,

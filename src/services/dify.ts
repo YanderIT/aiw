@@ -52,7 +52,7 @@ export interface DifyWorkflowLogsQuery {
 }
 
 // 功能类型定义
-export type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'revise-recommendation-letter' | 'default';
+export type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'revise-recommendation-letter' | 'sop' | 'revise-sop' | 'personal-statement' | 'revise-personal-statement' | 'default';
 
 // API Key 配置映射
 const API_KEY_MAP: Record<DifyFunctionType, string> = {
@@ -60,6 +60,10 @@ const API_KEY_MAP: Record<DifyFunctionType, string> = {
   'cover-letter': process.env.DIFY_API_KEY_COVER_LETTER || '',
   'resume-generator': process.env.DIFY_API_KEY_RESUME_GENERATOR || '',
   'revise-recommendation-letter': process.env.DIFY_API_KEY_REVISE_RECOMMENDATION_LETTER || '',
+  'sop': process.env.DIFY_API_KEY_SOP || '',
+  'revise-sop': process.env.DIFY_API_KEY_REVISE_SOP || '',
+  'personal-statement': process.env.DIFY_API_KEY_PERSONAL_STATEMENT || '',
+  'revise-personal-statement': process.env.DIFY_API_KEY_REVISE_PERSONAL_STATEMENT || '',
   'default': process.env.DIFY_API_KEY || '',
 };
 

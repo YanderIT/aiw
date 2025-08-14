@@ -3,12 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AITextarea } from "@/components/ui/ai-textarea";
 import { Textarea } from "@/components/ui/textarea";
 import { useResume, SkillsLanguageData } from "../ResumeContext";
+import { useResumeAI } from "@/hooks/useResumeAI";
 
 export default function SkillsLanguageModule() {
-  const { data, updateSkillsLanguageData } = useResume();
+  const { data, updateSkillsLanguageData, isEditMode } = useResume();
   const formData = data.skillsLanguage;
+  const { generateContent, isGenerating } = useResumeAI();
 
   const handleInputChange = (field: keyof SkillsLanguageData, value: string) => {
     updateSkillsLanguageData({ [field]: value });
@@ -29,14 +32,35 @@ export default function SkillsLanguageModule() {
           <Label htmlFor="skills" className="text-xs font-medium text-foreground">
             技能 <span className="text-destructive">*</span>
           </Label>
-          <Textarea
-            id="skills"
-            placeholder="请列出您的专业技能，用逗号分隔"
-            value={formData.skills}
-            onChange={(e) => handleInputChange("skills", e.target.value)}
-            className="min-h-[80px] resize-none text-xs"
-            rows={3}
-          />
+          {isEditMode ? (
+            <Textarea
+              id="skills"
+              placeholder="请列出您的专业技能，用逗号分隔"
+              value={formData.skills}
+              onChange={(e) => handleInputChange("skills", e.target.value)}
+              className="min-h-[80px] resize-none text-xs"
+              rows={3}
+            />
+          ) : (
+            <AITextarea
+              id="skills"
+              placeholder="请列出您的专业技能，用逗号分隔"
+              value={formData.skills}
+              onChange={(e) => handleInputChange("skills", e.target.value)}
+              className="min-h-[80px] resize-none text-xs"
+              rows={3}
+              aiGenerating={isGenerating}
+              onAIGenerate={async () => {
+                // Type 1: Skills Language - Skills
+                // Pass entire resume JSON for better context
+                const context = data;
+                const generatedContent = await generateContent(context, 1);
+                if (generatedContent) {
+                  handleInputChange("skills", generatedContent);
+                }
+              }}
+            />
+          )}
           <p className="text-[10px] text-muted-foreground">请列出编程语言、软件工具、专业技能等，用逗号分隔</p>
         </div>
 

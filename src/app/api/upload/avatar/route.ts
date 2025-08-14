@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { newStorage } from '@/lib/storage';
 import { nanoid } from 'nanoid';
+import { rateLimiter } from '@/lib/security/simple-rate-limiter';
+import { getClientIp, anonymizeIp } from '@/lib/utils/get-client-ip';
 
 // 允许的文件类型
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -13,6 +15,25 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 获取用户标识和客户端IP
+    const userIdentifier = (session.user as any).uuid || (session.user as any).id || session.user.email;
+    const clientIp = getClientIp(request);
+    
+    // 检查速率限制
+    const limitCheck = rateLimiter.checkLimit(userIdentifier, clientIp || undefined);
+    if (!limitCheck.allowed) {
+      console.log(`[上传限制] 用户 ${userIdentifier} 或 IP ${anonymizeIp(clientIp)} 触发限制: ${limitCheck.reason}`);
+      return NextResponse.json(
+        { 
+          error: limitCheck.reason || '上传频率过高，请稍后再试',
+          waitTime: limitCheck.waitTime,
+          userCount: limitCheck.userCount,
+          ipCount: limitCheck.ipCount
+        }, 
+        { status: 429 }
+      );
     }
 
     // 获取上传的文件
@@ -38,9 +59,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 获取用户信息
-    const userIdentifier = (session.user as any).uuid || (session.user as any).id || session.user.email;
     
     // 生成唯一的文件名
     const timestamp = Date.now();
@@ -60,6 +78,9 @@ export async function POST(request: NextRequest) {
       contentType: file.type,
       disposition: 'inline'
     });
+
+    // 记录成功上传日志
+    console.log(`[上传成功] 用户 ${userIdentifier} IP ${anonymizeIp(clientIp)} 上传文件: ${fileName}`);
 
     return NextResponse.json({
       success: true,

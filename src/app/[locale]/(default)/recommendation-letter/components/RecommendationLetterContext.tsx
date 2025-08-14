@@ -66,6 +66,7 @@ export interface GenerationState {
   workflowRunId: string | null;
   taskId: string | null;
   workflowStatus: 'running' | 'succeeded' | 'failed' | 'stopped' | null;
+  languagePreference: 'English' | 'Chinese'; // 添加语言偏好
 }
 
 // 版本管理
@@ -122,6 +123,7 @@ interface RecommendationLetterContextType {
   updateGeneratedContent: (content: string) => void;
   setGenerationError: (error: string | null) => void;
   setGenerationLoading: (loading: boolean) => void;
+  setLanguagePreference: (language: 'English' | 'Chinese') => void; // 添加设置语言偏好的方法
   getSelectedData: () => any; // 获取选中模块的数据
   // workflow 执行状态相关方法
   setWorkflowIds: (workflowRunId: string, taskId: string) => void;
@@ -222,7 +224,8 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
     error: null,
     workflowRunId: null,
     taskId: null,
-    workflowStatus: null
+    workflowStatus: null,
+    languagePreference: 'English' // 默认为英文
   });
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   
@@ -238,6 +241,9 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
         setData(parsedData);
       }
       
+      // 加载语言偏好
+      const savedLanguage = localStorage.getItem('recommendationLetter_language_preference');
+      
       // 检查是否是自动生成请求
       const urlParams = new URLSearchParams(window.location.search);
       const shouldAutoGenerate = urlParams.get('autoGenerate') === 'true';
@@ -248,11 +254,12 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
         const cachedContent = localStorage.getItem('recommendationLetter_generated_content');
         const cachedTime = localStorage.getItem('recommendationLetter_generated_at');
         
-        if (cachedContent) {
+        if (cachedContent || savedLanguage) {
           setGenerationState(prev => ({
             ...prev,
-            generatedContent: cachedContent,
-            lastGeneratedAt: cachedTime ? parseInt(cachedTime) : null
+            generatedContent: cachedContent || prev.generatedContent,
+            lastGeneratedAt: cachedTime ? parseInt(cachedTime) : null,
+            languagePreference: (savedLanguage as 'English' | 'Chinese') || prev.languagePreference
           }));
         }
       }
@@ -478,9 +485,22 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
     }));
   };
 
+  const setLanguagePreference = (language: 'English' | 'Chinese') => {
+    setGenerationState(prev => ({
+      ...prev,
+      languagePreference: language
+    }));
+    // 同时保存到缓存
+    try {
+      localStorage.setItem('recommendationLetter_language_preference', language);
+    } catch (error) {
+      console.error('Error saving language preference to cache:', error);
+    }
+  };
+
   const getSelectedData = () => {
     const selectedData: any = {
-      language: language  // 添加语言字段
+      language: generationState.languagePreference  // 使用语言偏好设置而不是locale
     };
     
     if (data.moduleSelection.basicInfo) {
@@ -665,6 +685,7 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
     updateGeneratedContent,
     setGenerationError,
     setGenerationLoading,
+    setLanguagePreference,
     getSelectedData,
     setWorkflowIds,
     updateWorkflowStatus,

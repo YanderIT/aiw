@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 
@@ -53,7 +61,8 @@ function ConfirmationPage() {
     updateGeneratedContent,
     setWorkflowIds,
     startWorkflowStatusPolling,
-    saveToCache
+    saveToCache,
+    setLanguagePreference
   } = useRecommendationLetter();
   
   // Dify Hook for API calls
@@ -121,6 +130,31 @@ function ConfirmationPage() {
       <div className="text-center mb-8">
         <h2 className="text-2xl font-semibold text-foreground mb-2">确认推荐信内容</h2>
         <p className="text-muted-foreground">请确认您要包含在推荐信中的内容，点击复选框可以切换选择</p>
+      </div>
+
+      {/* 语言选择器 */}
+      <div className="bg-muted/30 rounded-xl p-6">
+        <div className="flex items-center gap-4">
+          <Globe className="w-5 h-5 text-muted-foreground" />
+          <Label htmlFor="language-select" className="text-base font-medium">
+            推荐信语言 / Letter Language
+          </Label>
+          <Select
+            value={generationState.languagePreference}
+            onValueChange={(value: 'English' | 'Chinese') => setLanguagePreference(value)}
+          >
+            <SelectTrigger id="language-select" className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="English">English (英文)</SelectItem>
+              <SelectItem value="Chinese">中文 (Chinese)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 ml-9">
+          选择推荐信的生成语言 / Select the language for the recommendation letter
+        </p>
       </div>
 
       {/* 所有模块的可选择列表 */}

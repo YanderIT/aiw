@@ -6,8 +6,11 @@ export function respOk() {
   return respJson(0, "ok");
 }
 
-export function respErr(message: string) {
-  return respJson(-1, message);
+export function respErr(message: string, status: number = 200) {
+  return Response.json({
+    code: -1,
+    message: message
+  }, { status });
 }
 
 export function respJson(code: number, message: string, data?: any) {

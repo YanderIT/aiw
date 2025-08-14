@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AITextarea } from "@/components/ui/ai-textarea";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 // import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useResume, ActivitiesData } from "../ResumeContext";
+import { useResumeAI } from "@/hooks/useResumeAI";
 
 export default function ActivitiesModule() {
-  const { data, updateActivitiesData, addActivity, removeActivity } = useResume();
+  const { data, updateActivitiesData, addActivity, removeActivity, isEditMode } = useResume();
   const activities = data.activities;
+  const { generateContent, isGenerating } = useResumeAI();
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
   const handleInputChange = (index: number, field: keyof ActivitiesData, value: string) => {
     updateActivitiesData(index, { [field]: value });
@@ -167,14 +171,37 @@ export default function ActivitiesModule() {
                 <Label htmlFor={`description-${index}`} className="text-xs font-medium text-foreground">
                   你做了什么 <span className="text-destructive">*</span>
                 </Label>
-                <Textarea
-                  id={`description-${index}`}
-                  placeholder="请用英文描述您在活动中的具体工作和贡献"
-                  value={activity.description}
-                  onChange={(e) => handleInputChange(index, "description", e.target.value)}
-                  className="min-h-[100px] resize-none text-xs"
-                  rows={4}
-                />
+                {isEditMode ? (
+                  <Textarea
+                    id={`description-${index}`}
+                    placeholder="请用英文描述您在活动中的具体工作和贡献"
+                    value={activity.description}
+                    onChange={(e) => handleInputChange(index, "description", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                  />
+                ) : (
+                  <AITextarea
+                    id={`description-${index}`}
+                    placeholder="请用英文描述您在活动中的具体工作和贡献"
+                    value={activity.description}
+                    onChange={(e) => handleInputChange(index, "description", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                    aiGenerating={isGenerating && generatingIndex === index}
+                    onAIGenerate={async () => {
+                      // Type 3: Activities - Description
+                      setGeneratingIndex(index);
+                      const context = { activities: [activity] };
+                      const generatedContent = await generateContent(context, 3);
+                      if (generatedContent) {
+                        handleInputChange(index, "description", generatedContent);
+                      }
+                      setGeneratingIndex(null);
+                    }}
+                    contextHint={`${activity.activity_name} ${activity.role}`}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground">请用英文填写 3-4 条您在活动中的具体工作和贡献，每条以动词开头，用 • 符号分隔</p>
               </div>
             </div>

@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AITextarea } from "@/components/ui/ai-textarea";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 // import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { useResume, WorkExperienceData } from "../ResumeContext";
+import { useResumeAI } from "@/hooks/useResumeAI";
 
 export default function WorkExperienceModule() {
-  const { data, updateWorkExperienceData, addWorkExperience, removeWorkExperience } = useResume();
+  const { data, updateWorkExperienceData, addWorkExperience, removeWorkExperience, isEditMode } = useResume();
   const workExperiences = data.workExperience;
+  const { generateContent, isGenerating } = useResumeAI();
+  const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
   const handleInputChange = (index: number, field: keyof WorkExperienceData, value: string) => {
     updateWorkExperienceData(index, { [field]: value });
@@ -167,14 +171,37 @@ export default function WorkExperienceModule() {
                 <Label htmlFor={`responsibilities-${index}`} className="text-xs font-medium text-foreground">
                   具体职责 <span className="text-destructive">*</span>
                 </Label>
-                <Textarea
-                  id={`responsibilities-${index}`}
-                  placeholder="请用英文描述您的工作职责，每行一个要点"
-                  value={experience.responsibilities}
-                  onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
-                  className="min-h-[100px] resize-none text-xs"
-                  rows={4}
-                />
+                {isEditMode ? (
+                  <Textarea
+                    id={`responsibilities-${index}`}
+                    placeholder="请用英文描述您的工作职责，每行一个要点"
+                    value={experience.responsibilities}
+                    onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                  />
+                ) : (
+                  <AITextarea
+                    id={`responsibilities-${index}`}
+                    placeholder="请用英文描述您的工作职责，每行一个要点"
+                    value={experience.responsibilities}
+                    onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
+                    className="min-h-[100px] resize-none text-xs"
+                    rows={4}
+                    aiGenerating={isGenerating && generatingIndex === index}
+                    onAIGenerate={async () => {
+                      // Type 2: Work Experience - Responsibilities
+                      setGeneratingIndex(index);
+                      const context = { workExperience: [experience] };
+                      const generatedContent = await generateContent(context, 2);
+                      if (generatedContent) {
+                        handleInputChange(index, "responsibilities", generatedContent);
+                      }
+                      setGeneratingIndex(null);
+                    }}
+                    contextHint={`${experience.company} ${experience.job_title}`}
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground">tips: 请用英文填写 3-4 条工作职责，每条以动词开头，用 • 符号开头，结束回车换行</p>
               </div>
             </div>

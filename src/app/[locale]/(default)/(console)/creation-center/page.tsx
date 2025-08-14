@@ -56,10 +56,10 @@ export default async function CreationCenterPage() {
     {
       icon: "personal-statement-write",
       title: "个人陈述撰写",
-      description: "我们提供专业顾问的专业工具，包含文档/推荐信/个人陈述等关键问题",
+      description: "专业的Personal Statement撰写服务，展现您的独特背景、学术热情和职业目标，让您的申请脱颖而出",
       price: 100,
       category: "statement",
-      url: undefined
+      url: "/personal-statement"
     },
     // {
     //   icon: "purpose-statement-write",
@@ -88,7 +88,7 @@ export default async function CreationCenterPage() {
       description: "专业的Statement of Purpose撰写服务，帮助您清晰表达学术目标和研究兴趣，展现个人动机和未来规划",
       price: 120,
       category: "statement",
-      url: undefined
+      url: "/sop"
     },
     {
       icon: "document-polish",
