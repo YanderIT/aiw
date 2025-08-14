@@ -745,8 +745,8 @@ function ResumeResultContent() {
       const pdfWidth = 210;
       const pdfHeight = 297;
       const margin = 10; // 边距
-      const contentWidth = pdfWidth - 2 * margin;
-      const contentHeight = pdfHeight - 2 * margin;
+      const contentWidth = pdfWidth - margin;
+      const contentHeight = pdfHeight - margin;
 
       // 计算图片尺寸
       const imgWidth = canvas.width;
@@ -1029,10 +1029,7 @@ function ResumeResultContent() {
                         <div className="absolute top-4 left-4 w-16 h-16 bg-primary/10 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
                         <div className="absolute bottom-4 right-4 w-12 h-12 bg-secondary/10 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
 
-                        <div
-                          id="resume-container"
-                          className="relative flex justify-center p-2"
-                        >
+                        <div className="relative flex justify-center p-2">
                           {(() => {
                             const TemplateComponent =
                               getTemplateComponent(selectedTemplate);
@@ -1043,6 +1040,7 @@ function ResumeResultContent() {
 
                             return (
                               <div
+                                id="resume-container"
                                 className="transform-gpu origin-top transition-all duration-300 ease-out"
                                 style={{
                                   transform: `scale(${zoomLevel})`,

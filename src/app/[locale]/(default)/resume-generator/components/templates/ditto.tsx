@@ -58,11 +58,11 @@ const Header = ({
     <div>
       {/* 主要头部区域 */}
       <div
-        className="relative"
+        className="relative flex items-center"
         style={{
           backgroundColor: theme.header,
           color: "#FFFFFF",
-          padding: "20px 20px 15px 20px",
+          height: "150px",
         }}
       >
         {/* 头像 - 绝对定位实现跨越效果 */}
@@ -70,7 +70,7 @@ const Header = ({
           className="absolute z-10"
           style={{
             left: "80px",
-            top: "30px",
+            top: "50px",
             width: "150px",
             height: "150px",
           }}
