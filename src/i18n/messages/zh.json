@@ -1,0 +1,212 @@
+{
+  "metadata": {
+    "title": "智写匠 - 您的智能AI写作助手，轻松创作高质量文书",
+    "description": "智写匠是一款AI驱动的智能写作平台，帮助您轻松应对各种写作挑战，高效完成个人陈述、推荐信、学术论文等各类文书的撰写。",
+    "keywords": "智写匠, AI写作, 智能写作, 写作助手, 个人陈述, 推荐信, 论文写作"
+  },
+  "user": {
+    "sign_in": "登录",
+    "sign_out": "退出登录",
+    "credits": "额度",
+    "api_keys": "API 密钥",
+    "my_orders": "我的订单",
+    "user_center": "创作中心",
+    "admin_system": "管理后台"
+  },
+  "creation_center": {
+    "title": "创作中心"
+  },
+  "resume_generator": {
+    "title": "简历生成器",
+    "description": "使用AI智能生成专业简历，完善各个模块信息",
+    "preview_resume": "预览简历",
+    "generate_resume": "生成简历",
+    "modules": {
+      "header": "基本信息",
+      "education": "教育背景", 
+      "work_experience": "工作经历",
+      "research": "科研经历",
+      "activities": "活动经历",
+      "awards": "获奖情况",
+      "skills_language": "技能语言"
+    },
+    "progress": {
+      "completed": "完成进度",
+      "next": "下一步",
+      "previous": "上一步"
+    }
+  },
+  "my_documents": {
+    "title": "我的文档",
+    "manage_all_documents": "管理您的所有文档",
+    "search_placeholder": "搜索文档...",
+    "new_document": "新建文档",
+    "today": "今天",
+    "recent": "最近",
+    "no_documents": "还没有文档",
+    "no_documents_found": "没有找到匹配的文档",
+    "create_first_document": "创建您的第一个文档开始使用",
+    "try_different_search": "尝试其他搜索词",
+    "loading": "加载中...",
+    "download_coming_soon": "文档下载功能即将上线",
+    "delete_coming_soon": "文档删除功能即将上线",
+    "preview": {
+      "back_to_list": "返回文档列表",
+      "copy": "复制",
+      "download": "下载",
+      "unnamed_document": "未命名文档",
+      "copied_to_clipboard": "已复制到剪贴板",
+      "copy_failed": "复制失败",
+      "download_success": "下载成功",
+      "loading": "加载中...",
+      "load_failed": "无法加载文档",
+      "document_not_found": "文档不存在",
+      "resume_preview_coming": "简历预览功能开发中",
+      "resume_preview_desc": "简历文档的预览功能正在开发中，敬请期待"
+    }
+  },
+  "sign_modal": {
+    "title": "登录或注册",
+    "description": "选择您喜欢的方式继续",
+    "email_sign_in": "邮箱登录",
+    "google_sign_in": "Google 登录",
+    "github_sign_in": "GitHub 登录",
+    "check_email_toast": "我们已向您的邮箱发送了登录链接，请注意查收。",
+    "cancel_title": "取消",
+    "or_continue_with": "或继续使用",
+    "email_label": "邮箱",
+    "continue_with_email": "发送链接登录",
+    "no_account": "还没有账号？",
+    "has_account": "已有账号？",
+    "sign_up": "注册",
+    "sign_in": "登录",
+    "agreement_prefix": "点击即表示您同意我们的",
+    "terms": "服务条款",
+    "and": "和",
+    "privacy": "隐私政策",
+    "first_login_notice": "您首次登录时将自动创建账户。",
+    "email_required": "请输入邮箱地址",
+    "email_invalid": "请输入有效的邮箱地址",
+    "login_failed": "登录失败，请重试",
+    "sending": "发送中..."
+  },
+  "my_orders": {
+    "title": "我的订单",
+    "description": "在 智写匠 上购买的订单。",
+    "no_orders": "未找到订单",
+    "tip": "",
+    "activate_order": "激活订单",
+    "actived": "已激活",
+    "join_discord": "联系我们",
+    "read_docs": "订阅计划",
+    "table": {
+      "order_no": "订单号",
+      "email": "邮箱",
+      "product_name": "产品名称",
+      "amount": "金额",
+      "paid_at": "支付时间",
+      "github_username": "GitHub 用户名",
+      "status": "状态"
+    }
+  },
+  "my_credits": {
+    "title": "我的积分",
+    "left_tip": "剩余积分: {left_credits}",
+    "no_credits": "没有积分记录",
+    "recharge": "充值",
+    "table": {
+      "trans_no": "交易号",
+      "trans_type": "交易类型",
+      "credits": "积分",
+      "updated_at": "更新时间",
+      "status": "状态"
+    }
+  },
+  "api_keys": {
+    "title": "API 密钥",
+    "tip": "请妥善保管您的 API 密钥，避免泄露",
+    "no_api_keys": "没有 API 密钥",
+    "create_api_key": "创建 API 密钥",
+    "table": {
+      "name": "名称",
+      "key": "密钥",
+      "created_at": "创建时间"
+    },
+    "form": {
+      "name": "名称",
+      "name_placeholder": "API 密钥名称",
+      "submit": "提交"
+    }
+  },
+  "blog": {
+    "title": "博客",
+    "description": "关于 智写匠 的新闻、资源和更新",
+    "read_more_text": "阅读更多"
+  },
+  "my_invites": {
+    "title": "我的邀请",
+    "description": "查看您的邀请记录",
+    "no_invites": "未找到邀请记录",
+    "my_invite_link": "我的邀请链接",
+    "edit_invite_link": "编辑邀请链接",
+    "copy_invite_link": "复制邀请链接",
+    "invite_code": "邀请码",
+    "invite_tip": "每邀请 1 位朋友购买 智写匠，奖励 $50。",
+    "invite_balance": "邀请奖励余额",
+    "total_invite_count": "总邀请人数",
+    "total_paid_count": "已充值人数",
+    "total_award_amount": "总奖励金额",
+    "update_invite_code": "设置邀请码",
+    "update_invite_code_tip": "输入你的自定义邀请码",
+    "update_invite_button": "保存",
+    "no_orders": "你需要先购买过 智写匠 才能邀请朋友",
+    "no_affiliates": "你暂无邀请朋友的权限，请联系我们申请开通。",
+    "table": {
+      "invite_time": "邀请时间",
+      "invite_user": "邀请用户",
+      "status": "状态",
+      "reward_percent": "奖励比例",
+      "reward_amount": "奖励金额",
+      "pending": "已注册，未支付",
+      "completed": "已支付"
+    }
+  },
+  "feedback": {
+    "title": "反馈",
+    "description": "我们很乐意听取您对产品的看法或如何改进产品体验。",
+    "submit": "提交",
+    "loading": "提交中...",
+    "contact_tip": "其他联系方式",
+    "rating_tip": "您对 智写匠 的看法如何？",
+    "placeholder": "在这里留下您的反馈..."
+  },
+  "nav": {
+    "features": "功能特点"
+  },
+  "auth_callback": {
+    "verifying": "正在验证您的身份，请稍候...",
+    "login_success": "登录成功！",
+    "login_failed": "登录失败，请重试。",
+    "no_email": "在当前浏览器中找不到用于登录的邮箱地址。",
+    "no_email_toast": "无法验证，请在同一浏览器中打开链接。",
+    "invalid_link": "登录链接无效或已过期。"
+  },
+  "landing_page": {
+    "hero_title": "Ship Any AIdea",
+    "hero_description": "在几分钟内启动您的 AI SaaS 应用。该模板包含了您需要的一切，从用户认证、国际化到支付订阅。您只需要专注于构建您的核心 AI 功能。"
+  },
+  "pricing_page": {
+    "title": "选择适合你的方案",
+    "description": "我们的定价简单明了，无任何隐藏费用，随时可以取消。",
+    "pay_once": "一次性付费",
+    "subscribe": "订阅",
+    "buy": "购买",
+    "popular": "最受欢迎",
+    "features": "功能"
+  },
+  "loading": {
+    "page_loading": "页面加载中...",
+    "please_wait": "请稍候",
+    "loading": "加载中"
+  }
+}
