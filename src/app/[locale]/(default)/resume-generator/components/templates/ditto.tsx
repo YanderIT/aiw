@@ -110,7 +110,16 @@ const Header = ({
           borderTop: "1px solid #E0E0E0",
         }}
       >
-        <div className="flex flex-wrap gap-x-6 gap-y-2 items-center justify-start text-sm">
+        <div 
+          className="text-sm"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "1.5rem 0.5rem",
+            alignItems: "center",
+            justifyContent: "flex-start"
+          }}
+        >
           {/* 位置信息 */}
           {basics.location && (
             <div className="flex items-center gap-2">
@@ -123,7 +132,7 @@ const Header = ({
               >
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
               </svg>
-              <p style={{ color: "#333333" }}>{basics.location}</p>
+              <p style={{ color: "#333333"}}>{basics.location}</p>
             </div>
           )}
 
