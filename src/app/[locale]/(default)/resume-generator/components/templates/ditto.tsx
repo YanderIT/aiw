@@ -110,16 +110,7 @@ const Header = ({
           borderTop: "1px solid #E0E0E0",
         }}
       >
-        <div 
-          className="text-sm"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "1.5rem 0.5rem",
-            alignItems: "center",
-            justifyContent: "flex-start"
-          }}
-        >
+        <div className="flex flex-wrap gap-x-6 gap-y-2 items-center justify-start text-sm">
           {/* 位置信息 */}
           {basics.location && (
             <div className="flex items-center gap-2">
