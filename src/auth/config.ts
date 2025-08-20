@@ -325,4 +325,12 @@ export const authOptions: NextAuthConfig = {
       }
     },
   },
+  cookies: {
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+    }
+  }
 };
