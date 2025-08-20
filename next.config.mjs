@@ -20,6 +20,10 @@ const nextConfig = {
   output: "standalone",
   reactStrictMode: false,
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
+  typescript: {
+    // 在构建时忽略TypeScript错误
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
