@@ -53,7 +53,8 @@ export function getDocumentTypeDisplayName(type: DocumentType): string {
     [DocumentType.Resume]: "简历",
     [DocumentType.CoverLetter]: "求职信",
     [DocumentType.SOP]: "学习计划书",
-    [DocumentType.PersonalStatement]: "个人陈述"
+    [DocumentType.PersonalStatement]: "个人陈述",
+    [DocumentType.StudyAbroadConsultation]: "留学咨询"
   };
   
   return typeMap[type] || "文档";

@@ -89,6 +89,9 @@ export default function MyDocumentsPage() {
     // 如果是简历文档，跳转到简历编辑页面
     if (document.document_type === DocumentType.Resume) {
       router.push(`/resume-generator/edit/${document.uuid}`);
+    } else if (document.document_type === DocumentType.StudyAbroadConsultation) {
+      // 留学咨询文档跳转到结果页面
+      router.push(`/study-abroad-consultation/result/${document.uuid}`);
     } else {
       router.push(`/my-documents/${document.uuid}`);
     }

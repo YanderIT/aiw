@@ -74,6 +74,15 @@ export interface GenerationState {
   workflowStatus: 'running' | 'succeeded' | 'failed' | 'stopped' | null;
 }
 
+// 版本管理
+export interface DocumentVersion {
+  id: string;
+  content: string;
+  createdAt: number;
+  type: 'original' | 'revised';
+  revisionCount?: number;
+}
+
 // 定义每个模块的必填字段
 const REQUIRED_FIELDS = {
   basicInfo: {
@@ -124,7 +133,55 @@ interface CoverLetterContextType {
   getWorkflowStatus: () => Promise<void>;
   startWorkflowStatusPolling: () => void;
   stopWorkflowStatusPolling: () => void;
+  fillMockData: () => void; // 填充模拟数据
+  // 版本管理
+  versions: DocumentVersion[];
+  currentVersionId: string | null;
+  addVersion: (content: string, type: 'original' | 'revised') => void;
+  switchVersion: (versionId: string) => void;
+  getCurrentVersion: () => DocumentVersion | null;
+  getRevisionCount: () => number;
+  hasUsedFreeRevision: () => boolean;
 }
+
+// 模拟数据
+const mockData: CoverLetterData = {
+  basicInfo: {
+    full_name: 'Michael Chen',
+    address: '123 Innovation Drive, San Francisco, CA 94103',
+    email: 'michael.chen@example.com',
+    phone: '+1 (415) 555-0123',
+    date: new Date().toISOString().split('T')[0],
+    recruiter_name: 'Sarah Williams',
+    recruiter_title: 'Senior Talent Acquisition Manager',
+    company_name: 'Google',
+    company_address: '1600 Amphitheatre Parkway, Mountain View, CA 94043'
+  },
+  applicationBackground: {
+    current_program: 'Master of Computer Science at Stanford University',
+    target_position: 'Software Engineer - Machine Learning',
+    department: 'Google AI',
+    application_channel: 'Google Careers Website',
+    why_this_company: 'Google\'s commitment to AI innovation and its impact on billions of users worldwide aligns perfectly with my career goals'
+  },
+  experienceHistory: {
+    past_internship_1: 'Software Engineering Intern at Microsoft - Developed a recommendation system using deep learning that improved user engagement by 25%',
+    skills_from_internship: 'PyTorch, TensorFlow, distributed systems, A/B testing, and cross-functional collaboration',
+    highlight_project: 'Led a team of 4 to build an AI-powered code review assistant that reduced code review time by 40%',
+    leadership_or_teamwork: 'As president of the Stanford AI Club, organized 3 hackathons with 200+ participants and mentored 15 junior students'
+  },
+  fitAndClosing: {
+    fit_reason: 'My strong foundation in machine learning, proven track record in delivering AI solutions, and passion for scalable technology make me an ideal fit',
+    impressed_by_company: 'Google\'s recent advances in LLMs and the commitment to responsible AI development',
+    final_expectation: 'I am excited about the opportunity to contribute to Google\'s mission and would welcome the chance to discuss how my skills align with your team\'s needs'
+  },
+  moduleSelection: {
+    basicInfo: true,
+    applicationBackground: true,
+    experienceHistory: true,
+    fitAndClosing: true
+  }
+};
 
 const defaultCoverLetterData: CoverLetterData = {
   basicInfo: {
@@ -183,6 +240,10 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     workflowStatus: null
   });
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // 版本管理状态
+  const [versions, setVersions] = useState<DocumentVersion[]>([]);
+  const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 
   const loadFromCache = () => {
     try {
@@ -473,6 +534,57 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 填充模拟数据
+  const fillMockData = () => {
+    setData(mockData);
+    saveToCache();
+  };
+
+  // 版本管理方法
+  const addVersion = (content: string, type: 'original' | 'revised') => {
+    const newVersion: DocumentVersion = {
+      id: Date.now().toString(),
+      content,
+      createdAt: Date.now(),
+      type,
+      revisionCount: versions.filter(v => v.type === 'revised').length + (type === 'revised' ? 1 : 0)
+    };
+    
+    setVersions([...versions, newVersion]);
+    setCurrentVersionId(newVersion.id);
+    
+    // 如果是修改版本，更新生成内容
+    if (type === 'revised') {
+      setGenerationState(prev => ({
+        ...prev,
+        generatedContent: content
+      }));
+    }
+  };
+
+  const switchVersion = (versionId: string) => {
+    const version = versions.find(v => v.id === versionId);
+    if (version) {
+      setCurrentVersionId(versionId);
+      setGenerationState(prev => ({
+        ...prev,
+        generatedContent: version.content
+      }));
+    }
+  };
+
+  const getCurrentVersion = (): DocumentVersion | null => {
+    return versions.find(v => v.id === currentVersionId) || null;
+  };
+
+  const getRevisionCount = (): number => {
+    return versions.filter(v => v.type === 'revised').length;
+  };
+
+  const hasUsedFreeRevision = (): boolean => {
+    return getRevisionCount() >= 1;
+  };
+
   // 清理定时器
   useEffect(() => {
     return () => {
@@ -507,7 +619,16 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     updateWorkflowStatus,
     getWorkflowStatus,
     startWorkflowStatusPolling,
-    stopWorkflowStatusPolling
+    stopWorkflowStatusPolling,
+    fillMockData,
+    // 版本管理
+    versions,
+    currentVersionId,
+    addVersion,
+    switchVersion,
+    getCurrentVersion,
+    getRevisionCount,
+    hasUsedFreeRevision
   };
 
   return (

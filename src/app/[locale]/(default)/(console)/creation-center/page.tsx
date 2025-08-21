@@ -27,20 +27,13 @@ export default async function CreationCenterPage() {
   ];
 
   const featuredTools = [
-    // {
-    //   icon: "document-polish",
-    //   title: "文书专家润色",
-    //   description: "资深专业的润色大师，包含文字、语境、润色及质量全流程处理",
-    //   price: null,
-    //   category: "featured"
-    // },
     {
       icon: "one-on-one-consulting",
-      title: "1对1留学咨询",
+      title: "留学1对1咨询",
       description: "您此时此刻的疑惑可能无数人都曾经历过，不妨和过来人聊一聊，我们会根据您的问题匹配最专业对口的老师以确保您有所收获",
       price: null,
       category: "featured",
-      url: undefined
+      url: "/study-abroad-consultation"
     },
     {
       icon: "resume-generate",

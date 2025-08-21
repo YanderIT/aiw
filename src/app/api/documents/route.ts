@@ -81,11 +81,12 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Document not found or unauthorized" }, { status: 404 });
     }
 
-    // Update document with generated content
+    // Update document with generated content (preserve version_type and other metadata)
     const updated = await updateDocument(uuid, {
       content,
       ai_workflow_id,
       word_count: word_count || content.length
+      // Explicitly NOT updating: version_type, version, revision_count
     });
 
     return NextResponse.json({ 

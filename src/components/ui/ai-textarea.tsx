@@ -34,11 +34,11 @@ const AITextarea = React.forwardRef<HTMLTextAreaElement, AITextareaProps>(
   ) => {
     const [isFocused, setIsFocused] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
-    const internalRef = React.useRef<HTMLTextAreaElement>(null);
+    const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
     
     // Combine refs
     const textareaRef = React.useCallback((node: HTMLTextAreaElement | null) => {
-      internalRef.current = node;
+      (internalRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = node;
       if (typeof forwardedRef === 'function') {
         forwardedRef(node);
       } else if (forwardedRef) {
