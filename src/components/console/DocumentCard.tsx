@@ -70,6 +70,48 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         : preview;
     }
     
+    // 特殊处理简历文档
+    if (document.document_type === DocumentType.Resume && document.form_data) {
+      const formData = document.form_data;
+      const parts = [];
+      
+      // 添加模板名称
+      const template = formData.template || formData.resumeData?.selectedTemplate;
+      if (template) {
+        const templateName = template === 'kakuna' ? 'Kakuna模板' : 
+                           template === 'ditto' ? 'Ditto模板' : 
+                           `${template}模板`;
+        parts.push(templateName);
+      }
+      
+      // 添加姓名
+      if (formData.resumeData?.header?.full_name) {
+        parts.push(`姓名: ${formData.resumeData.header.full_name}`);
+      }
+      
+      // 添加教育信息
+      if (formData.resumeData?.education?.school_name) {
+        let eduInfo = formData.resumeData.education.school_name;
+        if (formData.resumeData.education.degree) {
+          eduInfo = `${eduInfo} - ${formData.resumeData.education.degree.split(' ')[0]}`;
+        }
+        parts.push(eduInfo);
+      }
+      
+      // 添加位置信息
+      if (formData.resumeData?.header?.city || formData.resumeData?.header?.country) {
+        const location = [];
+        if (formData.resumeData.header.city) location.push(formData.resumeData.header.city);
+        if (formData.resumeData.header.country) location.push(formData.resumeData.header.country);
+        if (location.length > 0) parts.push(location.join(', '));
+      }
+      
+      const preview = parts.join(' | ');
+      return preview.length > maxLength 
+        ? preview.substring(0, maxLength) + "..."
+        : preview;
+    }
+    
     if (!content) return "";
     const cleanContent = content.replace(/[#*`\[\]()]/g, '').trim();
     return cleanContent.length > maxLength 
@@ -102,10 +144,14 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       {/* 分割线和底部操作区 */}
       <div className="border-t border-gray-100 dark:border-gray-800 mt-3">
         <div className="px-4 py-3 flex items-center justify-between">
-          {/* 字数统计 */}
-          <span className="text-sm text-gray-400 dark:text-gray-500">
-            {document.word_count || 0} 字
-          </span>
+          {/* 字数统计 - 留学咨询和简历不显示 */}
+          {document.document_type !== DocumentType.StudyAbroadConsultation && document.document_type !== DocumentType.Resume ? (
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              {document.word_count || 0} 字
+            </span>
+          ) : (
+            <span></span>
+          )}
           
           {/* 删除按钮 */}
           <Button 

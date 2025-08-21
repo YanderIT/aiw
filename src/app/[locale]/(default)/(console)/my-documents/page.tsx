@@ -274,12 +274,12 @@ export default function MyDocumentsPage() {
             <p className="text-muted-foreground mb-4 sm:mb-6 px-4">
               {searchQuery ? "尝试其他搜索词" : "创建您的第一个文档开始使用"}
             </p>
-            {!searchQuery && (
+            {/* {!searchQuery && (
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Plus className="w-4 h-4 mr-2" />
                 新建文档
               </Button>
-            )}
+            )} */}
           </div>
         )}
       </div>

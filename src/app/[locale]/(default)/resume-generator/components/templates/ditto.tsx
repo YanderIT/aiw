@@ -66,29 +66,35 @@ const Header = ({
         }}
       >
         {/* 头像 - 绝对定位实现跨越效果 */}
-        <div
-          className="absolute z-10"
-          style={{
-            left: "80px",
-            top: "50px",
-            width: "150px",
-            height: "150px",
-          }}
-        >
+        {basics.picture?.url && !basics.picture?.effects?.hidden && (
           <div
-            className="bg-[#d1d5dc] flex items-center justify-center overflow-hidden shadow-lg"
+            className="absolute z-10"
             style={{
+              left: "80px",
+              top: "50px",
               width: "150px",
               height: "150px",
             }}
           >
-            <span className="text-6xl text-gray-600">👤</span>
+            <div
+              className="overflow-hidden shadow-lg"
+              style={{
+                width: "150px",
+                height: "150px",
+              }}
+            >
+              <img 
+                src={basics.picture.url} 
+                alt={basics.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div
           className="flex items-center gap-1"
-          style={{ marginLeft: "260px" }}
+          style={{ marginLeft: basics.picture?.url && !basics.picture?.effects?.hidden ? "260px" : "80px" }}
         >
           {/* 姓名和标题 - 右移为头像留出空间 */}
           <div className="flex-1 space-y-1">
@@ -106,7 +112,9 @@ const Header = ({
       <div
         className="bg-white"
         style={{
-          padding: "8px 20px 8px 260px",
+          padding: basics.picture?.url && !basics.picture?.effects?.hidden 
+            ? "8px 20px 8px 260px" 
+            : "8px 20px 8px 80px",
           borderTop: "1px solid #E0E0E0",
         }}
       >

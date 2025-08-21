@@ -75,6 +75,25 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
   return (
     <div className="flex flex-col items-center justify-center text-center mb-1">
       <div>
+        {/* 头像 - 居中显示在姓名上方 */}
+        {basics.picture?.url && !basics.picture?.effects?.hidden && (
+          <div className="flex justify-center mb-3">
+            <div
+              className="overflow-hidden"
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+              }}
+            >
+              <img 
+                src={basics.picture.url} 
+                alt={basics.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
         <div className="text-3xl font-bold mb-2" style={{ color: theme.primary }}>{basics.name}</div>
         {basics.headline && <div className="text-lg text-gray-600">{basics.headline}</div>}
       </div>
