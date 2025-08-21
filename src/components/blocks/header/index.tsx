@@ -81,7 +81,7 @@ export default function Header({ header }: { header: HeaderType }) {
                 />
               )}
               {header.brand?.title && (
-                <span className="text-xl text-primary font-bold">
+                <span className="text-xl font-bold">
                   {header.brand?.title || ""}
                 </span>
               )}
