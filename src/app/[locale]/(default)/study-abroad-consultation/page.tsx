@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { getUserInfo } from "@/services/user";
 import { redirect } from "next/navigation";
-import CoverLetterResultClient from "./components/CoverLetterResultClient";
+import StudyAbroadGeneratorClient from "./components/StudyAbroadGeneratorClient";
 
-export default async function CoverLetterResultPage() {
+export default async function StudyAbroadConsultationPage() {
   const t = await getTranslations();
   const userInfo = await getUserInfo();
   
@@ -11,5 +11,5 @@ export default async function CoverLetterResultPage() {
     redirect("/auth/signin");
   }
 
-  return <CoverLetterResultClient />;
-} 
+  return <StudyAbroadGeneratorClient />;
+}

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2 } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
+import { apiRequest } from '@/lib/api-client';
 
 // Import context
 import { CoverLetterProvider, useCoverLetter } from "./CoverLetterContext";
@@ -36,14 +37,18 @@ export interface CoverLetterModule {
 function ConfirmationPage() {
   const t = useTranslations();
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale || 'zh';
   const { 
     getConfirmationData, 
     getIncompleteSelections, 
     canGenerate, 
     toggleModuleSelection,
+    getSelectedData,
     generationState,
     setGenerationLoading,
-    setGenerationError
+    setGenerationError,
+    saveToCache
   } = useCoverLetter();
   
   const confirmationData = getConfirmationData();
@@ -67,12 +72,40 @@ function ConfirmationPage() {
       return;
     }
 
-    // 设置需要生成的标记，然后跳转到结果页面
     setGenerationLoading(true);
     setGenerationError(null);
-    
-    // 跳转到结果页面，在结果页面会自动开始生成
-    router.push('/cover-letter/result?autoGenerate=true');
+
+    try {
+      // 确保数据已保存到缓存
+      saveToCache();
+      
+      // 先创建文档记录
+      const selectedData = getSelectedData();
+      const { data: document } = await apiRequest('/api/documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document_type: 'cover_letter',
+          title: `${selectedData.full_name || '用户'} - 求职信`,
+          form_data: selectedData,
+          language: 'zh'
+        }),
+      });
+
+      if (!document) {
+        throw new Error('Failed to create document');
+      }
+      
+      // 跳转到结果页面，带上文档ID
+      router.push(`/${locale}/cover-letter/result/${document.uuid}?autoGenerate=true`);
+    } catch (error) {
+      console.error('Error creating document:', error);
+      toast.error('创建文档失败，请重试');
+      setGenerationLoading(false);
+      setGenerationError('创建文档失败');
+    }
   };
 
   return (
@@ -214,7 +247,26 @@ function ConfirmationPage() {
 function CoverLetterGeneratorContent() {
   const t = useTranslations();
   const [activeModule, setActiveModule] = useState("basicInfo");
-  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState } = useCoverLetter();
+  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
+  const [showDevMode, setShowDevMode] = useState(false);
+  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, saveToCache } = useCoverLetter();
+  
+  // Auto-show dev mode in development environment
+  const isDevEnvironment = process.env.NODE_ENV === 'development';
+
+  // 检测键盘快捷键
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + Shift + D 显示开发模式
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        setShowDevMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const modules: CoverLetterModule[] = [
     {
@@ -305,6 +357,85 @@ function CoverLetterGeneratorContent() {
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
                 文书模块
               </h3>
+              
+              {/* 开发模式控制 - 在开发环境中默认显示 */}
+              {(showDevMode || isDevEnvironment) && (
+                <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">开发者工具</span>
+                    </div>
+                    {!isDevEnvironment && (
+                      <button
+                        onClick={() => setShowDevMode(false)}
+                        className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* 在开发环境中直接显示填充按钮 */}
+                  {isDevEnvironment ? (
+                    <Button
+                      onClick={() => {
+                        fillMockData();
+                        toast.success('测试数据已填充');
+                        saveToCache();
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="w-full gap-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700"
+                    >
+                      <Wand2 className="w-3 h-3" />
+                      一键填充测试数据
+                    </Button>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-muted-foreground">开发模式</span>
+                        <button
+                          onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                            isDevelopmentMode ? 'bg-primary' : 'bg-muted'
+                          }`}
+                        >
+                          <span
+                            className={`${
+                              isDevelopmentMode ? 'translate-x-5' : 'translate-x-1'
+                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                          />
+                        </button>
+                      </div>
+                      
+                      {/* 一键填充按钮 */}
+                      {isDevelopmentMode && (
+                        <Button
+                          onClick={() => {
+                            fillMockData();
+                            toast.success('测试数据已填充');
+                            saveToCache();
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-2"
+                        >
+                          <Wand2 className="w-3 h-3" />
+                          一键填充测试数据
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {isDevEnvironment 
+                      ? '开发环境：点击按钮填充测试数据' 
+                      : '提示：使用 Ctrl/Cmd + Shift + D 可以快速切换开发者工具'}
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-3">
                 {modules.map((module) => {
                   const Icon = module.icon;
@@ -315,8 +446,8 @@ function CoverLetterGeneratorContent() {
                   
                   return (
                     <div key={module.id} className="group">
-                      <button
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative ${
+                      <div
+                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative cursor-pointer ${
                           activeModule === module.id
                             ? "bg-primary text-primary-foreground shadow-lg"
                             : isSelected
@@ -348,7 +479,7 @@ function CoverLetterGeneratorContent() {
                             <Square className="w-4 h-4" />
                           )}
                         </button>
-                      </button>
+                      </div>
                     </div>
                   );
                 })}

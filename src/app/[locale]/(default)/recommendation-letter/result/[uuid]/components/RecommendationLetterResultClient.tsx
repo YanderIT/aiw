@@ -319,15 +319,27 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
         const { data } = await response.json();
         setDbVersions(data.versions || []);
         
-        // 如果有版本，设置当前版本为最新版本
+        // 如果有版本，设置当前版本
         if (data.versions && data.versions.length > 0) {
-          const latestVersion = data.versions[data.versions.length - 1];
-          setCurrentDbVersionId(latestVersion.uuid);
-          
-          // 更新本地内容为最新版本的内容
-          if (latestVersion.content) {
-            updateGeneratedContent(latestVersion.content);
-            setHasLoadedVersions(true); // 标记已加载
+          // 如果还没有设置当前版本ID，默认选择原始版本
+          if (!currentDbVersionId) {
+            // 查找原始版本
+            const originalVersion = data.versions.find((v: any) => v.version_type === 'original');
+            const versionToSet = originalVersion || data.versions[0]; // 如果没有原始版本，使用第一个版本
+            setCurrentDbVersionId(versionToSet.uuid);
+            
+            // 更新本地内容为选中版本的内容
+            if (versionToSet.content) {
+              updateGeneratedContent(versionToSet.content);
+              setHasLoadedVersions(true); // 标记已加载
+            }
+          } else {
+            // 如果已经有当前版本ID，保持不变，只更新内容
+            const currentVersion = data.versions.find((v: any) => v.uuid === currentDbVersionId);
+            if (currentVersion?.content) {
+              updateGeneratedContent(currentVersion.content);
+              setHasLoadedVersions(true); // 标记已加载
+            }
           }
         }
       }
@@ -451,15 +463,20 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
           const { data } = await response.json();
           setDbVersions(data.versions || []);
           
-          // 如果有版本，设置当前版本为最新版本
+          // 如果有版本，设置当前版本
           if (data.versions && data.versions.length > 0) {
-            const latestVersion = data.versions[data.versions.length - 1];
-            setCurrentDbVersionId(latestVersion.uuid);
-            
-            // 只在第一次加载时更新内容，避免循环
-            if (!hasLoadedVersions && latestVersion.content) {
-              updateGeneratedContent(latestVersion.content);
-              setHasLoadedVersions(true);
+            // 如果还没有设置当前版本ID，默认选择原始版本
+            if (!currentDbVersionId) {
+              // 查找原始版本
+              const originalVersion = data.versions.find((v: any) => v.version_type === 'original');
+              const versionToSet = originalVersion || data.versions[0]; // 如果没有原始版本，使用第一个版本
+              setCurrentDbVersionId(versionToSet.uuid);
+              
+              // 只在第一次加载时更新内容，避免循环
+              if (!hasLoadedVersions && versionToSet.content) {
+                updateGeneratedContent(versionToSet.content);
+                setHasLoadedVersions(true);
+              }
             }
           }
         }
@@ -663,13 +680,13 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       // 更新服务器修改状态
       setServerRevisionStatus(true);
       
-      // 重新加载版本历史
-      await loadDocumentVersions();
-      
-      // 切换到新创建的版本
+      // 先设置新版本ID，再加载版本历史
       if (revision.uuid) {
         setCurrentDbVersionId(revision.uuid);
       }
+      
+      // 重新加载版本历史
+      await loadDocumentVersions();
       
       toast.success("推荐信已成功修改！");
     } catch (error) {
@@ -711,13 +728,13 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       // 更新服务器修改状态
       setServerRevisionStatus(true);
       
-      // 重新加载版本历史
-      await loadDocumentVersions();
-      
-      // 切换到新创建的版本
+      // 先设置新版本ID，再加载版本历史
       if (revision.uuid) {
         setCurrentDbVersionId(revision.uuid);
       }
+      
+      // 重新加载版本历史
+      await loadDocumentVersions();
       
       toast.success("段落已成功修改！");
     } catch (error) {
@@ -923,7 +940,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Edit3 className="w-6 h-6 text-primary" />
-                    <h3 className="text-xl font-semibold text-foreground">生成结果</h3>
+                    <h3 className="text-xl font-semibold text-foreground">结果</h3>
                     
                     {/* 版本切换器 */}
                     {dbVersions.length > 1 && (

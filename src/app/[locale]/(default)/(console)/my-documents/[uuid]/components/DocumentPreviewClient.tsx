@@ -40,6 +40,7 @@ import {
   PersonalStatementIcon, 
   ResumeIcon, 
   SOPIcon,
+  StudyAbroadConsultationIcon,
   DocumentIcon 
 } from "@/components/console/icons/DocumentIcons";
 
@@ -54,6 +55,7 @@ const getDocumentIcon = (type: DocumentType) => {
     [DocumentType.CoverLetter]: CoverLetterIcon,
     [DocumentType.SOP]: SOPIcon,
     [DocumentType.PersonalStatement]: PersonalStatementIcon,
+    [DocumentType.StudyAbroadConsultation]: StudyAbroadConsultationIcon,
   };
   
   return iconMap[type] || DocumentIcon;
@@ -271,6 +273,250 @@ export default function DocumentPreviewClient({ documentUuid }: DocumentPreviewC
               </p>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // 留学咨询类型的特殊处理
+  if (document.document_type === DocumentType.StudyAbroadConsultation) {
+    const formData = document.form_data || {};
+    
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => router.push('/my-documents')}
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回文档列表
+          </Button>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <div className="flex items-start gap-4">
+                <StudyAbroadConsultationIcon className="w-8 h-8 text-primary mt-1" />
+                <div>
+                  <CardTitle className="text-2xl mb-2">
+                    {document.title || "留学咨询"}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <FileText className="w-4 h-4" />
+                      {getDocumentTypeDisplayName(document.document_type)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {formatDocumentDate(document.created_at || '')}
+                    </span>
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <div className="space-y-6">
+            {/* 基本信息 */}
+            {formData.basicInfo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">基本信息</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  {formData.basicInfo.full_name && (
+                    <div>
+                      <Label className="text-muted-foreground">姓名</Label>
+                      <p className="font-medium">{formData.basicInfo.full_name}</p>
+                    </div>
+                  )}
+                  {formData.basicInfo.email && (
+                    <div>
+                      <Label className="text-muted-foreground">邮箱</Label>
+                      <p className="font-medium">{formData.basicInfo.email}</p>
+                    </div>
+                  )}
+                  {formData.basicInfo.phone && (
+                    <div>
+                      <Label className="text-muted-foreground">电话</Label>
+                      <p className="font-medium">{formData.basicInfo.phone}</p>
+                    </div>
+                  )}
+                  {formData.basicInfo.wechat && (
+                    <div>
+                      <Label className="text-muted-foreground">微信</Label>
+                      <p className="font-medium">{formData.basicInfo.wechat}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 学术背景 */}
+            {formData.academicBackground && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">学术背景</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.academicBackground.current_school && (
+                    <div>
+                      <Label className="text-muted-foreground">当前学校</Label>
+                      <p className="font-medium">{formData.academicBackground.current_school}</p>
+                    </div>
+                  )}
+                  {formData.academicBackground.current_degree && (
+                    <div>
+                      <Label className="text-muted-foreground">当前学历</Label>
+                      <p className="font-medium">{formData.academicBackground.current_degree}</p>
+                    </div>
+                  )}
+                  {formData.academicBackground.major && (
+                    <div>
+                      <Label className="text-muted-foreground">专业</Label>
+                      <p className="font-medium">{formData.academicBackground.major}</p>
+                    </div>
+                  )}
+                  {formData.academicBackground.gpa && (
+                    <div>
+                      <Label className="text-muted-foreground">GPA</Label>
+                      <p className="font-medium">{formData.academicBackground.gpa}</p>
+                    </div>
+                  )}
+                  {formData.academicBackground.language_scores && (
+                    <div>
+                      <Label className="text-muted-foreground">语言成绩</Label>
+                      <p className="font-medium">{formData.academicBackground.language_scores}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 申请目标 */}
+            {formData.targetProgram && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">申请目标</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.targetProgram.target_country && (
+                    <div>
+                      <Label className="text-muted-foreground">目标国家/地区</Label>
+                      <p className="font-medium">{formData.targetProgram.target_country}</p>
+                    </div>
+                  )}
+                  {formData.targetProgram.target_degree && (
+                    <div>
+                      <Label className="text-muted-foreground">目标学位</Label>
+                      <p className="font-medium">{formData.targetProgram.target_degree}</p>
+                    </div>
+                  )}
+                  {formData.targetProgram.target_major && (
+                    <div>
+                      <Label className="text-muted-foreground">目标专业</Label>
+                      <p className="font-medium">{formData.targetProgram.target_major}</p>
+                    </div>
+                  )}
+                  {formData.targetProgram.target_schools && (
+                    <div>
+                      <Label className="text-muted-foreground">目标院校</Label>
+                      <p className="font-medium">{formData.targetProgram.target_schools}</p>
+                    </div>
+                  )}
+                  {formData.targetProgram.application_year && (
+                    <div>
+                      <Label className="text-muted-foreground">申请时间</Label>
+                      <p className="font-medium">{formData.targetProgram.application_year}</p>
+                    </div>
+                  )}
+                  {formData.targetProgram.budget_range && (
+                    <div>
+                      <Label className="text-muted-foreground">预算范围</Label>
+                      <p className="font-medium">{formData.targetProgram.budget_range}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 背景经历 */}
+            {formData.backgroundExperience && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">背景经历</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.backgroundExperience.internship_experience && (
+                    <div>
+                      <Label className="text-muted-foreground">实习经历</Label>
+                      <p className="font-medium">{formData.backgroundExperience.internship_experience}</p>
+                    </div>
+                  )}
+                  {formData.backgroundExperience.research_experience && (
+                    <div>
+                      <Label className="text-muted-foreground">科研经历</Label>
+                      <p className="font-medium">{formData.backgroundExperience.research_experience}</p>
+                    </div>
+                  )}
+                  {formData.backgroundExperience.competition_awards && (
+                    <div>
+                      <Label className="text-muted-foreground">竞赛奖项</Label>
+                      <p className="font-medium">{formData.backgroundExperience.competition_awards}</p>
+                    </div>
+                  )}
+                  {formData.backgroundExperience.publications && (
+                    <div>
+                      <Label className="text-muted-foreground">发表论文</Label>
+                      <p className="font-medium">{formData.backgroundExperience.publications}</p>
+                    </div>
+                  )}
+                  {formData.backgroundExperience.other_achievements && (
+                    <div>
+                      <Label className="text-muted-foreground">其他成就</Label>
+                      <p className="font-medium">{formData.backgroundExperience.other_achievements}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 咨询需求 */}
+            {formData.consultationNeeds && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">咨询需求</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.consultationNeeds.main_concerns && (
+                    <div>
+                      <Label className="text-muted-foreground">主要关注</Label>
+                      <p className="font-medium">{formData.consultationNeeds.main_concerns}</p>
+                    </div>
+                  )}
+                  {formData.consultationNeeds.service_expectations && (
+                    <div>
+                      <Label className="text-muted-foreground">服务期望</Label>
+                      <p className="font-medium">{formData.consultationNeeds.service_expectations}</p>
+                    </div>
+                  )}
+                  {formData.consultationNeeds.additional_notes && (
+                    <div>
+                      <Label className="text-muted-foreground">其他说明</Label>
+                      <p className="font-medium">{formData.consultationNeeds.additional_notes}</p>
+                    </div>
+                  )}
+                  {formData.consultationNeeds.preferred_consultation_time && (
+                    <div>
+                      <Label className="text-muted-foreground">偏好咨询时间</Label>
+                      <p className="font-medium">{formData.consultationNeeds.preferred_consultation_time}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     );

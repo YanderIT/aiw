@@ -20,7 +20,8 @@ import {
   Wand2,
   ChevronDown,
   Undo2,
-  Redo2
+  Redo2,
+  GitCompare
 } from "lucide-react";
 import Markdown from "@/components/markdown";
 import MarkdownEditor from "@/components/blocks/mdeditor";
@@ -33,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevisionModal from "../../../components/RevisionModal";
 import FullRevisionModal, { RevisionSettings } from "../../../components/FullRevisionModal";
 import ParagraphRevision from "../../../components/ParagraphRevision";
+import VersionComparison from "../../../components/VersionComparison";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,10 +47,10 @@ const AIGeneratingLoader = () => {
   const [currentStep, setCurrentStep] = useState(0);
   
   const steps = [
-    { icon: Bot, text: "分析您的SOP内容...", color: "text-blue-500" },
+    { icon: Bot, text: "分析您的PS内容...", color: "text-blue-500" },
     { icon: Zap, text: "运用AI智能生成技术...", color: "text-yellow-500" },
-    { icon: Stars, text: "优化SOP结构和语言...", color: "text-purple-500" },
-    { icon: FileText, text: "完成SOP生成...", color: "text-green-500" }
+    { icon: Stars, text: "优化PS结构和语言...", color: "text-purple-500" },
+    { icon: FileText, text: "完成PS生成...", color: "text-green-500" }
   ];
 
   useEffect(() => {
@@ -123,17 +125,35 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   // 修改相关状态
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [showFullRevisionModal, setShowFullRevisionModal] = useState(false);
+  const [showVersionComparison, setShowVersionComparison] = useState(false);
   const [serverRevisionStatus, setServerRevisionStatus] = useState<boolean | null>(null);
   const [currentVersion, setCurrentVersion] = useState(1);
   const [versions, setVersions] = useState<any[]>([]);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
+  const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
+  
+  // 版本历史状态（从数据库加载）
+  const [dbVersions, setDbVersions] = useState<any[]>([]);
+  const [currentDbVersionId, setCurrentDbVersionId] = useState<string | null>(null);
+  const [isLoadingVersions, setIsLoadingVersions] = useState(false);
   
   const { runRevision, isRevising } = useDifyRevisePS();
   
-  // 使用计算属性获取显示内容 - 根据当前版本选择内容
-  const displayContent = currentVersion > 1 && versions.length > 0 
-    ? versions.find(v => v.version === currentVersion)?.content || generationState.generatedContent || ''
-    : generationState.generatedContent || '';
+  // 获取当前数据库版本内容
+  const getCurrentDbVersion = () => {
+    if (currentDbVersionId && dbVersions.length > 0) {
+      const version = dbVersions.find(v => v.uuid === currentDbVersionId);
+      return version?.content || generationState.generatedContent || '';
+    }
+    // 兼容旧的版本管理
+    if (currentVersion > 1 && versions.length > 0) {
+      return versions.find(v => v.version === currentVersion)?.content || generationState.generatedContent || '';
+    }
+    return generationState.generatedContent || '';
+  };
+  
+  // 使用计算属性获取显示内容
+  const displayContent = getCurrentDbVersion();
 
   // 生成SOP
   const handleGenerate = useCallback(async () => {
@@ -239,12 +259,74 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   const loadVersions = async () => {
     try {
       const response = await fetch(`/api/documents/${documentUuid}/versions`);
+      console.log('[PS] Loading old versions for document:', documentUuid);
       if (response.ok) {
         const result = await response.json();
-        setVersions(result.data || []);
+        // API返回格式: { versions: [...], total: number }
+        const versionData = result.versions || result.data || [];
+        console.log('[PS] Old versions loaded:', versionData.length, 'versions');
+        setVersions(versionData);
       }
     } catch (error) {
       console.error('Error loading versions:', error);
+    }
+  };
+  
+  // 加载文档版本历史（数据库）
+  const loadDocumentVersions = async (forceVersionId?: string) => {
+    if (!documentUuid) return;
+    
+    setIsLoadingVersions(true);
+    try {
+      const response = await fetch(`/api/documents/${documentUuid}/versions`);
+      console.log('[PS] Loading versions for document:', documentUuid, 'Response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('[PS] API Response:', result);
+        
+        // API返回格式: { success: true, data: { versions: [...], total: number } }
+        const versionData = result.data?.versions || result.versions || [];
+        console.log('[PS] Loaded versions:', versionData.length, 'versions', versionData);
+        setDbVersions(versionData);
+        
+        // 设置当前版本
+        if (versionData.length > 0) {
+          // 如果指定了强制版本ID（新创建的修订版本），使用它
+          if (forceVersionId) {
+            const targetVersion = versionData.find((v: any) => v.uuid === forceVersionId);
+            if (targetVersion) {
+              setCurrentDbVersionId(forceVersionId);
+              if (targetVersion.content) {
+                updateGeneratedContent(targetVersion.content);
+              }
+              console.log('[PS] Set current version to new revision:', forceVersionId);
+            }
+          } else if (!currentDbVersionId) {
+            // 如果还没有设置当前版本ID，默认选择原始版本
+            const originalVersion = versionData.find((v: any) => v.version_type === 'original');
+            const versionToSet = originalVersion || versionData[0]; // 如果没有原始版本，使用第一个版本
+            setCurrentDbVersionId(versionToSet.uuid);
+            if (versionToSet.content) {
+              updateGeneratedContent(versionToSet.content);
+            }
+            console.log('[PS] Set current version to:', versionToSet.uuid, 'Version:', versionToSet.version);
+          } else {
+            // 如果已经有当前版本ID，尝试更新内容
+            const currentVersion = versionData.find((v: any) => v.uuid === currentDbVersionId);
+            if (currentVersion?.content) {
+              updateGeneratedContent(currentVersion.content);
+            }
+            console.log('[PS] Keeping current version:', currentDbVersionId);
+          }
+        }
+      } else {
+        console.error('[PS] Failed to load versions:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('[PS] Error loading document versions:', error);
+    } finally {
+      setIsLoadingVersions(false);
     }
   };
 
@@ -255,6 +337,8 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       return;
     }
     
+    console.log('[PS] Initializing page with documentUuid:', documentUuid);
+    
     const initPage = async () => {
       // 从缓存加载数据
       loadFromCache();
@@ -262,6 +346,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       // 检查修改状态和加载版本
       await checkRevisionStatus();
       await loadVersions();
+      await loadDocumentVersions();
       
       let hasLoadedData = false;
       
@@ -411,6 +496,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
 
   const handleFullRevision = async (settings: RevisionSettings) => {
     setShowFullRevisionModal(false);
+    setGenerationLoading(true); // 设置loading状态
     
     // 准备 API 参数
     const styleLabels = settings.styles.map(styleValue => {
@@ -458,8 +544,18 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
 
         if (response.ok) {
           const result = await response.json();
+          
+          // 立即更新显示内容
           updateGeneratedContent(revisedContent);
           setCurrentVersion(result.data.version || 2);
+          
+          // 重新加载版本历史，并强制选择新版本
+          if (result.data?.uuid) {
+            await loadDocumentVersions(result.data.uuid);
+          } else {
+            await loadDocumentVersions();
+          }
+          
           await loadVersions();
           await checkRevisionStatus();
           toast.success("个人陈述修改成功！");
@@ -475,11 +571,14 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     } catch (error) {
       console.error('Revision failed:', error);
       toast.error("修改失败，请重试");
+    } finally {
+      setGenerationLoading(false); // 无论成功还是失败都清除loading状态
     }
   };
 
-  const handleParagraphRevisionAPI = async (params: any) => {
+  const handleParagraphRevisionAPI = async (params: any, paragraphIndex: number) => {
     try {
+      setRevisingParagraphIndex(paragraphIndex);
       const revisedContent = await runRevision({
         ...params,
         language: generationState.languagePreference || 'Chinese'
@@ -488,14 +587,57 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     } catch (error) {
       console.error('Paragraph revision failed:', error);
       throw error;
+    } finally {
+      setRevisingParagraphIndex(null);
     }
   };
 
-  const handleParagraphRevise = (index: number, newText: string) => {
+  const handleParagraphRevise = async (index: number, newText: string) => {
     const paragraphs = displayContent.split('\n\n');
     paragraphs[index] = newText;
     const newContent = paragraphs.join('\n\n');
-    updateGeneratedContent(newContent);
+    
+    try {
+      // 创建修改版本并保存到数据库
+      const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newContent,
+          revision_settings: {
+            type: 'paragraph',
+            paragraphIndex: index
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const { data: revision } = await response.json();
+        
+        // 更新本地内容
+        updateGeneratedContent(newContent);
+        
+        // 重新加载版本历史，并强制选择新版本
+        if (revision?.uuid) {
+          await loadDocumentVersions(revision.uuid);
+        } else {
+          await loadDocumentVersions();
+        }
+        
+        toast.success("段落已成功修改！");
+      } else {
+        // 如果保存失败，仍然更新本地内容
+        updateGeneratedContent(newContent);
+        toast.error("保存段落修改失败");
+      }
+    } catch (error) {
+      console.error('Error saving paragraph revision:', error);
+      // 如果出错，仍然更新本地内容
+      updateGeneratedContent(newContent);
+      toast.error("保存段落修改时出错");
+    }
   };
 
   const handleVersionSwitch = (version: number) => {
@@ -505,10 +647,28 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       updateGeneratedContent(versionData.content);
     }
   };
+  
+  // 处理数据库版本切换
+  const handleDbVersionSwitch = (versionId: string) => {
+    setCurrentDbVersionId(versionId);
+    const versionData = dbVersions.find(v => v.uuid === versionId);
+    if (versionData) {
+      updateGeneratedContent(versionData.content);
+    }
+  };
 
-  // 如果是初始加载或正在生成，显示加载动画
-  if (isInitialLoading || generationState.isGenerating) {
+  // 如果正在生成，显示AI生成动画
+  if (generationState.isGenerating) {
     return <AIGeneratingLoader />;
+  }
+  
+  // 如果是初始加载，显示简单的loading状态
+  if (isInitialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   // 如果有错误，显示错误信息
@@ -566,29 +726,83 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
 
       {/* 操作按钮 */}
       <div className="flex flex-wrap gap-2">
-        {/* 版本切换 */}
-        {versions.length > 1 && (
+        {/* 调试日志 */}
+        {(() => {
+          console.log('[PS] Render - dbVersions:', dbVersions?.length || 0, 'versions:', versions?.length || 0, {
+            dbVersions,
+            versions,
+            currentDbVersionId,
+            currentVersion,
+            isLoadingVersions
+          });
+          return null;
+        })()}
+        {/* 版本切换 - 显示版本信息和loading状态 */}
+        {(dbVersions.length > 0 || versions.length > 0) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                版本 {currentVersion}
-                <ChevronDown className="ml-2 h-4 w-4" />
+              <Button variant="outline" size="sm" disabled={isLoadingVersions}>
+                {isLoadingVersions ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    加载版本中...
+                  </>
+                ) : (
+                  <>
+                    版本 {dbVersions.length > 0 ? 
+                      dbVersions.find(v => v.uuid === currentDbVersionId)?.version || currentVersion : 
+                      currentVersion}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {versions.map((version) => (
-                <DropdownMenuItem
-                  key={version.version}
-                  onClick={() => handleVersionSwitch(version.version)}
-                  className={currentVersion === version.version ? 'bg-accent' : ''}
-                >
-                  版本 {version.version}
-                  {version.version === 1 && ' (原始)'}
-                  {version.version > 1 && ' (修改版)'}
-                </DropdownMenuItem>
-              ))}
+              {/* 优先显示数据库版本 */}
+              {dbVersions.length > 0 ? (
+                dbVersions.map((version) => (
+                  <DropdownMenuItem
+                    key={version.uuid}
+                    onClick={() => handleDbVersionSwitch(version.uuid)}
+                    className={currentDbVersionId === version.uuid ? 'bg-accent' : ''}
+                  >
+                    版本 {version.version}
+                    {version.version === 1 && ' (原始)'}
+                    {version.version > 1 && ` (修改版${version.revision_count || ''})`}
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                /* 旧版本系统 */
+                versions.map((version) => (
+                  <DropdownMenuItem
+                    key={version.version}
+                    onClick={() => handleVersionSwitch(version.version)}
+                    className={currentVersion === version.version ? 'bg-accent' : ''}
+                  >
+                    版本 {version.version}
+                    {version.version === 1 && ' (原始)'}
+                    {version.version > 1 && ' (修改版)'}
+                  </DropdownMenuItem>
+                ))
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+        {/* 版本对比按钮 - 只在有多个版本时显示 */}
+        {(dbVersions.length > 1 || versions.length > 1) && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowVersionComparison(true)}
+            disabled={isLoadingVersions}
+          >
+            {isLoadingVersions ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <GitCompare className="mr-2 h-4 w-4" />
+            )}
+            版本对比
+          </Button>
         )}
         <Button
           variant="outline"
@@ -615,14 +829,14 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           <Download className="mr-2 h-4 w-4" />
           导出
         </Button>
-        <Button variant="outline" size="sm" onClick={handleSave}>
+        {/* <Button variant="outline" size="sm" onClick={handleSave}>
           <Save className="mr-2 h-4 w-4" />
           保存
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleRegenerate}>
+        </Button> */}
+        {/* <Button variant="outline" size="sm" onClick={handleRegenerate}>
           <RefreshCw className="mr-2 h-4 w-4" />
           重新生成
-        </Button>
+        </Button> */}
         <Button 
           variant="outline" 
           size="sm" 
@@ -660,10 +874,10 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
                       paragraph={paragraph}
                       index={index}
                       onRevise={handleParagraphRevise}
-                      isRevising={isRevising}
+                      isRevising={revisingParagraphIndex === index}
                       isHighlighted={highlightedParagraph === index}
                       onHighlightChange={(highlight) => setHighlightedParagraph(highlight ? index : null)}
-                      onStartRevision={handleParagraphRevisionAPI}
+                      onStartRevision={(params) => handleParagraphRevisionAPI(params, index)}
                     />
                   ))}
                 </div>
@@ -689,6 +903,23 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
         onConfirm={handleFullRevision}
         currentWordCount={displayContent.length}
       />
+      
+      {/* 版本对比弹窗 */}
+      {showVersionComparison && (dbVersions.length > 1 || versions.length > 1) && (
+        <VersionComparison
+          isOpen={showVersionComparison}
+          onClose={() => setShowVersionComparison(false)}
+          versions={dbVersions.length > 0 ? dbVersions : 
+            /* 将旧版本转换为新格式 */
+            versions.map((v, idx) => ({
+              uuid: `version-${v.version}`,
+              version: v.version,
+              content: v.content,
+              version_type: v.version === 1 ? 'original' : 'revised'
+            }))}
+          currentVersionId={dbVersions.length > 0 ? currentDbVersionId : `version-${currentVersion}`}
+        />
+      )}
     </div>
   );
 }

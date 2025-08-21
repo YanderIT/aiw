@@ -11,6 +11,7 @@ import {
   PersonalStatementIcon, 
   ResumeIcon, 
   SOPIcon,
+  StudyAbroadConsultationIcon,
   DocumentIcon 
 } from "./icons/DocumentIcons";
 
@@ -28,6 +29,7 @@ const getDocumentIcon = (type: DocumentType) => {
     [DocumentType.CoverLetter]: CoverLetterIcon,
     [DocumentType.SOP]: SOPIcon,
     [DocumentType.PersonalStatement]: PersonalStatementIcon,
+    [DocumentType.StudyAbroadConsultation]: StudyAbroadConsultationIcon,
   };
   
   return iconMap[type] || DocumentIcon;
@@ -44,6 +46,30 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   
   // 获取前两三行的内容预览
   const getContentPreview = (content: string | undefined, maxLength: number = 120) => {
+    // 特殊处理留学咨询文档
+    if (document.document_type === DocumentType.StudyAbroadConsultation && document.form_data) {
+      const formData = document.form_data;
+      const parts = [];
+      
+      if (formData.basicInfo?.full_name) {
+        parts.push(`姓名: ${formData.basicInfo.full_name}`);
+      }
+      if (formData.targetProgram?.target_country) {
+        parts.push(`目标国家: ${formData.targetProgram.target_country}`);
+      }
+      if (formData.targetProgram?.target_degree) {
+        parts.push(`申请学位: ${formData.targetProgram.target_degree}`);
+      }
+      if (formData.consultationNeeds?.main_concerns) {
+        parts.push(`关注点: ${formData.consultationNeeds.main_concerns}`);
+      }
+      
+      const preview = parts.join(' | ');
+      return preview.length > maxLength 
+        ? preview.substring(0, maxLength) + "..."
+        : preview;
+    }
+    
     if (!content) return "";
     const cleanContent = content.replace(/[#*`\[\]()]/g, '').trim();
     return cleanContent.length > maxLength 

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Script from 'next/script';
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import HeroBg from "./bg";
 
 // Declare the custom element type
@@ -152,13 +153,15 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
               transition={{ duration: 0.6, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              <Button
-                size="lg"
-                className="text-base px-8 py-6 rounded-xl font-medium"
-              >
-                立即开始使用
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/creation-center">
+                <Button
+                  size="lg"
+                  className="text-base px-8 py-6 rounded-xl font-medium"
+                >
+                  立即开始使用
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
  
             </motion.div>
 

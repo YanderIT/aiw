@@ -30,7 +30,8 @@ export enum DocumentType {
   Resume = "resume",
   CoverLetter = "cover_letter",
   SOP = "sop",
-  PersonalStatement = "personal_statement"
+  PersonalStatement = "personal_statement",
+  StudyAbroadConsultation = "study_abroad_consultation"
 }
 
 export enum VersionType {

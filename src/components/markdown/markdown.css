@@ -1,15 +1,73 @@
 .markdown {
   background-color: var(--background);
   color: var(--foreground);
-  li {
-    list-style-type: square;
-    word-break: break-word;
-  }
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.markdown h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+}
+
+.markdown h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+}
+
+.markdown h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+}
+
+.markdown p {
+  margin: 0.5em 0 1em 0;
+  line-height: 1.7;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 0.5em 0 1em 0;
+  padding-left: 2em;
+}
+
+.markdown li {
+  list-style-type: disc;
+  word-break: break-word;
+  margin: 0.25em 0;
+}
+
+.markdown ol li {
+  list-style-type: decimal;
+}
+
+.markdown strong {
+  font-weight: bold;
+}
+
+.markdown em {
+  font-style: italic;
 }
 
 .markdown pre,
 .markdown code,
 .markdown blockquote {
-  background-color: var(--background);
+  background-color: var(--muted);
   color: var(--foreground);
+  padding: 0.25em 0.5em;
+  border-radius: 0.25em;
+}
+
+.markdown pre {
+  padding: 1em;
+  overflow-x: auto;
+}
+
+.markdown blockquote {
+  border-left: 4px solid var(--primary);
+  padding: 0.5em 1em;
+  margin: 1em 0;
 }
