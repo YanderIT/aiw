@@ -990,7 +990,8 @@ function ResumeResultContent() {
                                   (t) => t.value === selectedTemplate
                                 );
                                 return `当前模板: ${
-                                  currentTemplate?.label || "未选择"
+
+                                  currentTemplate?.subtitle || "未选择"
                                 }`;
                               })()}
                             </p>

@@ -114,7 +114,7 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
           <div className="absolute top-1/2 left-1/2 -translate-x-[175%] -translate-y-1/2 w-[80%] h-[80%] max-w-4xl">
             <spline-viewer 
               url="https://prod.spline.design/JdZgoBYW5zhBLimi/scene.splinecode"
-              className="w-[250%] h-[180%] 2xl:h-full"
+              className="w-[360%] 2xl:h-full"
             />
           </div>
         </motion.div>

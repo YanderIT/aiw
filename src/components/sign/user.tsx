@@ -26,7 +26,7 @@ export default function SignUser({ user }: { user: User }) {
     },
     {
       title: t("user.user_center"),
-      url: "/creation-center",
+      url: "/my-documents",
     },
     // {
     //   title: t("user.admin_system"),
