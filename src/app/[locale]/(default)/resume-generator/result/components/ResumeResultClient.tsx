@@ -692,7 +692,7 @@ function ResumeResultContent() {
         filename: `简历_${new Date().toLocaleDateString("zh-CN").replace(/\//g, "-")}.pdf`,
         quality: 0.95,
         scale: 2,
-        margin: 10
+        margin: 0
       });
 
     } catch (error) {

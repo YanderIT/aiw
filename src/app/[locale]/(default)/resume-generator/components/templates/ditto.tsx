@@ -77,18 +77,16 @@ const Header = ({
             }}
           >
             <div
-              className="overflow-hidden shadow-lg"
               style={{
                 width: "150px",
                 height: "150px",
+                // borderRadius: "50%",
+                backgroundImage: `url(${basics.picture.url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
               }}
-            >
-              <img 
-                src={basics.picture.url} 
-                alt={basics.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            />
           </div>
         )}
 
