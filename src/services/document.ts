@@ -1,4 +1,4 @@
-import { Document, DocumentType, findDocumentsByUser, findDocumentByUuid } from "@/models/document";
+import { Document, DocumentType, findDocumentsByUser, findDocumentByUuid, getDocumentCount } from "@/models/document";
 
 export interface DocumentListParams {
   page?: number;
@@ -20,6 +20,9 @@ export async function getUserDocuments(
 ): Promise<DocumentListResponse> {
   const { page = 1, limit = 10, document_type } = params;
   
+  // Get total count from database
+  const totalCount = await getDocumentCount(userUuid, document_type);
+  
   // Get documents from model
   const documents = await findDocumentsByUser(userUuid, document_type, page, limit);
   
@@ -36,7 +39,7 @@ export async function getUserDocuments(
   
   return {
     documents: filteredDocuments,
-    total: filteredDocuments.length,
+    total: params.search ? filteredDocuments.length : totalCount,
     page,
     limit
   };

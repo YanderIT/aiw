@@ -134,6 +134,30 @@ export async function findDocumentsByUser(
   return data || [];
 }
 
+export async function getDocumentCount(user_uuid: string, document_type?: DocumentType): Promise<number> {
+  const supabase = getSupabaseClient();
+  
+  let query = supabase
+    .from("documents")
+    .select("*", { count: 'exact', head: true })
+    .eq("user_uuid", user_uuid)
+    .eq("version", 1)
+    .eq("status", DocumentStatus.Active);
+
+  if (document_type) {
+    query = query.eq("document_type", document_type);
+  }
+
+  const { count, error } = await query;
+
+  if (error) {
+    console.error("Error getting document count:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
 export async function findDocumentVersions(parent_document_uuid: string): Promise<Document[]> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase

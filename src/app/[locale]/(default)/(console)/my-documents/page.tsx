@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Calendar } from "lucide-react";
+import { Search, Plus, Calendar, Loader2 } from "lucide-react";
 import { DocumentCard } from "@/components/console/DocumentCard";
 import { DocumentListItem } from "@/components/console/DocumentListItem";
 import { Document, DocumentType } from "@/models/document";
@@ -23,6 +23,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function MyDocumentsPage() {
   const t = useTranslations();
@@ -30,16 +46,39 @@ export default function MyDocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // Separate input state for UI
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [layoutType, setLayoutType] = useState<"grid" | "list">("grid");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  
+  // Search states
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // Debounce timer ref
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // 获取文档列表
   const fetchDocuments = useCallback(async () => {
     try {
-      const response = await fetch('/api/documents');
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+      });
+      
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+      
+      const response = await fetch(`/api/documents?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch documents');
       }
@@ -47,6 +86,8 @@ export default function MyDocumentsPage() {
       if (data.success) {
         setDocuments(data.data.documents);
         setFilteredDocuments(data.data.documents);
+        setTotalCount(data.data.total);
+        setTotalPages(Math.ceil(data.data.total / pageSize));
       }
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -54,25 +95,61 @@ export default function MyDocumentsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize, searchQuery]);
 
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  // 搜索文档
+  // 搜索文档时重置到第一页
   useEffect(() => {
-    if (searchQuery) {
-      const filtered = documents.filter(doc => 
-        doc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.content?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredDocuments(filtered);
-    } else {
-      setFilteredDocuments(documents);
+    setCurrentPage(1);
+  }, [searchQuery]);
+  
+  // Handle search input change with debouncing
+  const handleSearchInputChange = (value: string) => {
+    setSearchInput(value);
+    
+    // Clear existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
-  }, [searchQuery, documents]);
+    
+    // Show searching indicator if there's a value
+    if (value) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+    
+    // Set new timer for 1.5 seconds
+    debounceTimer.current = setTimeout(() => {
+      setSearchQuery(value);
+      setIsSearching(false);
+    }, 1500);
+  };
+  
+  // Handle Enter key press for immediate search
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Clear any pending timer
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+      // Immediately trigger search
+      setSearchQuery(searchInput);
+      setIsSearching(false);
+    }
+  };
+  
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   // 根据日期分组文档
   const todayDocuments = filteredDocuments.filter(doc => {
@@ -125,10 +202,9 @@ export default function MyDocumentsPage() {
 
       const data = await response.json();
       if (data.success) {
-        // 从列表中移除已删除的文档
-        setDocuments(documents.filter(doc => doc.uuid !== documentToDelete));
-        setFilteredDocuments(filteredDocuments.filter(doc => doc.uuid !== documentToDelete));
         toast.success("文档已删除");
+        // 重新加载当前页
+        fetchDocuments();
       }
     } catch (error) {
       console.error('Error deleting document:', error);
@@ -138,6 +214,56 @@ export default function MyDocumentsPage() {
       setDeleteDialogOpen(false);
       setDocumentToDelete(null);
     }
+  };
+  
+  // 处理页码变化
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  
+  // 处理每页数量变化
+  const handlePageSizeChange = (value: string) => {
+    const newPageSize = parseInt(value);
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+  
+  // 生成页码数组
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
   };
 
   return (
@@ -177,12 +303,17 @@ export default function MyDocumentsPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                {isSearching ? (
+                  <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                )}
                 <Input
                   placeholder="搜索文档..."
                   className="pl-10 pr-4 py-2 w-full sm:w-64"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => handleSearchInputChange(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
                 />
               </div>
 
@@ -280,6 +411,64 @@ export default function MyDocumentsPage() {
                 新建文档
               </Button>
             )} */}
+          </div>
+        )}
+        
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-6">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>共 {totalCount} 个文档</span>
+              <span>·</span>
+              <div className="flex items-center gap-2">
+                <span>每页显示</span>
+                <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="w-20 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="12">12</SelectItem>
+                    <SelectItem value="24">24</SelectItem>
+                    <SelectItem value="48">48</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>个</span>
+              </div>
+            </div>
+            
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {generatePageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === 'ellipsis' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => handlePageChange(page as number)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </div>
