@@ -26,7 +26,8 @@ import {
   Loader2,
 } from "lucide-react";
 import html2canvas from "yd-html2canvas";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
+import { exportMultiPagePDF } from "@/lib/multi-page-pdf-export";
 import { toast } from "sonner";
 
 // Import context and modules
@@ -672,113 +673,31 @@ function ResumeResultContent() {
     });
   };
 
-  // 导出简历
+  // 导出简历（多页支持）
   const exportResume = async () => {
     if (isExporting) return;
 
     setIsExporting(true);
-    // let originalStyles: Array<{ element: HTMLElement; property: string; value: string }> = [];
 
     try {
-      // 获取简历容器元素
+      // 检查简历容器是否存在
       const resumeContainer = document.getElementById("resume-container");
-
       if (!resumeContainer) {
         toast.error("未找到简历内容，请确保简历已正确加载");
         return;
       }
 
-      toast.loading("正在生成PDF，请稍候...", { id: "pdf-export" });
-
-      // 获取容器的原始样式
-      const originalStyle = {
-        width: resumeContainer.style.width,
-        height: resumeContainer.style.height,
-        transform: resumeContainer.style.transform,
-        overflow: resumeContainer.style.overflow,
-      };
-
-      // 临时替换oklch和oklab颜色
-      // originalStyles = replaceModernColors(resumeContainer);
-      // for (let index = 0; index < originalStyles.length; index++) {
-      //   const element = originalStyles[index];
-      //   console.log(element.element.style)
-
-      // }
-      // 临时设置容器样式以优化截图质量
-      resumeContainer.style.width = "auto";
-      resumeContainer.style.height = "auto";
-      resumeContainer.style.transform = "none";
-      resumeContainer.style.overflow = "visible";
-
-      // 等待样式应用
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // 使用html2canvas生成画布
-      const canvas = await html2canvas(resumeContainer, {
-        scale: 2, // 提高分辨率
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        width: resumeContainer.scrollWidth,
-        height: resumeContainer.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: resumeContainer.scrollWidth,
-        windowHeight: resumeContainer.scrollHeight,
+      // 使用新的多页PDF导出功能
+      await exportMultiPagePDF("resume-container", {
+        filename: `简历_${new Date().toLocaleDateString("zh-CN").replace(/\//g, "-")}.pdf`,
+        quality: 0.95,
+        scale: 2,
+        margin: 10
       });
 
-      // 恢复容器原始样式
-      resumeContainer.style.width = originalStyle.width;
-      resumeContainer.style.height = originalStyle.height;
-      resumeContainer.style.transform = originalStyle.transform;
-      resumeContainer.style.overflow = originalStyle.overflow;
-
-      // 创建PDF文档 (A4尺寸)
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      // A4纸张尺寸 (mm)
-      const pdfWidth = 210;
-      const pdfHeight = 297;
-      const margin = 10; // 边距
-      const contentWidth = pdfWidth - margin;
-      const contentHeight = pdfHeight - margin;
-
-      // 计算图片尺寸
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(
-        contentWidth / (imgWidth * 0.264583),
-        contentHeight / (imgHeight * 0.264583)
-      );
-
-      const scaledWidth = imgWidth * 0.264583 * ratio;
-      const scaledHeight = imgHeight * 0.264583 * ratio;
-
-      // 居中放置
-      const x = (pdfWidth - scaledWidth) / 2;
-      const y = (pdfHeight - scaledHeight) / 2;
-
-      // 将画布转换为图片并添加到PDF
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      pdf.addImage(imgData, "JPEG", x, y, scaledWidth, scaledHeight);
-
-      // 生成文件名
-      const fileName = `简历_${new Date()
-        .toLocaleDateString("zh-CN")
-        .replace(/\//g, "-")}.pdf`;
-
-      // 下载PDF
-      pdf.save(fileName);
-
-      toast.success("PDF导出成功！", { id: "pdf-export" });
     } catch (error) {
       console.error("PDF导出失败:", error);
-      toast.error("PDF导出失败，请重试", { id: "pdf-export" });
+      toast.error(`PDF导出失败: ${error instanceof Error ? error.message : '未知错误'}`, { id: "pdf-export" });
     } finally {
       setIsExporting(false);
     }
