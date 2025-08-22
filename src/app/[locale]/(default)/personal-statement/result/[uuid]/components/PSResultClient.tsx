@@ -7,33 +7,24 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Copy, 
   Download, 
-  Save, 
-  RefreshCw, 
-  Edit3,
-  Eye,
   Loader2,
   CheckCircle,
   FileText,
-  Bot,
+  Sparkles,
   Zap,
   Stars,
   Wand2,
   ChevronDown,
-  Undo2,
-  Redo2,
-  GitCompare
+  GitCompare,
+  RefreshCw
 } from "lucide-react";
 import Markdown from "@/components/markdown";
-import MarkdownEditor from "@/components/blocks/mdeditor";
 import { toast } from "sonner";
 import { PSProvider, usePS } from "../../../components/PSContext";
 import { useDify } from '@/hooks/useDify';
 import { useDifyRevisePS } from '@/hooks/useDifyRevisePS';
-import { useParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevisionModal from "../../../components/RevisionModal";
 import FullRevisionModal, { RevisionSettings } from "../../../components/FullRevisionModal";
-import ParagraphRevision from "../../../components/ParagraphRevision";
 import VersionComparison from "../../../components/VersionComparison";
 import {
   DropdownMenu,
@@ -47,9 +38,9 @@ const AIGeneratingLoader = () => {
   const [currentStep, setCurrentStep] = useState(0);
   
   const steps = [
-    { icon: Bot, text: "分析您的PS内容...", color: "text-blue-500" },
-    { icon: Zap, text: "运用AI智能生成技术...", color: "text-yellow-500" },
-    { icon: Stars, text: "优化PS结构和语言...", color: "text-purple-500" },
+    { icon: Sparkles, text: "分析您的PS内容...", color: "text-green-500" },
+    { icon: Zap, text: "运用AI智能生成技术...", color: "text-green-500" },
+    { icon: Stars, text: "优化PS结构和语言...", color: "text-green-500" },
     { icon: FileText, text: "完成PS生成...", color: "text-green-500" }
   ];
 
@@ -67,7 +58,7 @@ const AIGeneratingLoader = () => {
           <div className="absolute top-2 left-2 w-4 h-4 bg-primary rounded-full"></div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Bot className="w-12 h-12 text-primary animate-pulse" />
+          <Sparkles className="w-12 h-12 text-primary animate-pulse" />
         </div>
       </div>
 
@@ -100,9 +91,6 @@ const AIGeneratingLoader = () => {
 };
 
 function PSResultContent({ documentUuid }: { documentUuid: string }) {
-  const params = useParams();
-  const locale = params.locale || 'zh';
-  
   const { 
     data,
     updateData,
@@ -111,16 +99,13 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     setGenerationLoading,
     setGenerationError,
     setLanguagePreference,
-    loadFromCache,
-    getFormData
+    loadFromCache
   } = usePS();
 
   const { runWorkflow } = useDify({ functionType: 'personal-statement' });
   
-  const [isEditMode, setIsEditMode] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [editingContent, setEditingContent] = useState(''); // 仅用于编辑模式
   
   // 修改相关状态
   const [showRevisionModal, setShowRevisionModal] = useState(false);
@@ -129,8 +114,6 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   const [serverRevisionStatus, setServerRevisionStatus] = useState<boolean | null>(null);
   const [currentVersion, setCurrentVersion] = useState(1);
   const [versions, setVersions] = useState<any[]>([]);
-  const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
-  const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
   
   // 版本历史状态（从数据库加载）
   const [dbVersions, setDbVersions] = useState<any[]>([]);
@@ -408,15 +391,9 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
   }, [hasGenerated, data.target, generationState.isGenerating, handleGenerate]); // 添加所有依赖
 
-  // 编辑模式时同步内容
-  useEffect(() => {
-    if (isEditMode && generationState.generatedContent) {
-      setEditingContent(generationState.generatedContent);
-    }
-  }, [isEditMode, generationState.generatedContent]);
 
   const handleCopy = async () => {
-    const contentToCopy = isEditMode ? editingContent : displayContent;
+    const contentToCopy = displayContent;
     try {
       await navigator.clipboard.writeText(contentToCopy);
       toast.success("内容已复制到剪贴板");
@@ -426,7 +403,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   };
 
   const handleExport = () => {
-    const contentToExport = isEditMode ? editingContent : displayContent;
+    const contentToExport = displayContent;
     const blob = new Blob([contentToExport], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -437,37 +414,6 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success("个人陈述已导出");
-  };
-
-  const handleSave = async () => {
-    const contentToSave = isEditMode ? editingContent : displayContent;
-    try {
-      const updateResponse = await fetch('/api/documents', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uuid: documentUuid,
-          content: contentToSave,
-          word_count: contentToSave.length.toString()
-        }),
-      });
-
-      if (updateResponse.ok) {
-        toast.success("个人陈述已保存");
-      } else {
-        throw new Error('保存失败');
-      }
-    } catch (error) {
-      console.error('Error saving document:', error);
-      toast.error("保存失败，请重试");
-    }
-  };
-
-  const handleMarkdownChange = (value: string) => {
-    setEditingContent(value);
-    updateGeneratedContent(value);
   };
 
   const handleRegenerate = () => {
@@ -573,70 +519,6 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       toast.error("修改失败，请重试");
     } finally {
       setGenerationLoading(false); // 无论成功还是失败都清除loading状态
-    }
-  };
-
-  const handleParagraphRevisionAPI = async (params: any, paragraphIndex: number) => {
-    try {
-      setRevisingParagraphIndex(paragraphIndex);
-      const revisedContent = await runRevision({
-        ...params,
-        language: generationState.languagePreference || 'Chinese'
-      });
-      return revisedContent;
-    } catch (error) {
-      console.error('Paragraph revision failed:', error);
-      throw error;
-    } finally {
-      setRevisingParagraphIndex(null);
-    }
-  };
-
-  const handleParagraphRevise = async (index: number, newText: string) => {
-    const paragraphs = displayContent.split('\n\n');
-    paragraphs[index] = newText;
-    const newContent = paragraphs.join('\n\n');
-    
-    try {
-      // 创建修改版本并保存到数据库
-      const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: newContent,
-          revision_settings: {
-            type: 'paragraph',
-            paragraphIndex: index
-          }
-        }),
-      });
-
-      if (response.ok) {
-        const { data: revision } = await response.json();
-        
-        // 更新本地内容
-        updateGeneratedContent(newContent);
-        
-        // 重新加载版本历史，并强制选择新版本
-        if (revision?.uuid) {
-          await loadDocumentVersions(revision.uuid);
-        } else {
-          await loadDocumentVersions();
-        }
-        
-        toast.success("段落已成功修改！");
-      } else {
-        // 如果保存失败，仍然更新本地内容
-        updateGeneratedContent(newContent);
-        toast.error("保存段落修改失败");
-      }
-    } catch (error) {
-      console.error('Error saving paragraph revision:', error);
-      // 如果出错，仍然更新本地内容
-      updateGeneratedContent(newContent);
-      toast.error("保存段落修改时出错");
     }
   };
 
@@ -804,23 +686,6 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
             版本对比
           </Button>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditMode(!isEditMode)}
-        >
-          {isEditMode ? (
-            <>
-              <Eye className="mr-2 h-4 w-4" />
-              预览
-            </>
-          ) : (
-            <>
-              <Edit3 className="mr-2 h-4 w-4" />
-              编辑
-            </>
-          )}
-        </Button>
         <Button variant="outline" size="sm" onClick={handleCopy}>
           <Copy className="mr-2 h-4 w-4" />
           复制
@@ -856,36 +721,10 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       {/* 内容显示区 */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          {isEditMode ? (
-            <div className="min-h-[600px]">
-              <MarkdownEditor
-                value={editingContent}
-                onChange={handleMarkdownChange}
-              />
-            </div>
-          ) : (
-            <div className="p-8 prose prose-slate dark:prose-invert max-w-none">
-              {/* 如果开启了修改功能且未使用过，显示可编辑的段落 */}
-              {!serverRevisionStatus && displayContent ? (
-                <div className="space-y-4">
-                  {displayContent.split('\n\n').map((paragraph: string, index: number) => (
-                    <ParagraphRevision
-                      key={index}
-                      paragraph={paragraph}
-                      index={index}
-                      onRevise={handleParagraphRevise}
-                      isRevising={revisingParagraphIndex === index}
-                      isHighlighted={highlightedParagraph === index}
-                      onHighlightChange={(highlight) => setHighlightedParagraph(highlight ? index : null)}
-                      onStartRevision={(params) => handleParagraphRevisionAPI(params, index)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Markdown content={displayContent} />
-              )}
-            </div>
-          )}
+          <div className="p-8 prose prose-slate dark:prose-invert max-w-none">
+            {/* 始终使用 Markdown 组件渲染内容 */}
+            <Markdown content={displayContent} />
+          </div>
         </CardContent>
       </Card>
       
@@ -911,7 +750,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           onClose={() => setShowVersionComparison(false)}
           versions={dbVersions.length > 0 ? dbVersions : 
             /* 将旧版本转换为新格式 */
-            versions.map((v, idx) => ({
+            versions.map((v) => ({
               uuid: `version-${v.version}`,
               version: v.version,
               content: v.content,

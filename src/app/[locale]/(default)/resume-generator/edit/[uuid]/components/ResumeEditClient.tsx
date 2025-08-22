@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { useRouter } from '@/i18n/navigation';
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -10,15 +9,16 @@ import { GlobalLoading } from "@/components/ui/loading";
 import { ResumeProvider, useResume } from "../../../components/ResumeContext";
 import ResumeResultClient from "../../../result/components/ResumeResultClient";
 import { useLoadResumeDocument } from "@/hooks/useLoadResumeDocument";
+// Import the CSS file to ensure styles are loaded
+import "../../../result/components/resume-result.css";
 
 interface ResumeEditClientProps {
   documentUuid: string;
 }
 
 function ResumeEditContent({ documentUuid }: ResumeEditClientProps) {
-  const t = useTranslations();
   const router = useRouter();
-  const { documentState, data } = useResume();
+  const { documentState } = useResume();
   
   // 清除本地缓存，确保从服务器加载数据
   useEffect(() => {

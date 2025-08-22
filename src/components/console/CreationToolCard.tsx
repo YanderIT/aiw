@@ -95,17 +95,17 @@ export function CreationToolCard({
         {/* Glass background */}
         <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80 backdrop-blur-md rounded-3xl" />
       
-      {/* Animated gradient overlay */}
+      {/* Animated gradient overlay - lighter and softer */}
       <motion.div
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0 opacity-50"
         animate={{
           background: isHovered
             ? [
-                "linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(16, 185, 129, 0.04) 50%, rgba(20, 184, 166, 0.06) 100%)",
-                "linear-gradient(135deg, rgba(20, 184, 166, 0.06) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(16, 185, 129, 0.06) 100%)",
-                "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(20, 184, 166, 0.04) 50%, rgba(34, 197, 94, 0.06) 100%)",
+                "linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, rgba(16, 185, 129, 0.02) 50%, rgba(20, 184, 166, 0.03) 100%)",
+                "linear-gradient(135deg, rgba(20, 184, 166, 0.03) 0%, rgba(34, 197, 94, 0.02) 50%, rgba(16, 185, 129, 0.03) 100%)",
+                "linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(20, 184, 166, 0.02) 50%, rgba(34, 197, 94, 0.03) 100%)",
               ]
-            : "linear-gradient(135deg, rgba(34, 197, 94, 0.02) 0%, rgba(16, 185, 129, 0.02) 50%, rgba(20, 184, 166, 0.02) 100%)",
+            : "linear-gradient(135deg, rgba(34, 197, 94, 0.01) 0%, rgba(16, 185, 129, 0.01) 50%, rgba(20, 184, 166, 0.01) 100%)",
         }}
         transition={{
           duration: isHovered ? 4 : 0.5,
@@ -114,11 +114,11 @@ export function CreationToolCard({
         }}
       />
 
-      {/* Moving gradient spotlight effect */}
+      {/* Moving gradient spotlight effect - smaller and lighter */}
       <motion.div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         animate={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(34, 197, 94, 0.08), transparent 40%)`,
+          background: `radial-gradient(300px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(34, 197, 94, 0.04), transparent 30%)`,
         }}
       />
 
@@ -184,10 +184,10 @@ export function CreationToolCard({
             }}
           >
             <motion.div
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400/40 via-emerald-400/40 to-teal-400/40 blur-2xl"
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400/20 via-emerald-400/20 to-teal-400/20 blur-xl"
               animate={{
                 opacity: isHovered ? 1 : 0,
-                scale: isHovered ? 2 : 1,
+                scale: isHovered ? 1.5 : 1,
               }}
               transition={{ duration: 0.5 }}
             />
@@ -252,27 +252,27 @@ export function CreationToolCard({
           </div>
         </div>
 
-        {/* Glow corners */}
+        {/* Glow corners - smaller and lighter */}
         <motion.div
-          className="absolute top-0 left-0 w-24 h-24 pointer-events-none"
+          className="absolute top-0 left-0 w-16 h-16 pointer-events-none"
           animate={{
-            opacity: isHovered ? 0.2 : 0,
+            opacity: isHovered ? 0.15 : 0,
             scale: isHovered ? 1 : 0.5,
           }}
           transition={{ duration: 0.5 }}
         >
-          <div className="w-full h-full bg-gradient-to-br from-green-400/40 to-transparent rounded-br-3xl blur-xl" />
+          <div className="w-full h-full bg-gradient-to-br from-green-400/25 to-transparent rounded-br-3xl blur-lg" />
         </motion.div>
         
         <motion.div
-          className="absolute bottom-0 right-0 w-24 h-24 pointer-events-none"
+          className="absolute bottom-0 right-0 w-16 h-16 pointer-events-none"
           animate={{
-            opacity: isHovered ? 0.2 : 0,
+            opacity: isHovered ? 0.15 : 0,
             scale: isHovered ? 1 : 0.5,
           }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="w-full h-full bg-gradient-to-tl from-teal-400/40 to-transparent rounded-tl-3xl blur-xl" />
+          <div className="w-full h-full bg-gradient-to-tl from-teal-400/25 to-transparent rounded-tl-3xl blur-lg" />
         </motion.div>
       </div>
 

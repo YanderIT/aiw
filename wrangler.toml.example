@@ -1,4 +1,4 @@
-name = "智写匠-template-one"
+name = "Essmote AI-template-one"
 main = ".open-next/worker.js"
 compatibility_date = "2025-03-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]

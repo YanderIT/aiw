@@ -104,7 +104,7 @@ export default function QuickActions({ collapsed = false, className }: QuickActi
               }}
               className="ml-auto"
             >
-              <TrendingUp className="h-4 w-4 text-amber-600/60" />
+              {/* <TrendingUp className="h-4 w-4 text-amber-600/60" /> */}
             </motion.div>
           )}
           

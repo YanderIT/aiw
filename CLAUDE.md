@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"智写匠" (ZhiXieJiang) is a Next.js 15-based AI SaaS platform for document generation including resumes, cover letters, and recommendation letters. Built with React 19, TypeScript strict mode, and Tailwind CSS v4 for deployment on Vercel, Cloudflare, and Docker.
+"Essmote AI" (ZhiXieJiang) is a Next.js 15-based AI SaaS platform for document generation including resumes, cover letters, and recommendation letters. Built with React 19, TypeScript strict mode, and Tailwind CSS v4 for deployment on Vercel, Cloudflare, and Docker.
 
 ## Development Commands
 

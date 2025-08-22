@@ -126,7 +126,7 @@ export default async function () {
         {
           title: t("my_invites.edit_invite_link"),
           icon: "RiBookLine",
-          url: "https://docs.智写匠.ai",
+          url: "https://docs.Essmote AI.ai",
           target: "_blank",
           variant: "outline",
         },

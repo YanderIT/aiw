@@ -14,7 +14,7 @@ import {
   Loader2,
   CheckCircle,
   FileText,
-  Bot,
+  Sparkles,
   Zap,
   Stars,
   Wand2,
@@ -47,9 +47,9 @@ const AIGeneratingLoader = () => {
   const [currentStep, setCurrentStep] = useState(0);
   
   const steps = [
-    { icon: Bot, text: "分析您的SOP内容...", color: "text-blue-500" },
-    { icon: Zap, text: "运用AI智能生成技术...", color: "text-yellow-500" },
-    { icon: Stars, text: "优化SOP结构和语言...", color: "text-purple-500" },
+    { icon: Sparkles, text: "分析您的SOP内容...", color: "text-green-500" },
+    { icon: Zap, text: "运用AI智能生成技术...", color: "text-green-500" },
+    { icon: Stars, text: "优化SOP结构和语言...", color: "text-green-500" },
     { icon: FileText, text: "完成SOP生成...", color: "text-green-500" }
   ];
 
@@ -67,7 +67,7 @@ const AIGeneratingLoader = () => {
           <div className="absolute top-2 left-2 w-4 h-4 bg-primary rounded-full"></div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Bot className="w-12 h-12 text-primary animate-pulse" />
+          <Sparkles className="w-12 h-12 text-primary animate-pulse" />
         </div>
       </div>
 

@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "title": "智写匠 - 您的智能AI写作助手，轻松创作高质量文书",
-    "description": "智写匠是一款AI驱动的智能写作平台，帮助您轻松应对各种写作挑战，高效完成个人陈述、推荐信、学术论文等各类文书的撰写。",
-    "keywords": "智写匠, AI写作, 智能写作, 写作助手, 个人陈述, 推荐信, 论文写作"
+    "title": "Essmote AI - 您的智能AI写作助手，轻松创作高质量文书",
+    "description": "Essmote AI是一款AI驱动的智能写作平台，帮助您轻松应对各种写作挑战，高效完成个人陈述、推荐信、学术论文等各类文书的撰写。",
+    "keywords": "Essmote AI, AI写作, 智能写作, 写作助手, 个人陈述, 推荐信, 论文写作"
   },
   "user": {
     "sign_in": "登录",
@@ -92,7 +92,7 @@
   },
   "my_orders": {
     "title": "我的订单",
-    "description": "在 智写匠 上购买的订单。",
+    "description": "在 Essmote AI 上购买的订单。",
     "no_orders": "未找到订单",
     "tip": "",
     "activate_order": "激活订单",
@@ -140,7 +140,7 @@
   },
   "blog": {
     "title": "博客",
-    "description": "关于 智写匠 的新闻、资源和更新",
+    "description": "关于 Essmote AI 的新闻、资源和更新",
     "read_more_text": "阅读更多"
   },
   "my_invites": {
@@ -151,7 +151,7 @@
     "edit_invite_link": "编辑邀请链接",
     "copy_invite_link": "复制邀请链接",
     "invite_code": "邀请码",
-    "invite_tip": "每邀请 1 位朋友购买 智写匠，奖励 $50。",
+    "invite_tip": "每邀请 1 位朋友购买 Essmote AI，奖励 $50。",
     "invite_balance": "邀请奖励余额",
     "total_invite_count": "总邀请人数",
     "total_paid_count": "已充值人数",
@@ -159,7 +159,7 @@
     "update_invite_code": "设置邀请码",
     "update_invite_code_tip": "输入你的自定义邀请码",
     "update_invite_button": "保存",
-    "no_orders": "你需要先购买过 智写匠 才能邀请朋友",
+    "no_orders": "你需要先购买过 Essmote AI 才能邀请朋友",
     "no_affiliates": "你暂无邀请朋友的权限，请联系我们申请开通。",
     "table": {
       "invite_time": "邀请时间",
@@ -177,7 +177,7 @@
     "submit": "提交",
     "loading": "提交中...",
     "contact_tip": "其他联系方式",
-    "rating_tip": "您对 智写匠 的看法如何？",
+    "rating_tip": "您对 Essmote AI 的看法如何？",
     "placeholder": "在这里留下您的反馈..."
   },
   "nav": {

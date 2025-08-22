@@ -1,9 +1,9 @@
 {
-  "name": "智写匠-template-one",
+  "name": "Essmote AI-template-one",
   "version": "2.3.1",
   "private": true,
   "author": "idoubi",
-  "homepage": "https://智写匠.ai",
+  "homepage": "https://Essmote AI.ai",
   "scripts": {
     "dev": "cross-env NODE_NO_WARNINGS=1 next dev --turbopack",
     "build": "next build",
@@ -14,7 +14,7 @@
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf:upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "docker:build": "docker build -f Dockerfile -t 智写匠-template-one:latest ."
+    "docker:build": "docker build -f Dockerfile -t Essmote AI-template-one:latest ."
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.1.11",

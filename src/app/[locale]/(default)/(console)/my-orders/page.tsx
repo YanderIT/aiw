@@ -51,7 +51,7 @@ export default async function () {
         {
           title: t("my_orders.read_docs"),
           icon: "RiBookLine",
-          url: "https://docs.智写匠.ai",
+          url: "https://docs.Essmote AI.ai",
           target: "_blank",
           variant: "outline",
         },

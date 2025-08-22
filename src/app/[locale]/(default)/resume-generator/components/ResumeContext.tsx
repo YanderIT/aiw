@@ -347,9 +347,15 @@ export function ResumeProvider({
       if (cached) {
         try {
           const parsedData = JSON.parse(cached);
-          // 确保新字段存在
-          if (!parsedData.moduleSelection) {
+          // 对于新建简历页面，总是使用默认的模块选择（只选中必填模块）
+          // 但保留其他缓存的数据
+          if (!isEditMode) {
             parsedData.moduleSelection = defaultResumeData.moduleSelection;
+          } else {
+            // 编辑模式下，确保新字段存在
+            if (!parsedData.moduleSelection) {
+              parsedData.moduleSelection = defaultResumeData.moduleSelection;
+            }
           }
           if (!parsedData.selectedTemplate) {
             parsedData.selectedTemplate = defaultResumeData.selectedTemplate;

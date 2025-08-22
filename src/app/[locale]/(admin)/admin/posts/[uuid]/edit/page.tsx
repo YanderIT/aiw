@@ -58,11 +58,11 @@ export default async function ({
         name: "slug",
         title: "Slug",
         type: "text",
-        placeholder: "what-is-智写匠",
+        placeholder: "what-is-Essmote AI",
         validation: {
           required: true,
         },
-        tip: "post slug should be unique, visit like: /blog/what-is-智写匠",
+        tip: "post slug should be unique, visit like: /blog/what-is-Essmote AI",
       },
       {
         name: "locale",

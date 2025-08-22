@@ -173,17 +173,55 @@ export default function Header({ header }: { header: HeaderType }) {
             {header.show_locale && <LocaleToggle />}
             {header.show_theme && <ThemeToggle />}
 
-            <Button 
-              variant="ghost" 
-              className="bg-gradient-to-r from-blue-500/15 to-cyan-400/15 backdrop-blur-md border border-blue-200/30 shadow-lg hover:from-blue-500/25 hover:to-cyan-400/25 hover:shadow-blue-200/50 transition-all duration-300 font-semibold rounded-full px-6 relative overflow-hidden"
-              onClick={handleCreationCenterClick}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <span className="flex items-center gap-1 cursor-pointer text-foreground relative z-10">
-                创作中心
-                <Icon name="Plus" className="size-4 shrink-0" />
-              </span>
-            </Button>
+            <div className="relative group">
+              <Button 
+                variant="ghost" 
+                className="relative bg-background/40 backdrop-blur-md border border-border/30 shadow-sm hover:shadow-lg transition-all duration-500 font-semibold rounded-full px-6 overflow-visible hover:bg-background/50"
+                onClick={handleCreationCenterClick}
+              >
+                {/* Glass gradient overlay */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-500/[0.06] via-emerald-500/[0.04] to-teal-500/[0.06] opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Soft glow diffusion on hover */}
+                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none">
+                  <div 
+                    className="absolute inset-0 rounded-full blur-md"
+                    style={{
+                      background: "radial-gradient(circle at center, rgba(134, 239, 172, 0.3), rgba(52, 211, 153, 0.2), transparent 70%)",
+                    }}
+                  />
+                </div>
+                
+                {/* Thinner shimmer effect */}
+                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-60 pointer-events-none overflow-hidden">
+                  <div 
+                    className="absolute inset-0 -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-2000"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.3) 49%, rgba(134, 239, 172, 0.2) 50%, rgba(255, 255, 255, 0.3) 51%, transparent 55%, transparent 100%)",
+                      width: "200%",
+                    }}
+                  />
+                </div>
+                
+                <span className="flex items-center gap-1.5 text-foreground relative z-10">
+                  创作中心
+                  <Icon name="Plus" className="size-4 shrink-0" />
+                </span>
+              </Button>
+              
+              {/* Bottom gradient border animation - signature green glow */}
+              <div className="absolute -bottom-[2px] left-4 right-4 h-[2px] overflow-hidden">
+                <div className="absolute bottom-0 left-0 right-0 h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div
+                    className="absolute bottom-0 h-full translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-3000 ease-linear"
+                    style={{
+                      width: "50%",
+                      background: "linear-gradient(90deg, transparent 0%, #22c55e 25%, #10b981 50%, #14b8a6 75%, transparent 100%)",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
 
             {header.buttons?.map((item, i) => {
               return (

@@ -3,10 +3,10 @@
   "theme": "light",
   "header": {
     "brand": {
-      "title": "智写匠",
+      "title": "Essmote AI",
       "logo": {
         "src": "/logo.png",
-        "alt": "智写匠"
+        "alt": "Essmote AI"
       },
       "url": "/"
     },
@@ -37,10 +37,10 @@
   "hero": {
     "title": "用 AI 赋能留学申请，轻松拿下梦校 Offer",
     "highlight_text": "AI 赋能",
-    "description": "智写匠是你的专属AI留学文书导师。我们利用尖端AI技术，结合海量名校成功案例，助你打造独一无二的申请材料，告别文书焦虑。",
+    "description": "Essmote AI是你的专属AI留学文书导师。我们利用尖端AI技术，结合海量名校成功案例，助你打造独一无二的申请材料，告别文书焦虑。",
     "announcement": {
       "label": "喜报",
-      "title": "🎉 超过1000名学子通过智写匠拿到梦校Offer！",
+      "title": "🎉 超过1000名学子通过Essmote AI拿到梦校Offer！",
       "url": "/#testimonial"
     },
     "tip": "🎁 注册即享免费文书润色",
@@ -89,7 +89,7 @@
     ]
   },
   "branding": {
-    "title": "智写匠 由领先技术驱动",
+    "title": "Essmote AI 由领先技术驱动",
     "items": [
       {
         "title": "Next.js",
@@ -130,9 +130,9 @@
   },
   "introduce": {
     "name": "introduce",
-    "title": "什么是智写匠？",
+    "title": "什么是Essmote AI？",
     "label": "介绍",
-    "description": "智写匠不仅是一个AI写作工具，更是你申请路上的智能伙伴。我们专注于留学申请文书领域，深度解析名校录取偏好，为你提供从头脑风暴、内容生成到最终润色的全流程解决方案。",
+    "description": "Essmote AI不仅是一个AI写作工具，更是你申请路上的智能伙伴。我们专注于留学申请文书领域，深度解析名校录取偏好，为你提供从头脑风暴、内容生成到最终润色的全流程解决方案。",
     "image": {
       "src": "https://picsum.photos/seed/introduce/600/500"
     },
@@ -156,9 +156,9 @@
   },
   "benefit": {
     "name": "benefit",
-    "title": "为什么选择智写匠？",
+    "title": "为什么选择Essmote AI？",
     "label": "优势",
-    "description": "我们懂AI，更懂留学申请。智写匠将技术与申请经验完美结合。",
+    "description": "我们懂AI，更懂留学申请。Essmote AI将技术与申请经验完美结合。",
     "items": [
       {
         "title": "基于海量成功案例",
@@ -301,13 +301,13 @@
     "name": "testimonial",
     "label": "成功案例",
     "title": "听听他们怎么说",
-    "description": "看看学长学姐们如何通过智写匠拿到梦想的Offer。",
+    "description": "看看学长学姐们如何通过Essmote AI拿到梦想的Offer。",
     "icon": "GoThumbsup",
     "items": [
       {
         "title": "Cathy Z.",
         "label": "成功录取 CMU CS硕士",
-        "description": "转专业申请CS真的太难了，尤其是PS不知道怎么写。智写匠帮我梳理了我的项目经历，生成的初稿质量超高，逻辑清晰，帮我省了至少两周时间！",
+        "description": "转专业申请CS真的太难了，尤其是PS不知道怎么写。Essmote AI帮我梳理了我的项目经历，生成的初稿质量超高，逻辑清晰，帮我省了至少两周时间！",
         "image": {
           "src": "/imgs/users/1.png"
         }
@@ -315,7 +315,7 @@
       {
         "title": "David W.",
         "label": "成功录取 LBS MBA",
-        "description": "申请商学院的Essay很讲究故事性。智写匠的AI头脑风暴功能给了我很多灵感，帮我把零散的工作经历串成了一个非常有说服力的职业故事。",
+        "description": "申请商学院的Essay很讲究故事性。Essmote AI的AI头脑风暴功能给了我很多灵感，帮我把零散的工作经历串成了一个非常有说服力的职业故事。",
         "image": {
           "src": "/imgs/users/2.png"
         }
@@ -323,7 +323,7 @@
       {
         "title": "Serena L.",
         "label": "成功录取 剑桥大学 MPhil",
-        "description": "我的研究计划被导师说太空洞。用了智写匠之后，它引导我把研究问题具体化，还提供了很多相关的文献参考，最后导师都对我的RP赞不绝口。",
+        "description": "我的研究计划被导师说太空洞。用了Essmote AI之后，它引导我把研究问题具体化，还提供了很多相关的文献参考，最后导师都对我的RP赞不绝口。",
         "image": {
           "src": "/imgs/users/3.png"
         }
@@ -331,7 +331,7 @@
       {
         "title": "Alex Q.",
         "label": "成功录取 MIT 博士全奖",
-        "description": "博士申请，文书和科研经历同样重要。智写匠不仅帮我润色了我的SOP，还帮我优化了CV的格式和描述，让我的申请材料看起来非常专业。",
+        "description": "博士申请，文书和科研经历同样重要。Essmote AI不仅帮我润色了我的SOP，还帮我优化了CV的格式和描述，让我的申请材料看起来非常专业。",
         "image": {
           "src": "/imgs/users/4.png"
         }
@@ -339,7 +339,7 @@
       {
         "title": "Fiona S.",
         "label": "成功录取 港大 金融硕士",
-        "description": "港校申请时间很紧，要准备的材料又多。智写匠简直是我的救星，一天之内就帮我搞定了PS和CV的初稿，让我有更多时间准备面试。",
+        "description": "港校申请时间很紧，要准备的材料又多。Essmote AI简直是我的救星，一天之内就帮我搞定了PS和CV的初稿，让我有更多时间准备面试。",
         "image": {
           "src": "/imgs/users/5.png"
         }
@@ -347,7 +347,7 @@
       {
         "title": "Ben Y.",
         "label": "成功录取 斯坦福 LLM",
-        "description": "作为律师，我知道文书的严谨性有多重要。智写匠的语法和风格检查功能比Word强大太多了，帮我发现了很多我自己都没注意到的细节问题。",
+        "description": "作为律师，我知道文书的严谨性有多重要。Essmote AI的语法和风格检查功能比Word强大太多了，帮我发现了很多我自己都没注意到的细节问题。",
         "image": {
           "src": "/imgs/users/6.png"
         }
@@ -357,16 +357,16 @@
   "faq": {
     "name": "faq",
     "label": "常见问题",
-    "title": "关于 智写匠 的常见问题",
+    "title": "关于 Essmote AI 的常见问题",
     "description": "还有其他问题？请随时联系我们。",
     "items": [
       {
         "title": "使用AI写文书是否安全？会被发现吗？",
-        "description": "我们提倡将AI作为强大的辅助工具，而非代写。智写匠帮助你梳理思路、优化表达，最终的文稿仍由你主导创作，确保原创性和独特性。我们的技术也会进行反AI检测优化，最大程度降低风险。"
+        "description": "我们提倡将AI作为强大的辅助工具，而非代写。Essmote AI帮助你梳理思路、优化表达，最终的文稿仍由你主导创作，确保原创性和独特性。我们的技术也会进行反AI检测优化，最大程度降低风险。"
       },
       {
-        "title": "智写匠和通用大模型（如ChatGPT）有什么区别？",
-        "description": "智写匠是专为留学申请领域深度优化的垂直模型。我们拥有专属的成功文书数据库、针对性的引导流程和更懂招生官偏好的算法，生成的内容更专业、更贴切、更具说服力。"
+        "title": "Essmote AI和通用大模型（如ChatGPT）有什么区别？",
+        "description": "Essmote AI是专为留学申请领域深度优化的垂直模型。我们拥有专属的成功文书数据库、针对性的引导流程和更懂招生官偏好的算法，生成的内容更专业、更贴切、更具说服力。"
       },
       {
         "title": "如果我对生成的内容不满意怎么办？",
@@ -382,7 +382,7 @@
       },
       {
         "title": "支持哪些学校和专业？",
-        "description": "智写匠支持全球范围内几乎所有主流国家、学校和专业的申请。我们的AI模型具备强大的泛化能力，能够根据您输入的任何要求进行定制化生成。"
+        "description": "Essmote AI支持全球范围内几乎所有主流国家、学校和专业的申请。我们的AI模型具备强大的泛化能力，能够根据您输入的任何要求进行定制化生成。"
       }
     ]
   },
@@ -402,15 +402,15 @@
   "footer": {
     "name": "footer",
     "brand": {
-      "title": "智写匠",
-      "description": "智写匠是一款AI驱动的留学文书写作平台，帮助申请者轻松创作高质量的申请材料。",
+      "title": "Essmote AI",
+      "description": "Essmote AI是一款AI驱动的留学文书写作平台，帮助申请者轻松创作高质量的申请材料。",
       "logo": {
         "src": "/logo.png",
-        "alt": "智写匠"
+        "alt": "Essmote AI"
       },
       "url": "/"
     },
-    "copyright": "© 2024 • 智写匠 保留所有权利。",
+    "copyright": "© 2024 • Essmote AI 保留所有权利。",
     "nav": {
       "items": [
         {

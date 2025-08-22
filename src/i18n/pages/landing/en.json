@@ -1,12 +1,12 @@
 {
-  "template": "智写匠-template-one",
+  "template": "Essmote AI-template-one",
   "theme": "light",
   "header": {
     "brand": {
-      "title": "智写匠",
+      "title": "Essmote AI",
       "logo": {
         "src": "/logo.png",
-        "alt": "智写匠"
+        "alt": "Essmote AI"
       },
       "url": "/"
     },
@@ -31,8 +31,8 @@
     },
     "buttons": [
       {
-        "title": "Get 智写匠",
-        "url": "https://智写匠.ai",
+        "title": "Get Essmote AI",
+        "url": "https://Essmote AI.ai",
         "target": "_blank",
         "variant": "link",
         "icon": "RiArrowRightUpLine"
@@ -45,7 +45,7 @@
   "hero": {
     "title": "Ship Any AI Startups in hours, not days",
     "highlight_text": "Ship Any",
-    "description": "智写匠 is a NextJS boilerplate for building AI SaaS startups.<br/>Ship Fast with a variety of templates and components.",
+    "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups.<br/>Ship Fast with a variety of templates and components.",
     "announcement": {
       "label": "2025",
       "title": "🎉 Happy New Year",
@@ -72,7 +72,7 @@
     "show_badge": false
   },
   "branding": {
-    "title": "智写匠 is built on the shoulders of giants",
+    "title": "Essmote AI is built on the shoulders of giants",
     "items": [
       {
         "title": "Next.js",
@@ -113,9 +113,9 @@
   },
   "introduce": {
     "name": "introduce",
-    "title": "What is 智写匠",
+    "title": "What is Essmote AI",
     "label": "Introduce",
-    "description": "智写匠 is a NextJS boilerplate for building AI SaaS startups. Built in a variety of templates and components.",
+    "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups. Built in a variety of templates and components.",
     "image": {
       "src": "/imgs/features/1.png"
     },
@@ -139,7 +139,7 @@
   },
   "benefit": {
     "name": "benefit",
-    "title": "Why Choose 智写匠",
+    "title": "Why Choose Essmote AI",
     "label": "Benefits",
     "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
     "items": [
@@ -171,7 +171,7 @@
   },
   "usage": {
     "name": "usage",
-    "title": "How to Launch with 智写匠",
+    "title": "How to Launch with Essmote AI",
     "description": "Get your AI SaaS startup running in three simple steps:",
     "image": {
       "src": "/imgs/features/1.png"
@@ -180,15 +180,15 @@
     "text_align": "center",
     "items": [
       {
-        "title": "Get 智写匠",
-        "description": "Buy 智写匠 with a one-time payment. Check your email for the code and documentation.",
+        "title": "Get Essmote AI",
+        "description": "Buy Essmote AI with a one-time payment. Check your email for the code and documentation.",
         "image": {
           "src": "/imgs/features/5.png"
         }
       },
       {
         "title": "Start Your Project",
-        "description": "Read the documentation and clone the code of 智写匠. Start building your AI SaaS startup.",
+        "description": "Read the documentation and clone the code of Essmote AI. Start building your AI SaaS startup.",
         "image": {
           "src": "/imgs/features/6.png"
         }
@@ -211,7 +211,7 @@
   },
   "feature": {
     "name": "feature",
-    "title": "Key Features of 智写匠",
+    "title": "Key Features of Essmote AI",
     "description": "Everything you need to launch your AI SaaS startup quickly and efficiently.",
     "items": [
       {
@@ -283,14 +283,14 @@
   "testimonial": {
     "name": "testimonial",
     "label": "Testimonial",
-    "title": "What Users Say About 智写匠",
-    "description": "Hear from developers and founders who launched their AI startups with 智写匠.",
+    "title": "What Users Say About Essmote AI",
+    "description": "Hear from developers and founders who launched their AI startups with Essmote AI.",
     "icon": "GoThumbsup",
     "items": [
       {
         "title": "David Chen",
         "label": "Founder of AIWallpaper.shop",
-        "description": "智写匠 saved us months of development time. We launched our AI wallpaper business in just 2 days and got our first paying customer within a week!",
+        "description": "Essmote AI saved us months of development time. We launched our AI wallpaper business in just 2 days and got our first paying customer within a week!",
         "image": {
           "src": "/imgs/users/1.png"
         }
@@ -306,7 +306,7 @@
       {
         "title": "Marcus Thompson",
         "label": "Solo Developer",
-        "description": "As a solo developer, 智写匠 gave me everything I needed - auth, payments, AI integration, and beautiful UI. Launched my SaaS in a weekend!",
+        "description": "As a solo developer, Essmote AI gave me everything I needed - auth, payments, AI integration, and beautiful UI. Launched my SaaS in a weekend!",
         "image": {
           "src": "/imgs/users/3.png"
         }
@@ -322,7 +322,7 @@
       {
         "title": "James Wilson",
         "label": "Tech Lead at GPTs.works",
-        "description": "智写匠's infrastructure is rock-solid. We scaled from 0 to 10k users without touching the backend. Best investment for our AI startup.",
+        "description": "Essmote AI's infrastructure is rock-solid. We scaled from 0 to 10k users without touching the backend. Best investment for our AI startup.",
         "image": {
           "src": "/imgs/users/5.png"
         }
@@ -330,7 +330,7 @@
       {
         "title": "Anna Zhang",
         "label": "Startup Founder",
-        "description": "From idea to launch in 3 days! 智写匠's templates and deployment tools made it possible to test our AI business concept incredibly fast.",
+        "description": "From idea to launch in 3 days! Essmote AI's templates and deployment tools made it possible to test our AI business concept incredibly fast.",
         "image": {
           "src": "/imgs/users/6.png"
         }
@@ -340,49 +340,49 @@
   "faq": {
     "name": "faq",
     "label": "FAQ",
-    "title": "Frequently Asked Questions About 智写匠",
+    "title": "Frequently Asked Questions About Essmote AI",
     "description": "Have another question? Contact us on Discord or by email.",
     "items": [
       {
-        "title": "What exactly is 智写匠 and how does it work?",
-        "description": "智写匠 is a comprehensive NextJS boilerplate designed specifically for building AI SaaS startups. It provides ready-to-use templates, infrastructure setup, and deployment tools that help you launch your AI business in hours instead of days."
+        "title": "What exactly is Essmote AI and how does it work?",
+        "description": "Essmote AI is a comprehensive NextJS boilerplate designed specifically for building AI SaaS startups. It provides ready-to-use templates, infrastructure setup, and deployment tools that help you launch your AI business in hours instead of days."
       },
       {
-        "title": "Do I need advanced technical skills to use 智写匠?",
-        "description": "While basic programming knowledge is helpful, 智写匠 is designed to be developer-friendly. Our templates and documentation make it easy to get started, even if you're not an expert in AI or cloud infrastructure."
+        "title": "Do I need advanced technical skills to use Essmote AI?",
+        "description": "While basic programming knowledge is helpful, Essmote AI is designed to be developer-friendly. Our templates and documentation make it easy to get started, even if you're not an expert in AI or cloud infrastructure."
       },
       {
-        "title": "What types of AI SaaS can I build with 智写匠?",
-        "description": "智写匠 supports a wide range of AI applications, from content generation to data analysis tools. Our templates cover popular use cases like AI chatbots, content generators, image processing apps, and more."
+        "title": "What types of AI SaaS can I build with Essmote AI?",
+        "description": "Essmote AI supports a wide range of AI applications, from content generation to data analysis tools. Our templates cover popular use cases like AI chatbots, content generators, image processing apps, and more."
       },
       {
-        "title": "How long does it typically take to launch with 智写匠?",
-        "description": "With 智写匠, you can have a working prototype in hours and a production-ready application in hours. Our one-click deployment and pre-configured infrastructure significantly reduce the traditional months-long development cycle."
+        "title": "How long does it typically take to launch with Essmote AI?",
+        "description": "With Essmote AI, you can have a working prototype in hours and a production-ready application in hours. Our one-click deployment and pre-configured infrastructure significantly reduce the traditional months-long development cycle."
       },
       {
-        "title": "What's included in the 智写匠 infrastructure?",
-        "description": "智写匠 provides a complete infrastructure stack including authentication, database setup, API integration, payment processing, and scalable cloud deployment. Everything is pre-configured following industry best practices."
+        "title": "What's included in the Essmote AI infrastructure?",
+        "description": "Essmote AI provides a complete infrastructure stack including authentication, database setup, API integration, payment processing, and scalable cloud deployment. Everything is pre-configured following industry best practices."
       },
       {
         "title": "Can I customize the templates to match my brand?",
-        "description": "Absolutely! All 智写匠 templates are fully customizable. You can modify the design, features, and functionality to match your brand identity and specific business requirements while maintaining the robust underlying infrastructure."
+        "description": "Absolutely! All Essmote AI templates are fully customizable. You can modify the design, features, and functionality to match your brand identity and specific business requirements while maintaining the robust underlying infrastructure."
       }
     ]
   },
   "cta": {
     "name": "cta",
     "title": "Ship your first AI SaaS Startup",
-    "description": "Start from here, ship with 智写匠.",
+    "description": "Start from here, ship with Essmote AI.",
     "buttons": [
       {
-        "title": "Get 智写匠",
-        "url": "https://智写匠.ai",
+        "title": "Get Essmote AI",
+        "url": "https://Essmote AI.ai",
         "target": "_blank",
         "icon": "GoArrowUpRight"
       },
       {
         "title": "Read Document",
-        "url": "https://docs.智写匠.ai",
+        "url": "https://docs.Essmote AI.ai",
         "target": "_blank",
         "variant": "outline"
       }
@@ -391,15 +391,15 @@
   "footer": {
     "name": "footer",
     "brand": {
-      "title": "智写匠",
-      "description": "智写匠 is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
+      "title": "Essmote AI",
+      "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
       "logo": {
         "src": "/logo.png",
-        "alt": "智写匠"
+        "alt": "Essmote AI"
       },
       "url": "/"
     },
-    "copyright": "© 2025 • 智写匠 All rights reserved.",
+    "copyright": "© 2025 • Essmote AI All rights reserved.",
     "nav": {
       "items": [
         {
@@ -427,17 +427,17 @@
           "children": [
             {
               "title": "Documents",
-              "url": "https://docs.智写匠.ai",
+              "url": "https://docs.Essmote AI.ai",
               "target": "_blank"
             },
             {
               "title": "Components",
-              "url": "https://智写匠.ai/components",
+              "url": "https://Essmote AI.ai/components",
               "target": "_blank"
             },
             {
               "title": "Templates",
-              "url": "https://智写匠.ai/templates",
+              "url": "https://Essmote AI.ai/templates",
               "target": "_blank"
             }
           ]
@@ -469,13 +469,13 @@
         {
           "title": "X",
           "icon": "RiTwitterXFill",
-          "url": "https://x.com/智写匠ai",
+          "url": "https://x.com/Essmote AIai",
           "target": "_blank"
         },
         {
           "title": "Github",
           "icon": "RiGithubFill",
-          "url": "https://github.com/智写匠ai",
+          "url": "https://github.com/Essmote AIai",
           "target": "_blank"
         },
         {
@@ -487,7 +487,7 @@
         {
           "title": "Email",
           "icon": "RiMailLine",
-          "url": "mailto:support@智写匠.ai",
+          "url": "mailto:support@Essmote AI.ai",
           "target": "_self"
         }
       ]

@@ -22,10 +22,10 @@ export default async function AdminLayout({
 
   const sidebar: Sidebar = {
     brand: {
-      title: "智写匠",
+      title: "Essmote AI",
       logo: {
         src: "/logo.png",
-        alt: "智写匠",
+        alt: "Essmote AI",
       },
       url: "/admin",
     },
@@ -67,19 +67,19 @@ export default async function AdminLayout({
       items: [
         {
           title: "Documents",
-          url: "https://docs.智写匠.ai",
+          url: "https://docs.Essmote AI.ai",
           target: "_blank",
           icon: "RiFileTextLine",
         },
         {
           title: "Blocks",
-          url: "https://智写匠.ai/blocks",
+          url: "https://Essmote AI.ai/blocks",
           target: "_blank",
           icon: "RiDashboardLine",
         },
         {
           title: "Showcases",
-          url: "https://智写匠.ai/showcase",
+          url: "https://Essmote AI.ai/showcase",
           target: "_blank",
           icon: "RiAppsLine",
         },
@@ -95,7 +95,7 @@ export default async function AdminLayout({
         },
         {
           title: "Github",
-          url: "https://github.com/智写匠ai/智写匠-template-one",
+          url: "https://github.com/Essmote AIai/Essmote AI-template-one",
           target: "_blank",
           icon: "RiGithubLine",
         },
@@ -107,7 +107,7 @@ export default async function AdminLayout({
         },
         {
           title: "X",
-          url: "https://x.com/智写匠ai",
+          url: "https://x.com/Essmote AIai",
           target: "_blank",
           icon: "RiTwitterLine",
         },
