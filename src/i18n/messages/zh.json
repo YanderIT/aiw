@@ -208,5 +208,51 @@
     "page_loading": "页面加载中...",
     "please_wait": "请稍候",
     "loading": "加载中"
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "我们重视您的每一条反馈，帮助我们不断改进产品体验",
+    "privacyNotice": "提交即表示您同意我们的",
+    "privacyPolicy": "隐私政策",
+    "form": {
+      "name": "姓名",
+      "email": "联系方式",
+      "emailTip": "邮箱或微信号",
+      "feedbackType": "反馈类型",
+      "selectFeedbackType": "请选择反馈类型",
+      "documentType": "相关文档类型",
+      "selectDocumentType": "请选择文档类型（可选）",
+      "satisfaction": "满意度",
+      "selectSatisfaction": "请选择满意度",
+      "message": "详细反馈",
+      "messagePlaceholder": "请详细描述您遇到的问题或建议，我们会认真查看每一条反馈...",
+      "submit": "提交反馈",
+      "submitting": "提交中...",
+      "feedbackTypes": {
+        "document_quality": "文书质量问题",
+        "feature_request": "功能建议",
+        "bug_report": "错误报告",
+        "ai_generation": "AI生成问题",
+        "template_issue": "模板问题",
+        "account_payment": "账户/支付问题",
+        "other": "其他反馈"
+      },
+      "documentTypes": {
+        "recommendation_letter": "推荐信",
+        "cover_letter": "求职信",
+        "personal_statement": "个人陈述",
+        "sop": "SOP",
+        "resume": "简历",
+        "study_abroad_consultation": "留学咨询",
+        "not_applicable": "不适用"
+      },
+      "satisfactionLevels": {
+        "very_satisfied": "非常满意",
+        "satisfied": "满意",
+        "neutral": "一般",
+        "dissatisfied": "不满意",
+        "very_dissatisfied": "非常不满意"
+      }
+    }
   }
 }

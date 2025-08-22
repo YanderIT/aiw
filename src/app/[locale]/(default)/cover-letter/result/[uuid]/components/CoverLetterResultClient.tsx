@@ -124,6 +124,9 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
   const [showVersionComparison, setShowVersionComparison] = useState(false);
   const [serverRevisionStatus, setServerRevisionStatus] = useState<boolean | null>(null);
   const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
+  // 正在保存修改
+  const [isSavingRevision, setIsSavingRevision] = useState(false);
+  const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState<number | null>(null);
   
   // 版本历史状态（从数据库加载）
   const [dbVersions, setDbVersions] = useState<any[]>([]);
@@ -537,6 +540,9 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
           setEditingContent(revisedContent);
           updateGeneratedContent(revisedContent);
           
+          // 立即更新修改状态，禁用修改按钮
+          setServerRevisionStatus(true);
+          
           // 重新加载版本历史，并强制选择新版本
           if (revision?.uuid) {
             await loadDocumentVersions(revision.uuid);
@@ -563,8 +569,9 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
     }
   };
 
-  // 段落修改处理
-  const handleParagraphRevision = async (params: any) => {
+  // 段落修改API调用
+  const handleParagraphRevisionAPI = async (params: any, paragraphIndex: number) => {
+    setRevisingParagraphIndex(paragraphIndex);
     try {
       // 获取语言设置
       const selectedData = getSelectedData();
@@ -579,16 +586,59 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
       console.error('Paragraph revision failed:', error);
       toast.error('段落重写失败，请重试');
       throw error;
+    } finally {
+      setRevisingParagraphIndex(null);
     }
   };
 
-  // 处理段落修改
-  const handleParagraphRevise = (index: number, newText: string) => {
+  // 处理段落修改并保存
+  const handleParagraphRevise = async (index: number, newText: string) => {
     const paragraphs = displayContent.split('\n\n');
     paragraphs[index] = newText;
     const newContent = paragraphs.join('\n\n');
     setEditingContent(newContent);
     setGeneratedContent(newContent);
+    
+    // 创建修改版本并保存到数据库
+    try {
+      setIsSavingRevision(true);
+      const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newContent,
+          revision_settings: {
+            type: 'paragraph',
+            paragraphIndex: index
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const { data: revision } = await response.json();
+        
+        // 立即更新修改状态，禁用修改按钮
+        setServerRevisionStatus(true);
+        
+        // 重新加载版本历史，并强制选择新版本
+        if (revision?.uuid) {
+          await loadDocumentVersions(revision.uuid);
+        } else {
+          await loadDocumentVersions();
+        }
+        
+        toast.success('段落已成功修改并创建新版本！');
+      } else {
+        throw new Error('Failed to save paragraph revision');
+      }
+    } catch (error) {
+      console.error('Failed to save paragraph revision:', error);
+      toast.error('保存失败，请重试');
+    } finally {
+      setIsSavingRevision(false);
+    }
   };
 
   // 版本切换处理
@@ -809,13 +859,32 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
                       <Download className="w-4 h-4 mr-2" />
                       导出
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleRevisionClick}
+                      disabled={serverRevisionStatus || revisingParagraphIndex !== null || isLoadingVersions}
+                    >
+                      <Wand2 className="mr-2 h-4 w-4" />
+                      修改
+                      {serverRevisionStatus && (
+                        <Badge variant="secondary" className="ml-2">
+                          已使用
+                        </Badge>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
 
               {/* Editable Content */}
               <div className="flex-1 p-4 overflow-auto">
-                {isGenerating ? (
+                {isSavingRevision ? (
+                  <div className="flex items-center justify-center min-h-[400px]">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
+                  </div>
+                ) : isGenerating ? (
                   <div className="flex items-center justify-center min-h-[500px]">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     <span className="ml-3 text-lg">正在生成求职信...</span>
@@ -829,7 +898,27 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
                   </div>
                 ) : (
                   <div className="prose prose-slate dark:prose-invert max-w-none">
-                    <Markdown content={generatedContent} />
+                    {/* 如果还没有使用修改功能且有显示内容，显示可编辑的段落 */}
+                    {!serverRevisionStatus && displayContent && !isLoadingVersions ? (
+                      <div className="space-y-4">
+                        {displayContent.split('\n\n').map((paragraph: string, index: number) => (
+                          <ParagraphRevision
+                            key={index}
+                            paragraph={paragraph}
+                            index={index}
+                            onRevise={handleParagraphRevise}
+                            isHighlighted={highlightedParagraphIndex === index}
+                            onHighlightChange={(shouldHighlight) => {
+                              setHighlightedParagraphIndex(shouldHighlight ? index : null);
+                            }}
+                            onStartRevision={handleParagraphRevisionAPI}
+                            isRevising={revisingParagraphIndex === index}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <Markdown content={displayContent} />
+                    )}
                   </div>
                 )}
               </div>

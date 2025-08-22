@@ -25,6 +25,7 @@ import { useDify } from '@/hooks/useDify';
 import { useDifyRevisePS } from '@/hooks/useDifyRevisePS';
 import RevisionModal from "../../../components/RevisionModal";
 import FullRevisionModal, { RevisionSettings } from "../../../components/FullRevisionModal";
+import ParagraphRevision from "../../../components/ParagraphRevision";
 import VersionComparison from "../../../components/VersionComparison";
 import {
   DropdownMenu,
@@ -122,6 +123,13 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   
   const { runRevision, isRevising } = useDifyRevisePS();
   
+  // 段落高亮状态
+  const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState<number | null>(null);
+  // 正在修改的段落索引
+  const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
+  // 正在保存修改
+  const [isSavingRevision, setIsSavingRevision] = useState(false);
+  
   // 获取当前数据库版本内容
   const getCurrentDbVersion = () => {
     if (currentDbVersionId && dbVersions.length > 0) {
@@ -137,6 +145,104 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   
   // 使用计算属性获取显示内容
   const displayContent = getCurrentDbVersion();
+  
+  // 段落修改处理
+  const handleParagraphRevise = async (index: number, newText: string) => {
+    const paragraphs = displayContent.split('\n\n');
+    paragraphs[index] = newText;
+    const newContent = paragraphs.join('\n\n');
+    
+    // 更新生成的内容
+    updateGeneratedContent(newContent);
+    
+    // 如果有数据库版本管理，更新版本
+    if (currentDbVersionId && dbVersions.length > 0) {
+      const updatedVersions = dbVersions.map(v => 
+        v.uuid === currentDbVersionId 
+          ? { ...v, content: newContent }
+          : v
+      );
+      setDbVersions(updatedVersions);
+    }
+    
+    // 兼容旧版本管理
+    if (currentVersion > 1 && versions.length > 0) {
+      const updatedVersions = versions.map(v => 
+        v.version === currentVersion 
+          ? { ...v, content: newContent }
+          : v
+      );
+      setVersions(updatedVersions);
+    }
+    
+    // 创建修改版本并保存到数据库
+    try {
+      setIsSavingRevision(true);
+      const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newContent,
+          revision_settings: {
+            type: 'paragraph',
+            paragraphIndex: index
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const { data: revision } = await response.json();
+        
+        // 立即更新修改状态，禁用修改按钮
+        setServerRevisionStatus(true);
+        
+        // 重新加载版本历史，并强制选择新版本
+        if (revision?.uuid) {
+          await loadDocumentVersions(revision.uuid);
+        } else {
+          await loadDocumentVersions();
+        }
+        
+        toast.success('段落已成功修改并创建新版本！');
+      } else {
+        throw new Error('Failed to save paragraph revision');
+      }
+    } catch (error) {
+      console.error('Failed to save paragraph revision:', error);
+      toast.error('保存失败，请重试');
+    } finally {
+      setIsSavingRevision(false);
+    }
+  };
+  
+  // 段落重写 API 调用
+  const handleParagraphRevisionAPI = async (params: any, paragraphIndex: number) => {
+    try {
+      // 设置正在修改的段落索引
+      setRevisingParagraphIndex(paragraphIndex);
+      
+      // 添加语言参数 - 使用与生成时相同的语言设置
+      const paramsWithLanguage = {
+        ...params,
+        language: generationState.languagePreference || 'Chinese'
+      };
+      
+      const revisedContent = await runRevision(paramsWithLanguage);
+      
+      // 重置修改状态
+      setRevisingParagraphIndex(null);
+      
+      return revisedContent;
+    } catch (error) {
+      console.error('Paragraph revision failed:', error);
+      toast.error('段落重写失败，请重试');
+      // 出错也要重置状态
+      setRevisingParagraphIndex(null);
+      throw error;
+    }
+  };
 
   // 生成SOP
   const handleGenerate = useCallback(async () => {
@@ -231,7 +337,8 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       const response = await fetch(`/api/documents/${documentUuid}/revisions`);
       if (response.ok) {
         const result = await response.json();
-        setServerRevisionStatus(result.data?.has_used_free_revision || false);
+        const hasUsedRevision = result.data?.has_used_free_revision || false;
+        setServerRevisionStatus(hasUsedRevision);
       }
     } catch (error) {
       console.error('Error checking revision status:', error);
@@ -495,6 +602,9 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           updateGeneratedContent(revisedContent);
           setCurrentVersion(result.data.version || 2);
           
+          // 立即更新修改状态，禁用修改按钮
+          setServerRevisionStatus(true);
+          
           // 重新加载版本历史，并强制选择新版本
           if (result.data?.uuid) {
             await loadDocumentVersions(result.data.uuid);
@@ -706,7 +816,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           variant="outline" 
           size="sm" 
           onClick={handleRevisionClick}
-          disabled={serverRevisionStatus || isRevising}
+          disabled={serverRevisionStatus || isRevising || isLoadingVersions || revisingParagraphIndex !== null}
         >
           <Wand2 className="mr-2 h-4 w-4" />
           修改
@@ -721,10 +831,36 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
       {/* 内容显示区 */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="p-8 prose prose-slate dark:prose-invert max-w-none">
-            {/* 始终使用 Markdown 组件渲染内容 */}
-            <Markdown content={displayContent} />
-          </div>
+          {isSavingRevision ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
+            </div>
+          ) : (
+            <div className="p-8 prose prose-slate dark:prose-invert max-w-none">
+              {/* 如果还没有使用修改功能且有显示内容，显示可编辑的段落 */}
+              {!serverRevisionStatus && displayContent && !isLoadingVersions ? (
+                <div className="space-y-4">
+                  {displayContent.split('\n\n').map((paragraph: string, index: number) => (
+                    <ParagraphRevision
+                      key={index}
+                      paragraph={paragraph}
+                      index={index}
+                      onRevise={handleParagraphRevise}
+                      isHighlighted={highlightedParagraphIndex === index}
+                      onHighlightChange={(shouldHighlight) => {
+                        setHighlightedParagraphIndex(shouldHighlight ? index : null);
+                      }}
+                      onStartRevision={handleParagraphRevisionAPI}
+                      isRevising={revisingParagraphIndex === index}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Markdown content={displayContent} />
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
       

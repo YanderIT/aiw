@@ -78,8 +78,8 @@ export default function FullRevisionModal({
 
   const validateWordCount = (value: string) => {
     const count = parseInt(value);
-    if (isNaN(count) || count < 200 || count > 2000) {
-      setErrors({ ...errors, wordCount: '请输入200-2000之间的数字' });
+    if (isNaN(count) || count < 200 || count > 6000) {
+      setErrors({ ...errors, wordCount: '请输入200-6000之间的数字' });
       return false;
     }
     setErrors({ ...errors, wordCount: undefined });
@@ -167,7 +167,7 @@ export default function FullRevisionModal({
                     <Input
                       type="number"
                       min="200"
-                      max="2000"
+                      max="6000"
                       value={targetWordCount}
                       onChange={(e) => {
                         setTargetWordCount(e.target.value);
@@ -188,7 +188,7 @@ export default function FullRevisionModal({
                     <Input
                       type="number"
                       min="200"
-                      max="2000"
+                      max="6000"
                       value={targetWordCount}
                       onChange={(e) => {
                         setTargetWordCount(e.target.value);
@@ -207,7 +207,7 @@ export default function FullRevisionModal({
               <p className="text-sm text-red-500 mt-2">{errors.wordCount}</p>
             )}
             <p className="text-xs text-muted-foreground mt-2">
-              限制输入范围 200-2000 字
+              限制输入范围 200-6000 字
             </p>
           </div>
 

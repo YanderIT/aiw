@@ -109,7 +109,7 @@ export default function VersionComparison({
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[80vh]">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">版本对比</DialogTitle>
         </DialogHeader>
@@ -158,17 +158,17 @@ export default function VersionComparison({
           </div>
         )}
         
-        <div className="grid grid-cols-2 gap-4 mt-4 overflow-hidden">
+        <div className="grid grid-cols-2 gap-4 mt-4 flex-1 overflow-hidden">
           {/* 左侧版本 */}
-          <div className="border rounded-lg">
-            <div className="bg-muted px-4 py-2 border-b flex items-center justify-between">
+          <div className="border rounded-lg flex flex-col overflow-hidden">
+            <div className="bg-muted px-4 py-2 border-b flex items-center justify-between flex-shrink-0">
               <Badge variant="outline">
                 {hasVersions && leftVersionId
                   ? getVersionDisplayName(versions.find(v => v.uuid === leftVersionId)!)
                   : '原始版本'}
               </Badge>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-y-auto">
+            <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2">
                 {differences.map((diff, index) => (
                   <div
@@ -177,7 +177,7 @@ export default function VersionComparison({
                       diff.changed ? 'bg-red-50 dark:bg-red-900/20' : ''
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-sm whitespace-pre-wrap break-words">
                       {diff.original || <span className="text-muted-foreground">[空行]</span>}
                     </p>
                   </div>
@@ -187,15 +187,15 @@ export default function VersionComparison({
           </div>
           
           {/* 右侧版本 */}
-          <div className="border rounded-lg">
-            <div className="bg-muted px-4 py-2 border-b">
+          <div className="border rounded-lg flex flex-col overflow-hidden">
+            <div className="bg-muted px-4 py-2 border-b flex-shrink-0">
               <Badge variant="secondary">
                 {hasVersions && rightVersionId
                   ? getVersionDisplayName(versions.find(v => v.uuid === rightVersionId)!)
                   : '修改版本'}
               </Badge>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-y-auto">
+            <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2">
                 {differences.map((diff, index) => (
                   <div
@@ -204,7 +204,7 @@ export default function VersionComparison({
                       diff.changed ? 'bg-green-50 dark:bg-green-900/20' : ''
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-sm whitespace-pre-wrap break-words">
                       {diff.revised || <span className="text-muted-foreground">[空行]</span>}
                     </p>
                   </div>
@@ -214,7 +214,7 @@ export default function VersionComparison({
           </div>
         </div>
         
-        <div className="mt-4 text-sm text-muted-foreground">
+        <div className="mt-4 text-sm text-muted-foreground flex-shrink-0">
           <p>• 红色背景表示左侧版本中被修改的内容</p>
           <p>• 绿色背景表示右侧版本中的新内容</p>
         </div>

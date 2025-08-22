@@ -21,7 +21,7 @@ interface ParagraphRevisionProps {
   isRevising?: boolean;
   isHighlighted?: boolean;
   onHighlightChange?: (shouldHighlight: boolean) => void;
-  onStartRevision?: (params: any) => Promise<string>;
+  onStartRevision?: (params: any, index: number) => Promise<string>;
 }
 
 const STYLE_OPTIONS = [
@@ -45,7 +45,7 @@ export default function ParagraphRevision({
   onHighlightChange,
   onStartRevision
 }: ParagraphRevisionProps) {
-  const [isHovering, setIsHovering] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [showRevisionDialog, setShowRevisionDialog] = useState(false);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [wordControl, setWordControl] = useState<'keep' | 'expand' | 'reduce'>('keep');
@@ -96,7 +96,7 @@ export default function ParagraphRevision({
     setIsLocalRevising(true);
     try {
       if (onStartRevision) {
-        const result = await onStartRevision(params);
+        const result = await onStartRevision(params, index);
         setRevisedText(result);
       } else {
         // 如果没有提供 API 函数，使用模拟
@@ -124,40 +124,51 @@ export default function ParagraphRevision({
 
   return (
     <div
-      className={`relative group transition-all duration-200 ${
+      className={`group relative transition-all duration-200 ${
         isHighlighted ? 'bg-yellow-100 dark:bg-yellow-900/30 rounded px-2 py-1 -mx-2 -my-1' : ''
       }`}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* 段落内容 */}
-      <div className="relative">
+      <div className="relative min-h-[2rem]">
         {isLocalRevising || isRevising ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
             <span className="text-sm text-muted-foreground">正在重写段落...</span>
           </div>
         ) : (
-          <p className="whitespace-pre-wrap pr-20">
+          <p className="whitespace-pre-wrap pr-24">
             {showOriginal && revisedText ? originalText : (revisedText || paragraph)}
           </p>
         )}
         
         {/* 重写按钮 - 固定在段落右上角 */}
-        {isHovering && !revisedText && (
+        {!revisedText && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`absolute top-0 right-0 transition-all duration-200 shadow-sm bg-background/95 hover:bg-background border text-xs ${
+              isHovered ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={() => {
+              setShowRevisionDialog(true);
+              onHighlightChange?.(true);
+            }}
+          >
+            <Edit3 className="w-3 h-3 mr-1" />
+            重写
+          </Button>
+        )}
+        
+        {/* Popover弹窗 - 使用portal渲染，避免干扰hover */}
+        {!revisedText && (
           <Popover open={showRevisionDialog} onOpenChange={(open) => {
             setShowRevisionDialog(open);
             onHighlightChange?.(open);
           }}>
             <PopoverTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-sm bg-background/95 hover:bg-background border text-xs"
-              >
-                <Edit3 className="w-3 h-3 mr-1" />
-                重写
-              </Button>
+              <span />
             </PopoverTrigger>
           <PopoverContent className="w-96 p-4" align="end">
             <div className="space-y-4">

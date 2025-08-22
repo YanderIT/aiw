@@ -130,6 +130,8 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
   const [versions, setVersions] = useState<any[]>([]);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
   const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
+  // 正在保存修改
+  const [isSavingRevision, setIsSavingRevision] = useState(false);
   
   // 版本历史状态（从数据库加载）
   const [dbVersions, setDbVersions] = useState<any[]>([]);
@@ -531,6 +533,9 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
           updateGeneratedContent(revisedContent);
           setCurrentVersion(result.data.version || 2);
           
+          // 立即更新修改状态，禁用修改按钮
+          setServerRevisionStatus(true);
+          
           // 重新加载版本历史，并强制选择新版本
           if (result.data?.uuid) {
             await loadDocumentVersions(result.data.uuid);
@@ -580,6 +585,7 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
     const newContent = paragraphs.join('\n\n');
     
     try {
+      setIsSavingRevision(true);
       // 创建修改版本并保存到数据库
       const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
         method: 'POST',
@@ -601,6 +607,9 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
         // 更新本地内容
         updateGeneratedContent(newContent);
         
+        // 立即更新修改状态，禁用修改按钮
+        setServerRevisionStatus(true);
+        
         // 重新加载版本历史，并强制选择新版本
         if (revision?.uuid) {
           await loadDocumentVersions(revision.uuid);
@@ -619,6 +628,8 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
       // 如果出错，仍然更新本地内容
       updateGeneratedContent(newContent);
       toast.error("保存段落修改时出错");
+    } finally {
+      setIsSavingRevision(false);
     }
   };
 
@@ -639,9 +650,18 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
     }
   };
 
-  // 如果是初始加载或正在生成，显示加载动画
-  if (isInitialLoading || generationState.isGenerating) {
+  // 如果正在生成，显示AI生成动画
+  if (generationState.isGenerating) {
     return <AIGeneratingLoader />;
+  }
+  
+  // 如果是初始加载，显示简单的loading状态
+  if (isInitialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   // 如果有错误，显示错误信息
@@ -814,7 +834,7 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
           variant="outline" 
           size="sm" 
           onClick={handleRevisionClick}
-          disabled={serverRevisionStatus || isRevising}
+          disabled={serverRevisionStatus || isRevising || isLoadingVersions || revisingParagraphIndex !== null}
         >
           <Wand2 className="mr-2 h-4 w-4" />
           修改
@@ -829,7 +849,12 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
       {/* 内容显示区 */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          {isEditMode ? (
+          {isSavingRevision ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
+            </div>
+          ) : isEditMode ? (
             <div className="min-h-[600px]">
               <MarkdownEditor
                 value={editingContent}
@@ -839,7 +864,7 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
           ) : (
             <div className="p-8 prose prose-slate dark:prose-invert max-w-none">
               {/* 如果开启了修改功能且未使用过，显示可编辑的段落 */}
-              {!serverRevisionStatus && displayContent ? (
+              {!serverRevisionStatus && displayContent && !isLoadingVersions ? (
                 <div className="space-y-4">
                   {displayContent.split('\n\n').map((paragraph: string, index: number) => (
                     <ParagraphRevision
@@ -850,7 +875,7 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
                       isRevising={revisingParagraphIndex === index}
                       isHighlighted={highlightedParagraph === index}
                       onHighlightChange={(highlight) => setHighlightedParagraph(highlight ? index : null)}
-                      onStartRevision={(params) => handleParagraphRevisionAPI(params, index)}
+                      onStartRevision={handleParagraphRevisionAPI}
                     />
                   ))}
                 </div>

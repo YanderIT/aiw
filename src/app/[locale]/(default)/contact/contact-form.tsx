@@ -4,12 +4,47 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAppContext } from "@/contexts/app";
+import { 
+  MessageSquare, 
+  FileText, 
+  Star, 
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Zap
+} from "lucide-react";
 
-const PROJECT_TYPES = ['web', 'app', 'saas', 'ai', 'mini', 'system', 'other'] as const;
-const BUDGET_RANGES = ['small', 'medium', 'large', 'enterprise'] as const;
+// 反馈类型
+const FEEDBACK_TYPES = [
+  'document_quality',
+  'feature_request', 
+  'bug_report',
+  'ai_generation',
+  'template_issue',
+  'account_payment',
+  'other'
+] as const;
+
+// 满意度等级
+const SATISFACTION_LEVELS = [
+  'very_satisfied',
+  'satisfied',
+  'neutral',
+  'dissatisfied',
+  'very_dissatisfied'
+] as const;
+
+// 文档类型
+const DOCUMENT_TYPES = [
+  'recommendation_letter',
+  'cover_letter',
+  'personal_statement',
+  'sop',
+  'resume',
+  'study_abroad_consultation',
+  'not_applicable'
+] as const;
 
 interface ContactFormProps {
   title: string;
@@ -18,54 +53,63 @@ interface ContactFormProps {
     name: string;
     email: string;
     emailTip: string;
-    projectType: string;
-    selectProjectType: string;
-    budget: string;
-    selectBudget: string;
+    feedbackType: string;
+    selectFeedbackType: string;
+    documentType: string;
+    selectDocumentType: string;
+    satisfaction: string;
+    selectSatisfaction: string;
     message: string;
     messagePlaceholder: string;
-    needsNda: string;
-    ndaDescription: string;
     submit: string;
     submitting: string;
     privacyNotice: string;
     privacyPolicy: string;
-    projectTypes: {
-      web: string;
-      app: string;
-      saas: string;
-      ai: string;
-      mini: string;
-      system: string;
+    feedbackTypes: {
+      document_quality: string;
+      feature_request: string;
+      bug_report: string;
+      ai_generation: string;
+      template_issue: string;
+      account_payment: string;
       other: string;
     };
-    budgetRanges: {
-      small: string;
-      medium: string;
-      large: string;
-      enterprise: string;
+    documentTypes: {
+      recommendation_letter: string;
+      cover_letter: string;
+      personal_statement: string;
+      sop: string;
+      resume: string;
+      study_abroad_consultation: string;
+      not_applicable: string;
+    };
+    satisfactionLevels: {
+      very_satisfied: string;
+      satisfied: string;
+      neutral: string;
+      dissatisfied: string;
+      very_dissatisfied: string;
     };
   };
 }
 
 export default function ContactForm({ title, subtitle, translations }: ContactFormProps) {
-  const { theme } = useAppContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    projectType: '',
-    budget: '',
-    message: '',
-    needsNda: false
+    feedbackType: '',
+    documentType: '',
+    satisfaction: '',
+    message: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 简单验证
-    if (!formData.name || !formData.email || !formData.projectType || !formData.budget || !formData.message) {
-      toast.error('请填写必填字段');
+    // 验证必填字段
+    if (!formData.name || !formData.email || !formData.feedbackType || !formData.satisfaction || !formData.message) {
+      toast.error('请填写所有必填字段');
       return;
     }
 
@@ -80,20 +124,25 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
         body: JSON.stringify(formData),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('提交失败');
+        throw new Error(result.error || '提交失败');
       }
 
-      toast.success('提交成功，我们会尽快与您联系');
+      toast.success('感谢您的反馈！我们会认真查看并尽快回复。');
+      
+      // 重置表单
       setFormData({
         name: '',
         email: '',
-        projectType: '',
-        budget: '',
-        message: '',
-        needsNda: false
+        feedbackType: '',
+        documentType: '',
+        satisfaction: '',
+        message: ''
       });
     } catch (error) {
+      console.error('提交失败:', error);
       toast.error('提交失败，请稍后重试');
     } finally {
       setIsSubmitting(false);
@@ -108,11 +157,16 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
     }));
   };
 
-  const handleNdaChange = (checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      needsNda: checked
-    }));
+  // 根据满意度获取对应的颜色
+  const getSatisfactionColor = (level: string) => {
+    switch(level) {
+      case 'very_satisfied': return 'text-green-500';
+      case 'satisfied': return 'text-green-400';
+      case 'neutral': return 'text-yellow-500';
+      case 'dissatisfied': return 'text-orange-500';
+      case 'very_dissatisfied': return 'text-red-500';
+      default: return 'text-muted-foreground';
+    }
   };
 
   return (
@@ -141,14 +195,20 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
         </svg>
         <rect width="100%" height="100%" strokeWidth={0} fill="url(#83fd4e5a-9d52-42fc-97b6-718e5d7ee527)" />
       </svg>
+      
       <div className="mx-auto max-w-xl lg:max-w-4xl">
-        <h2 className="text-4xl font-bold tracking-tight text-foreground">{title}</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <MessageSquare className="w-8 h-8 text-primary" />
+          <h2 className="text-4xl font-bold tracking-tight text-foreground">{title}</h2>
+        </div>
         <p className="mt-2 text-lg leading-8 text-muted-foreground">
           {subtitle}
         </p>
+        
         <div className="mt-16 flex flex-col gap-16 sm:gap-y-20 lg:flex-row">
           <form onSubmit={handleSubmit} className="lg:flex-auto">
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+              {/* 姓名 */}
               <div className="sm:col-span-2">
                 <label htmlFor="name" className="block text-sm font-semibold leading-6 text-foreground">
                   {translations.name} *
@@ -166,6 +226,7 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
                 </div>
               </div>
               
+              {/* 联系方式 */}
               <div className="sm:col-span-2">
                 <label htmlFor="email" className="block text-sm font-semibold leading-6 text-foreground">
                   {translations.email} * ({translations.emailTip})
@@ -178,58 +239,84 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="请输入邮箱或手机号码"
+                    placeholder="请输入邮箱或微信号"
                     className="block w-full rounded-md border-0 px-3.5 py-2 text-foreground bg-background shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                   />
                 </div>
               </div>
 
+              {/* 反馈类型 */}
               <div className="sm:col-span-2">
-                <label htmlFor="projectType" className="block text-sm font-semibold leading-6 text-foreground">
-                  {translations.projectType} *
+                <label htmlFor="feedbackType" className="block text-sm font-semibold leading-6 text-foreground">
+                  {translations.feedbackType} *
                 </label>
                 <div className="mt-2.5">
                   <select
-                    id="projectType"
-                    name="projectType"
-                    value={formData.projectType}
+                    id="feedbackType"
+                    name="feedbackType"
+                    value={formData.feedbackType}
                     onChange={handleChange}
                     required
                     className="block w-full rounded-md border-0 px-3.5 py-2 text-foreground bg-background shadow-sm ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                   >
-                    <option value="">{translations.selectProjectType}</option>
-                    {PROJECT_TYPES.map(type => (
+                    <option value="">{translations.selectFeedbackType}</option>
+                    {FEEDBACK_TYPES.map(type => (
                       <option key={type} value={type}>
-                        {translations.projectTypes[type]}
+                        {translations.feedbackTypes[type]}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
+              {/* 相关文档类型 */}
               <div className="sm:col-span-2">
-                <label htmlFor="budget" className="block text-sm font-semibold leading-6 text-foreground">
-                  {translations.budget} *
+                <label htmlFor="documentType" className="block text-sm font-semibold leading-6 text-foreground">
+                  {translations.documentType}
                 </label>
                 <div className="mt-2.5">
                   <select
-                    id="budget"
-                    name="budget"
-                    value={formData.budget}
+                    id="documentType"
+                    name="documentType"
+                    value={formData.documentType}
                     onChange={handleChange}
-                    required
                     className="block w-full rounded-md border-0 px-3.5 py-2 text-foreground bg-background shadow-sm ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                   >
-                    <option value="">{translations.selectBudget}</option>
-                    {BUDGET_RANGES.map(range => (
-                      <option key={range} value={range}>
-                        {translations.budgetRanges[range]}
+                    <option value="">{translations.selectDocumentType}</option>
+                    {DOCUMENT_TYPES.map(type => (
+                      <option key={type} value={type}>
+                        {translations.documentTypes[type]}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
+              {/* 满意度 */}
+              <div className="sm:col-span-2">
+                <label htmlFor="satisfaction" className="block text-sm font-semibold leading-6 text-foreground">
+                  {translations.satisfaction} *
+                </label>
+                <div className="mt-2.5">
+                  <select
+                    id="satisfaction"
+                    name="satisfaction"
+                    value={formData.satisfaction}
+                    onChange={handleChange}
+                    required
+                    className={`block w-full rounded-md border-0 px-3.5 py-2 bg-background shadow-sm ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 ${getSatisfactionColor(formData.satisfaction)}`}
+                  >
+                    <option value="" className="text-foreground">{translations.selectSatisfaction}</option>
+                    {SATISFACTION_LEVELS.map(level => (
+                      <option key={level} value={level} className="text-foreground">
+                        {translations.satisfactionLevels[level]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* 详细反馈 */}
               <div className="sm:col-span-2">
                 <label htmlFor="message" className="block text-sm font-semibold leading-6 text-foreground">
                   {translations.message} *
@@ -238,7 +325,7 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
                   <textarea
                     id="message"
                     name="message"
-                    rows={4}
+                    rows={6}
                     value={formData.message}
                     onChange={handleChange}
                     required
@@ -247,32 +334,31 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
                   />
                 </div>
               </div>
-
-              <div className="sm:col-span-2">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="nda"
-                    checked={formData.needsNda}
-                    onCheckedChange={handleNdaChange}
-                  />
-                  <Label htmlFor="nda" className="text-sm font-semibold leading-6 text-foreground">
-                    {translations.needsNda}
-                  </Label>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {translations.ndaDescription}
-                </p>
-              </div>
             </div>
+            
+            {/* 提交按钮 */}
             <div className="mt-10">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="block w-full rounded-md bg-primary text-primary-foreground px-3.5 py-2.5 text-center text-sm font-semibold shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+                className="block w-full rounded-md bg-primary text-primary-foreground px-3.5 py-2.5 text-center text-sm font-semibold shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 transition-all duration-200"
               >
-                {isSubmitting ? translations.submitting : translations.submit}
+                <span className="flex items-center justify-center gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                      {translations.submitting}
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      {translations.submit}
+                    </>
+                  )}
+                </span>
               </button>
             </div>
+            
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
               {translations.privacyNotice}{' '}
               <Link href="/privacy-policy" className="font-semibold text-primary hover:text-primary/80">
@@ -281,53 +367,56 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
               。
             </p>
           </form>
+          
+          {/* 右侧信息栏 */}
           <div className="lg:mt-6 lg:w-80 lg:flex-none">
-            <div className="flex items-center">
-              <Image
-                src={theme === "dark" ? "/logowhite.png" : "/logo.png"}
-                alt="Company Logo"
-                width={150}
-                height={48}
-                className="h-12 w-auto"
-              />
-              <p className="ml-4 text-lg font-semibold text-foreground">
-                Yander Tech
-              </p>
-            </div>
-            <div className="mt-10">
-              <Image
-                src="/imgs/cooperation.png"
-                alt="Cooperation"
-                width={320}
-                height={240}
-                className="w-full rounded-lg"
-              />
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-foreground">
-                  合作流程
-                </h3>
-                <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                  我们提供完整的合作流程，确保您的项目顺利进行。
-                </p>
-                <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-                  <li className="flex gap-x-3">
-                    <svg className="h-6 w-5 flex-none text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                    </svg>
-                    需求咨询与评估
-                  </li>
-                  <li className="flex gap-x-3">
-                    <svg className="h-6 w-5 flex-none text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                    </svg>
-                    方案制定与报价
-                  </li>
-                  <li className="flex gap-x-3">
-                    <svg className="h-6 w-5 flex-none text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                    </svg>
-                    开发实施与交付
-                  </li>
+            <div className="rounded-2xl bg-muted/50 p-8">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Star className="w-5 h-5 text-primary" />
+                为什么选择我们？
+              </h3>
+              
+              <div className="mt-8 space-y-6">
+                <div className="flex gap-3">
+                  <FileText className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-foreground">专业文书服务</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      提供推荐信、求职信、个人陈述、SOP、简历等多种留学文书生成服务
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-foreground">AI智能生成</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      基于先进的AI技术，快速生成高质量的个性化文书内容
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-foreground">持续优化</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      我们重视每一条用户反馈，不断改进产品体验
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8 pt-8 border-t border-border">
+                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  反馈须知
+                </h4>
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  <li>• 请提供具体的问题描述或建议</li>
+                  <li>• 如遇紧急问题，请联系客服</li>
+                  <li>• 我们会在1-2个工作日内回复</li>
                 </ul>
               </div>
             </div>
@@ -336,4 +425,4 @@ export default function ContactForm({ title, subtitle, translations }: ContactFo
       </div>
     </div>
   );
-} 
+}

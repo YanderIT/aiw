@@ -20,6 +20,7 @@ import {
   Copy, 
   Download, 
   Save, 
+  
   RefreshCw, 
   FileText,
   Sparkles,
@@ -27,7 +28,6 @@ import {
   Eye,
   Edit,
   Loader2,
-  Bot,
   Zap,
   Stars,
   GitCompare,
@@ -73,9 +73,9 @@ const AIGeneratingLoader = () => {
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number}>>([]);
   
   const steps = [
-    { icon: Bot, text: "分析您的推荐信内容...", color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
-    { icon: Zap, text: "运用AI智能生成技术...", color: "text-yellow-500", bgColor: "bg-yellow-100 dark:bg-yellow-900/30" },
-    { icon: Stars, text: "优化推荐信结构和语言...", color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+    { icon: Sparkles, text: "分析您的推荐信内容...", color: "text-green-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+    { icon: Zap, text: "运用AI智能生成技术...", color: "text-green-500", bgColor: "bg-yellow-100 dark:bg-yellow-900/30" },
+    { icon: Stars, text: "优化推荐信结构和语言...", color: "text-green-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
     { icon: FileText, text: "完成推荐信生成...", color: "text-green-500", bgColor: "bg-green-100 dark:bg-green-900/30" }
   ];
 
@@ -127,7 +127,7 @@ const AIGeneratingLoader = () => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-primary/20 shadow-2xl">
             <div className="w-16 h-16 bg-gradient-to-br from-primary/30 to-primary/20 rounded-full flex items-center justify-center">
-              <Bot className="w-10 h-10 text-primary animate-pulse drop-shadow-lg" />
+              <Sparkles className="w-10 h-10 text-primary animate-pulse drop-shadow-lg" />
             </div>
           </div>
         </div>
@@ -260,6 +260,9 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
   
   // 段落高亮状态
   const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState<number | null>(null);
+  const [revisingParagraphIndex, setRevisingParagraphIndex] = useState<number | null>(null);
+  // 正在保存修改
+  const [isSavingRevision, setIsSavingRevision] = useState(false);
 
   // Dify Hooks for API calls
   const { runWorkflow } = useDify({ functionType: 'recommendation-letter' });
@@ -675,9 +678,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
 
       const { data: revision } = await response.json();
       
-      // 不再添加到本地状态，而是重新加载版本历史
-      
-      // 更新服务器修改状态
+      // 立即更新修改状态，禁用修改按钮
       setServerRevisionStatus(true);
       
       // 先设置新版本ID，再加载版本历史
@@ -704,6 +705,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
     const newContent = paragraphs.join('\n\n');
     
     try {
+      setIsSavingRevision(true);
       // 创建修改版本并保存到数据库
       const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
         method: 'POST',
@@ -725,7 +727,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
 
       const { data: revision } = await response.json();
       
-      // 更新服务器修改状态
+      // 立即更新修改状态，禁用修改按钮
       setServerRevisionStatus(true);
       
       // 先设置新版本ID，再加载版本历史
@@ -742,19 +744,29 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       toast.error("保存段落修改失败");
       // 如果保存失败，仍然更新本地内容
       updateGeneratedContent(newContent);
+    } finally {
+      setIsSavingRevision(false);
     }
   };
   
   // 段落重写 API 调用
-  const handleParagraphRevisionAPI = async (params: any) => {
+  const handleParagraphRevisionAPI = async (params: any, paragraphIndex: number) => {
+    setRevisingParagraphIndex(paragraphIndex);
     try {
       // 获取语言设置
       const selectedData = getSelectedData();
       
-      // 添加语言参数
+      // 添加语言参数 - 使用正确的格式
+      const languageMap: { [key: string]: string } = {
+        'zh': 'Chinese',
+        'en': 'English',
+        'Chinese': 'Chinese',
+        'English': 'English'
+      };
+      
       const paramsWithLanguage = {
         ...params,
-        language: selectedData.language || 'zh'
+        language: languageMap[selectedData.language] || 'Chinese'
       };
       
       const revisedContent = await runRevision(paramsWithLanguage);
@@ -763,6 +775,8 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       console.error('Paragraph revision failed:', error);
       toast.error('段落重写失败，请重试');
       throw error;
+    } finally {
+      setRevisingParagraphIndex(null);
     }
   };
 
@@ -1017,7 +1031,22 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                       className="bg-background hover:bg-muted text-base px-4 py-2"
                     >
                       <Download className="w-5 h-5 mr-2" />
-                      Export
+                      导出
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="default" 
+                      onClick={handleRevisionClick}
+                      disabled={serverRevisionStatus || revisingParagraphIndex !== null || isLoadingVersions}
+                      className="bg-background hover:bg-muted text-base px-4 py-2"
+                    >
+                      <Wand2 className="mr-2 h-5 w-5" />
+                      修改
+                      {serverRevisionStatus && (
+                        <Badge variant="secondary" className="ml-2">
+                          已使用
+                        </Badge>
+                      )}
                     </Button>
                     {/* <Button
                       variant="outline"
@@ -1035,12 +1064,17 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
 
               {/* Editable Content */}
               <div className="flex-1 p-4">
-                {generationState.isGenerating ? (
+                {isSavingRevision ? (
+                  <div className="flex items-center justify-center min-h-[400px]">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
+                  </div>
+                ) : generationState.isGenerating ? (
                   <AIGeneratingLoader />
                 ) : isPreviewMode ? (
                   <div className="w-full h-full min-h-[500px] overflow-y-auto prose prose-slate dark:prose-invert max-w-none">
                     {/* 如果开启了修改功能，显示可编辑的段落 */}
-                    {!(serverRevisionStatus !== null ? serverRevisionStatus : hasUsedFreeRevision()) && generationState.generatedContent ? (
+                    {!(serverRevisionStatus !== null ? serverRevisionStatus : hasUsedFreeRevision()) && generationState.generatedContent && !isLoadingVersions ? (
                       <div className="space-y-4">
                         {displayContent.split('\n\n').map((paragraph: string, index: number) => (
                           <ParagraphRevision
@@ -1053,7 +1087,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                               setHighlightedParagraphIndex(shouldHighlight ? index : null);
                             }}
                             onStartRevision={handleParagraphRevisionAPI}
-                            isRevising={isRevising}
+                            isRevising={revisingParagraphIndex === index}
                           />
                         ))}
                       </div>

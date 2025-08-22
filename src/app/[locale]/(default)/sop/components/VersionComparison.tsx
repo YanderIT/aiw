@@ -168,7 +168,7 @@ export default function VersionComparison({
                   : '原始版本'}
               </Badge>
             </div>
-            <div className="p-4 flex-1 overflow-y-auto">
+            <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2">
                 {differences.map((diff, index) => (
                   <div
@@ -177,7 +177,7 @@ export default function VersionComparison({
                       diff.changed ? 'bg-red-50 dark:bg-red-900/20' : ''
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-sm whitespace-pre-wrap break-words">
                       {diff.original || <span className="text-muted-foreground">[空行]</span>}
                     </p>
                   </div>
@@ -195,7 +195,7 @@ export default function VersionComparison({
                   : '修改版本'}
               </Badge>
             </div>
-            <div className="p-4 flex-1 overflow-y-auto">
+            <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2">
                 {differences.map((diff, index) => (
                   <div
@@ -204,7 +204,7 @@ export default function VersionComparison({
                       diff.changed ? 'bg-green-50 dark:bg-green-900/20' : ''
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-sm whitespace-pre-wrap break-words">
                       {diff.revised || <span className="text-muted-foreground">[空行]</span>}
                     </p>
                   </div>

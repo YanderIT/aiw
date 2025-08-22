@@ -434,21 +434,11 @@
           ]
         },
         {
-          "title": "资源",
+          "title": "Support",
           "children": [
             {
-              "title": "帮助文档",
-              "url": "/docs",
-              "target": "_blank"
-            },
-            {
-              "title": "文书范例",
-              "url": "/#carousel",
-              "target": "_self"
-            },
-            {
               "title": "联系我们",
-              "url": "/#faq",
+              "url": "/contact",
               "target": "_self"
             }
           ]

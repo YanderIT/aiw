@@ -164,5 +164,51 @@
     "page_loading": "Loading page...",
     "please_wait": "Please wait",
     "loading": "Loading"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We value every piece of feedback to help us continuously improve our product experience",
+    "privacyNotice": "By submitting, you agree to our",
+    "privacyPolicy": "Privacy Policy",
+    "form": {
+      "name": "Name",
+      "email": "Contact",
+      "emailTip": "Email or WeChat",
+      "feedbackType": "Feedback Type",
+      "selectFeedbackType": "Select feedback type",
+      "documentType": "Related Document Type",
+      "selectDocumentType": "Select document type (optional)",
+      "satisfaction": "Satisfaction",
+      "selectSatisfaction": "Select satisfaction level",
+      "message": "Detailed Feedback",
+      "messagePlaceholder": "Please describe your issue or suggestion in detail. We carefully review every piece of feedback...",
+      "submit": "Submit Feedback",
+      "submitting": "Submitting...",
+      "feedbackTypes": {
+        "document_quality": "Document Quality Issue",
+        "feature_request": "Feature Request",
+        "bug_report": "Bug Report",
+        "ai_generation": "AI Generation Issue",
+        "template_issue": "Template Issue",
+        "account_payment": "Account/Payment Issue",
+        "other": "Other Feedback"
+      },
+      "documentTypes": {
+        "recommendation_letter": "Recommendation Letter",
+        "cover_letter": "Cover Letter",
+        "personal_statement": "Personal Statement",
+        "sop": "Statement of Purpose",
+        "resume": "Resume",
+        "study_abroad_consultation": "Study Abroad Consultation",
+        "not_applicable": "Not Applicable"
+      },
+      "satisfactionLevels": {
+        "very_satisfied": "Very Satisfied",
+        "satisfied": "Satisfied",
+        "neutral": "Neutral",
+        "dissatisfied": "Dissatisfied",
+        "very_dissatisfied": "Very Dissatisfied"
+      }
+    }
   }
 }
