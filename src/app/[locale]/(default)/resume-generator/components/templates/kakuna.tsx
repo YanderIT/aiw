@@ -34,23 +34,23 @@ const PageBreak = ({ pageNumber, themeColor }: { pageNumber: number; themeColor:
 
 const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) => {
   const { basics } = resume;
-  
+
   // 获取社交媒体图标和显示名称
   const getSocialIcon = (url: string, name: string) => {
     const lowerName = name.toLowerCase();
     const lowerUrl = url.toLowerCase();
-    
+
     if (lowerName.includes('linkedin') || lowerUrl.includes('linkedin')) {
       return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0077B5" className="inline-block">
-          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0077B5" style={{verticalAlign: 'middle'}}>
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
         </svg>
       );
     }
     if (lowerName.includes('github') || lowerUrl.includes('github')) {
       return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" className="inline-block">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000000" style={{verticalAlign: 'middle'}}>
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
         </svg>
       );
     }
@@ -60,7 +60,7 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
   const getSocialDisplayName = (url: string, name: string) => {
     const lowerName = name.toLowerCase();
     const lowerUrl = url.toLowerCase();
-    
+
     if (lowerName.includes('linkedin') || lowerUrl.includes('linkedin')) {
       const username = url.split('/').pop() || name;
       return `${username}`;
@@ -79,26 +79,23 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
         {basics.picture?.url && !basics.picture?.effects?.hidden && (
           <div className="flex justify-center mb-3">
             <div
-              className="overflow-hidden"
               style={{
                 width: "100px",
                 height: "100px",
                 borderRadius: "50%",
+                backgroundImage: `url(${basics.picture.url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
               }}
-            >
-              <img 
-                src={basics.picture.url} 
-                alt={basics.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            />
           </div>
         )}
         <div className="text-3xl font-bold mb-2" style={{ color: theme.primary }}>{basics.name}</div>
         {basics.headline && <div className="text-lg text-gray-600">{basics.headline}</div>}
       </div>
 
-      <div className="flex flex-wrap items-center justify-center text-base">
+      <div className="flex flex-wrap justify-center text-base">
         {[
           basics.location,
           basics.phone && <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">{basics.phone}</a>,
@@ -112,20 +109,21 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
         {basics.url?.href && (
           <div className="flex items-center gap-x-1.5">
             <svg width="16" height="16" viewBox="0 0 24 24" fill={theme.primary} className="inline-block">
-              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
             </svg>
             <a href={basics.url.href} target="_blank" rel="noreferrer">
               {basics.url.label || basics.url.href}
             </a>
           </div>
         )}
-
         {basics.customFields?.map((item) => (
-          <div key={item.id} className="flex items-center gap-x-1.5 ml-2">
+          <div key={item.id} className="flex items-center ml-2">
             {getSocialIcon(item.value, item.name)}
-            <a href={item.value} target="_blank" rel="noreferrer noopener nofollow">
+            <p className="ml-2">
+              {/* <a href={item.value} target="_blank" rel="noreferrer noopener nofollow"> */}
               {getSocialDisplayName(item.value, item.name)}
-            </a>
+              {/* </a> */}
+            </p>
           </div>
         ))}
       </div>
@@ -133,13 +131,13 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
   );
 };
 
-const Section = ({ 
-  section, 
+const Section = ({
+  section,
   children,
   title,
   theme
-}: { 
-  section: any; 
+}: {
+  section: any;
   children: React.ReactNode;
   title?: string;
   theme: any;
@@ -148,10 +146,9 @@ const Section = ({
 
   return (
     <section id={section.id} className="grid" style={{ breakInside: 'avoid' }}>
-      <h4 className="mb-3 text-left font-bold text-lg" style={{ 
+      <h4 className="mb-3 text-left font-bold text-lg h-10" style={{
         color: theme.primary,
-        borderBottom: `1px solid ${theme.primary}`,
-        paddingBottom: '0px'
+        borderBottom: `1px solid ${theme.primary}`
       }}>
         {title || section?.name}
       </h4>
@@ -162,9 +159,9 @@ const Section = ({
   );
 };
 
-const MainContent = ({ resume, theme, layoutConfiguration }: { 
-  resume: StandardResumeData; 
-  theme: any; 
+const MainContent = ({ resume, theme, layoutConfiguration }: {
+  resume: StandardResumeData;
+  theme: any;
   layoutConfiguration?: { mainSections: string[]; sidebarSections: string[] }
 }) => {
   const { sections } = resume;
@@ -353,12 +350,12 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
             {sections.awards?.items?.map((item) => {
               // 提取年份（从日期字符串中）
               const year = item.date ? item.date.split('/').pop() || item.date : '';
-              
+
               // 判断是奖项还是证书（基于是否有 title 或其他标识）
               const displayTitle = item.title || ''; // 可能是 award_name 或 certificate_name
               const displayIssuer = item.awarder || ''; // 可能是 award_issuer 或 certificate_issuer
               const displayRank = item.summary || ''; // award_rank
-              
+
               return (
                 <div key={item.id} className="mb-2">
                   <div className="flex justify-between items-start">
@@ -411,7 +408,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
 
   // 使用布局配置或默认配置
   // 对于 kakuna 模板，合并主要部分和侧边栏部分，因为它是单栏布局
-  const allSections = layoutConfiguration 
+  const allSections = layoutConfiguration
     ? [...layoutConfiguration.mainSections, ...layoutConfiguration.sidebarSections.filter(s => s !== 'profiles')] // 排除 profiles，因为它不适合在主内容中显示
     : ['experience', 'education', 'research', 'activities', 'skills', 'awards', 'languages'];
 
@@ -427,9 +424,9 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
   );
 };
 
-export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfiguration }: { 
-  resume: StandardResumeData; 
-  themeColor?: string; 
+export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfiguration }: {
+  resume: StandardResumeData;
+  themeColor?: string;
   layoutConfiguration?: { mainSections: string[]; sidebarSections: string[] }
 }) => {
   // 判断是否是新的色阶格式（如 "blue-500"）或旧的格式（如 "blue"）
@@ -441,10 +438,10 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
   useEffect(() => {
     const calculatePageBreaks = () => {
       if (!containerRef.current) return;
-      
+
       const containerHeight = containerRef.current.scrollHeight;
       const pageCount = Math.ceil(containerHeight / A4_HEIGHT_PX);
-      
+
       if (pageCount > 1) {
         const breaks = [];
         for (let i = 1; i < pageCount; i++) {
@@ -458,13 +455,13 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
 
     // Calculate on mount
     calculatePageBreaks();
-    
+
     // Use ResizeObserver to recalculate when content changes
     const resizeObserver = new ResizeObserver(calculatePageBreaks);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     return () => {
       resizeObserver.disconnect();
     };
@@ -486,7 +483,7 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
     >
       <Header resume={resume} theme={theme} />
       <MainContent resume={resume} theme={theme} layoutConfiguration={layoutConfiguration} />
-      
+
       {/* Page break indicators */}
       {pageBreaks.map((breakHeight, index) => (
         <div
@@ -500,7 +497,7 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
           <PageBreak pageNumber={index + 2} themeColor={theme.primary} />
         </div>
       ))}
-      
+
       {/* CSS for page breaks and scrolling */}
       <style jsx global>{`
         @media print {
