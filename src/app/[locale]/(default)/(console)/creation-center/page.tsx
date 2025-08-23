@@ -141,7 +141,7 @@ export default async function CreationCenterPage() {
               {t("creation_center.title")}
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              AI工具让学申请简单、高效、低价
+              AI工具让留学申请简单、高效、低价
             </p>
             
             {/* Search Bar */}
