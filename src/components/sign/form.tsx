@@ -212,7 +212,7 @@ export default function SignForm({
     process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED === "true" ||
     process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === "true"
   );
-  const hasEmailAuth = isFirebaseEmailLinkEnabled || isCredentialsEnabled;
+  const hasEmailAuth = isCredentialsEnabled;
   const showDivider = hasOtherAuthMethods && hasEmailAuth;
 
   return (

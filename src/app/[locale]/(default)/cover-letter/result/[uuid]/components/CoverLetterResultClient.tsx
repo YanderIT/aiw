@@ -817,7 +817,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
                           onValueChange={(value) => setCurrentDbVersionId(value)}
                           disabled={isLoadingVersions}
                         >
-                          <SelectTrigger className="w-[180px] h-9">
+                          <SelectTrigger className="w-[100px] sm:w-[120px] lg:w-[140px] h-9">
                             <SelectValue placeholder="选择版本" />
                           </SelectTrigger>
                           <SelectContent>
