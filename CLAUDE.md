@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"Essmote AI" (ZhiXieJiang) is a Next.js 15-based AI SaaS platform for document generation including resumes, cover letters, and recommendation letters. Built with React 19, TypeScript strict mode, and Tailwind CSS v4 for deployment on Vercel, Cloudflare, and Docker.
+"Essmote AI" (ZhiXieJiang) is a Next.js 15-based AI SaaS platform for document generation including resumes, cover letters, recommendation letters, personal statements, and SOPs. Built with React 19, TypeScript strict mode, and Tailwind CSS v4 for deployment on Vercel, Cloudflare, and Docker.
 
 ## Development Commands
 
@@ -41,22 +41,20 @@ pnpm docker:build     # Build Docker image (standalone output)
 - **next-auth v5 beta** for authentication
 - **Supabase** for database and storage
 - **Stripe** for payments
-- **Firebase** for authentication backend
 - **Dify AI** for workflow-based document generation
 
 ### Authentication Flow
 Configured in `src/auth/config.ts` with multiple providers:
-- Email/password via Firebase when `NEXT_PUBLIC_CREDENTIALS_EMAIL_PASSWORD_AUTH_ENABLED=true`
+- Email/password authentication when `NEXT_PUBLIC_CREDENTIALS_EMAIL_PASSWORD_AUTH_ENABLED=true`
 - Google OAuth with One Tap when `NEXT_PUBLIC_AUTH_GOOGLE_ENABLED=true`
 - GitHub OAuth when `NEXT_PUBLIC_AUTH_GITHUB_ENABLED=true`
-- Firebase email link when `NEXT_PUBLIC_FIREBASE_EMAIL_LINK_AUTH_ENABLED=true`
 - Session management with JWT
 
 ### AI Integration Pattern
 The `DifyService` (`src/services/dify.ts`) manages AI workflows:
 ```typescript
 // Function-specific API keys
-const functionType: DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'revise-recommendation-letter';
+const functionType: DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'sop' | 'personal-statement';
 
 // Use the hook with function type
 const { runWorkflow, uploadFile } = useDify({ functionType });
@@ -74,7 +72,8 @@ Environment variables:
 - `DIFY_API_KEY_RECOMMENDATION_LETTER`
 - `DIFY_API_KEY_COVER_LETTER`
 - `DIFY_API_KEY_RESUME_GENERATOR`
-- `DIFY_API_KEY_REVISE_RECOMMENDATION_LETTER`
+- `DIFY_API_KEY_SOP`
+- `DIFY_API_KEY_PERSONAL_STATEMENT`
 - `DIFY_API_KEY` (default fallback)
 
 ### Document Generation Architecture
@@ -161,9 +160,9 @@ ref={(node) => drag(drop(node))}
 ### Authentication
 - `AUTH_SECRET`: NextAuth secret
 - `AUTH_URL`: Application URL
-- `NEXT_PUBLIC_FIREBASE_*`: Firebase configuration
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google OAuth
 - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`: GitHub OAuth
+- `NEXT_PUBLIC_CREDENTIALS_EMAIL_PASSWORD_AUTH_ENABLED`: Enable email/password auth
 
 ### Services
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`: Database
@@ -242,14 +241,15 @@ The `DifyService` class manages all Dify API interactions:
 
 #### Function Types
 ```typescript
-type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'revise-recommendation-letter' | 'default';
+type DifyFunctionType = 'recommendation-letter' | 'cover-letter' | 'resume-generator' | 'sop' | 'personal-statement' | 'default';
 ```
 
 Each function type maps to environment variables:
 - `DIFY_API_KEY_RECOMMENDATION_LETTER`
 - `DIFY_API_KEY_COVER_LETTER`
 - `DIFY_API_KEY_RESUME_GENERATOR`
-- `DIFY_API_KEY_REVISE_RECOMMENDATION_LETTER`
+- `DIFY_API_KEY_SOP`
+- `DIFY_API_KEY_PERSONAL_STATEMENT`
 - `DIFY_API_KEY` (default fallback)
 
 ### Understanding runWorkflow

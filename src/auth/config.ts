@@ -8,7 +8,6 @@ import { getClientIp } from "@/lib/ip";
 import { getIsoTimestr } from "@/lib/time";
 import { getUuid } from "@/lib/hash";
 import { saveUser } from "@/services/user";
-import { firebaseAdmin } from "@/lib/firebase-admin";
 import { findUserByEmail } from "@/models/user";
 import { verifyPassword } from "@/lib/password";
 
@@ -71,79 +70,6 @@ if (process.env.NEXT_PUBLIC_CREDENTIALS_EMAIL_PASSWORD_AUTH_ENABLED === "true") 
   );
 }
 
-// Firebase Credentials Auth
-providers.push(
-  CredentialsProvider({
-    id: "credentials",
-    name: "credentials",
-    credentials: {
-      idToken: { type: "text" },
-    },
-    async authorize(credentials) {
-      console.log("Credentials provider - authorize called with:", credentials);
-      
-      if (!credentials?.idToken) {
-        console.log("Credentials provider - no idToken provided");
-        return null;
-      }
-
-      try {
-        console.log("Credentials provider - verifying idToken...");
-        
-        // 添加重试机制
-        let retryCount = 0;
-        const maxRetries = 3;
-        let decodedToken;
-        
-        while (retryCount < maxRetries) {
-          try {
-            decodedToken = await firebaseAdmin
-              .auth()
-              .verifyIdToken(credentials.idToken as string);
-            break; // 成功则跳出循环
-          } catch (retryError: any) {
-            retryCount++;
-            console.log(`Firebase Auth verification attempt ${retryCount} failed:`, retryError.message);
-            
-            if (retryCount >= maxRetries) {
-              throw retryError; // 达到最大重试次数，抛出错误
-            }
-            
-            // 等待1秒后重试
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-        
-        if (!decodedToken) {
-          console.log("Credentials provider - failed to verify token after retries");
-          return null;
-        }
-        
-        const { uid, email, name, picture } = decodedToken;
-
-        console.log("Credentials provider - token verified:", { uid, email, name });
-
-        if (!email) {
-          console.log("Credentials provider - no email in token");
-          return null;
-        }
-
-        const user = {
-          id: uid,
-          name: name || email.split('@')[0],
-          email: email,
-          image: picture,
-        };
-
-        console.log("Credentials provider - returning user:", user);
-        return user;
-      } catch (error) {
-        console.error("Firebase Auth Error:", error);
-        return null;
-      }
-    },
-  })
-);
 
 // Google One Tap Auth
 if (
@@ -297,8 +223,8 @@ export const authOptions: NextAuthConfig = {
             nickname: user.name || "",
             avatar_url: user.image || "",
             signin_type: account?.provider === "credentials" ? "email" : (account?.type || "unknown"),
-            signin_provider: account?.provider || "credentials",
-            signin_openid: account?.provider === "credentials" ? user.id : (account?.providerAccountId || user.id),
+            signin_provider: account?.provider || "email-password",
+            signin_openid: account?.provider === "email-password" ? user.id : (account?.providerAccountId || user.id),
             created_at: getIsoTimestr(),
             signin_ip: await getClientIp(),
           };

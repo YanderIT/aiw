@@ -40,8 +40,7 @@ export default function SignForm({
     message: "",
   });
 
-  // 检查是否启用各种登录方式
-  const isFirebaseEmailLinkEnabled = process.env.NEXT_PUBLIC_FIREBASE_EMAIL_LINK_AUTH_ENABLED === "true";
+  // 检查是否启用邮箱密码登录
   const isCredentialsEnabled = process.env.NEXT_PUBLIC_CREDENTIALS_EMAIL_PASSWORD_AUTH_ENABLED === "true";
 
   // 防抖检查用户名
@@ -98,47 +97,6 @@ export default function SignForm({
     }
   }, [nickname, isRegistering, isCredentialsEnabled, debounceCheckNickname]);
 
-  // Firebase 邮箱链接登录
-  const handleFirebaseEmailLinkSignIn = async () => {
-    // 验证邮箱是否为空
-    if (!email || email.trim() === "") {
-      toast.error(t("sign_modal.email_required"));
-      return;
-    }
-
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error(t("sign_modal.email_invalid"));
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch("/api/auth/send-signin-link", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, locale }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        window.localStorage.setItem("emailForSignIn", email);
-        toast.success(t("sign_modal.check_email_toast"));
-      } else {
-        toast.error(result.message || t("sign_modal.login_failed"));
-      }
-    } catch (error: any) {
-      console.error("Send signin link error:", error);
-      toast.error(t("sign_modal.login_failed"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // 邮箱密码登录
   const handleCredentialsSignIn = async () => {
@@ -301,7 +259,7 @@ export default function SignForm({
         )}
       </CardHeader>
       <CardContent className="grid gap-4 p-0">
-        {(isFirebaseEmailLinkEnabled || isCredentialsEnabled) && (
+        {isCredentialsEnabled && (
           <>
             <div className="grid gap-2">
               <Label htmlFor="email">{t("sign_modal.email_label")}</Label>
@@ -398,16 +356,6 @@ export default function SignForm({
               </>
             )}
 
-            {isFirebaseEmailLinkEnabled && !isRegistering && (
-              <Button 
-                onClick={handleFirebaseEmailLinkSignIn} 
-                className="w-full h-12" 
-                variant={isCredentialsEnabled ? "outline" : "default"}
-                disabled={isLoading}
-              >
-                {isLoading ? t("sign_modal.sending") : t("sign_modal.continue_with_email")}
-              </Button>
-            )}
           </>
         )}
         <p className="px-8 pt-4 text-center text-sm text-muted-foreground">

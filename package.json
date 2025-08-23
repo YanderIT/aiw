@@ -83,8 +83,6 @@
     "embla-carousel-fade": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
     "eslint-config-next": "^15.2.3",
-    "firebase": "^11.9.1",
-    "firebase-admin": "^13.4.0",
     "framer-motion": "^11.15.0",
     "google-one-tap": "^1.0.6",
     "highlight.js": "^11.11.0",
