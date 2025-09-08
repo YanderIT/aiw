@@ -2,7 +2,7 @@
 
 import { Section as SectionType } from "@/types/blocks/section";
 import { motion } from "framer-motion";
-import { animate, stagger } from "motion";
+import { animate } from "motion";
 import { splitText } from "motion-plus";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-export default function HeroSplineCentered({ section }: { section: SectionType }) {
+export default function HeroSplineV6({ section }: { section: SectionType }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isSplineLoaded, setIsSplineLoaded] = useState(false);
 
@@ -68,7 +68,7 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
     // Load script only if not already loaded
     const script = document.createElement('script');
     script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.10.35/build/spline-viewer.js';
+    script.src = 'https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js';
     script.onload = () => {
       setIsSplineLoaded(true);
     };
@@ -125,7 +125,7 @@ export default function HeroSplineCentered({ section }: { section: SectionType }
           {/* Spline container - positioned behind title */}
           <div className="absolute top-1/2 left-1/2 -translate-x-[175%] -translate-y-1/2 w-[80%] h-[80%] max-w-4xl">
             <spline-viewer 
-              url="https://prod.spline.design/JdZgoBYW5zhBLimi/scene.splinecode"
+              url="https://prod.spline.design/LcprKNtmnXYzj27b/scene.splinecode"
               className="w-[335%] 2xl:h-full"
             />
           </div>

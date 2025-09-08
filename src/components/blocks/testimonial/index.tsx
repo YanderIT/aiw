@@ -30,7 +30,7 @@ export default function Testimonial({ section }: { section: SectionType }) {
     <section id={section.name} className="py-16">
       <div className="flex flex-col items-center gap-4">
         {section.label && (
-          <div className="flex items-center gap-1 text-sm font-semibold text-primary">
+          <div className="flex items-center gap-1 text-lg font-semibold text-primary">
             {section.icon && (
               <Icon name={section.icon} className="h-6 w-auto border-primary" />
             )}

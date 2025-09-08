@@ -4,7 +4,7 @@ import Icon from "@/components/icon";
 import { Section as SectionType } from "@/types/blocks/section";
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { TrendingUp, Award, Users, Clock, Globe } from "lucide-react";
+import { TrendingUp, Users, Star, FileText, UserCheck, Zap, Target } from "lucide-react";
 
 function AnimatedCounter({ 
   value, 
@@ -36,8 +36,8 @@ function AnimatedCounter({
         if (!startTime) startTime = timestamp;
         const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
         
-        // Easing function
-        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        // 增强的缓动函数 - 更流畅的滚动效果
+        const easedProgress = 1 - Math.pow(1 - progress, 2.5);
         const currentValue = easedProgress * value;
         
         if (decimals > 0) {
@@ -76,50 +76,54 @@ function AnimatedCounter({
 
 const statsConfig = [
   {
-    icon: Award,
-    title: "用户满意率",
-    value: 98.7,
+    icon: Star,
+    title: "95% 好评率",
+    value: 95,
     suffix: "%",
-    unit: "好评率",
-    decimals: 1,
+    unit: "用户满意率",
+    decimals: 0,
     color: "blue",
   },
   {
     icon: Users,
-    title: "AI润色用户",
+    title: "6500+ 注册用户",
     value: 6500,
     suffix: "+",
-    unit: "使用过AI润色",
+    unit: "累计注册用户数",
     color: "purple",
   },
   {
-    icon: Clock,
-    title: "平均生成用时",
-    value: 3,
-    suffix: "",
-    unit: "分钟",
-    color: "orange",
-    small: true,
-  },
-
-  {
-    icon: TrendingUp,
-    title: "累计生成文书数量",
-    value: 21000,
+    icon: FileText,
+    title: "3,289+ 份文书",
+    value: 3289,
     suffix: "+",
-    unit: "份文书",
-    color: "red",
+    unit: "累计生成文书数量",
+    color: "green",
     highlight: true,
   },
-
   {
-    icon: Globe,
-    title: "母语文书老师",
+    icon: UserCheck,
+    title: "10+ 常驻参与润色的文书老师",
     value: 10,
     suffix: "+",
-    unit: "常驻参与润色",
-    color: "green",
-    small: true,
+    unit: "人工润色",
+    color: "orange",
+  },
+  {
+    icon: Zap,
+    title: "3 分钟快速生成",
+    value: 3,
+    suffix: "",
+    unit: "平均生成用时",
+    color: "red",
+  },
+  {
+    icon: Target,
+    title: "92% 用户获得录取",
+    value: 92,
+    suffix: "%",
+    unit: "录取率",
+    color: "emerald",
   },
 ];
 
@@ -178,8 +182,8 @@ export default function StatsPremium({ section }: { section: SectionType }) {
                        bg-gradient-to-r from-[#86f096]/10 to-[#3dcd77]/10 
                        backdrop-blur-sm border border-[#3dcd77]/20 dark:border-[#3dcd77]/10 mb-6"
           >
-            <TrendingUp className="w-3.5 h-3.5 text-[#3dcd77] dark:text-[#86f096]" />
-            <span className="text-xs font-medium text-[#3dcd77] dark:text-[#86f096]">平台数据</span>
+            <TrendingUp className="w-4 h-4 text-[#3dcd77] dark:text-[#86f096]" />
+            <span className="text-lg font-semibold text-[#3dcd77] dark:text-[#86f096]">平台数据</span>
           </motion.div>
           
           <h2 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -190,20 +194,20 @@ export default function StatsPremium({ section }: { section: SectionType }) {
           </p>
         </motion.div>
 
-        {/* Stats Grid - Linear Layout */}
+        {/* Stats Grid - 2行×3列布局 */}
         <div ref={containerRef} className="relative">
-          <div className="grid gap-4 lg:gap-5">
-            {/* First Row - 3 Main Stats */}
+          <div className="grid gap-4 lg:gap-6">
+            {/* First Row - 前3个指标 */}
             <div className="grid md:grid-cols-3 gap-4">
               {statsConfig.slice(0, 3).map((stat, index) => (
                 <StatsCard key={index} stat={stat} index={index} isInView={isInView} />
               ))}
             </div>
 
-            {/* Second Row - 2 Secondary Stats */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {statsConfig.slice(3, 5).map((stat, index) => (
-                <StatsCard key={index + 3} stat={stat} index={index + 3} isInView={isInView} compact />
+            {/* Second Row - 后3个指标 */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {statsConfig.slice(3, 6).map((stat, index) => (
+                <StatsCard key={index + 3} stat={stat} index={index + 3} isInView={isInView} />
               ))}
             </div>
           </div>
@@ -217,10 +221,9 @@ interface StatsCardProps {
   stat: typeof statsConfig[0];
   index: number;
   isInView: boolean;
-  compact?: boolean;
 }
 
-function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
+function StatsCard({ stat, index, isInView }: StatsCardProps) {
   const IconComponent = stat.icon;
   const [isHovering, setIsHovering] = useState(false);
 
@@ -244,7 +247,7 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
       <div className={`
         relative overflow-hidden rounded-xl
         transition-all duration-300
-        ${compact ? 'p-6' : 'p-7'}
+        p-7
         ${stat.highlight ? 'ring-1 ring-gray-200 dark:ring-gray-700' : ''}
         bg-white dark:bg-gray-900
         border border-gray-200 dark:border-gray-800
@@ -280,15 +283,12 @@ function StatsCard({ stat, index, isInView, compact }: StatsCardProps) {
           </h3>
 
           {/* Number */}
-          <div className={`
-            font-semibold text-gray-900 dark:text-gray-100 mb-1
-            ${stat.small ? 'text-2xl lg:text-3xl' : 'text-3xl lg:text-4xl'}
-          `}>
+          <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1 text-3xl lg:text-4xl">
             <AnimatedCounter 
               value={stat.value} 
               suffix={stat.suffix}
               decimals={stat.decimals || 0}
-              duration={isHovering ? 1.5 : 2 + index * 0.2}
+              duration={isHovering ? 1.2 : 2.2 + index * 0.15}
               isHovering={isHovering}
             />
           </div>

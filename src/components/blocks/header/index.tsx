@@ -23,12 +23,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { Header as HeaderType } from "@/types/blocks/header";
 import Icon from "@/components/icon";
 import { Link } from "@/i18n/navigation";
 import LocaleToggle from "@/components/locale/toggle";
-import { Menu } from "lucide-react";
+import { Menu, Sparkles, CheckIcon } from "lucide-react";
 import SignToggle from "@/components/sign/toggle";
 import ThemeToggle from "@/components/theme/toggle";
 import { cn } from "@/lib/utils";
@@ -37,12 +43,14 @@ import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
 import { GlobalLoading } from "@/components/ui/loading";
 import { useState } from "react";
+import { useHero, HeroType } from "@/contexts/hero-context";
 
 export default function Header({ header }: { header: HeaderType }) {
   const { data: session } = useSession();
   const { setShowSignModal } = useAppContext();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { heroType, setHeroType } = useHero();
 
   if (header.disabled) {
     return null;
@@ -172,6 +180,81 @@ export default function Header({ header }: { header: HeaderType }) {
           <div className="shrink-0 flex gap-2 items-center">
             {header.show_locale && <LocaleToggle />}
             {header.show_theme && <ThemeToggle />}
+
+            {/* Hero Switcher */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="hidden sm:inline-block">Hero Switcher</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v1-centered")}
+                    className="gap-2"
+                  >
+                    {heroType === "v1-centered" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v1-centered" ? "ml-0" : "ml-6"}>
+                      Hero V1 (Centered)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v2-new")}
+                    className="gap-2"
+                  >
+                    {heroType === "v2-new" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v2-new" ? "ml-0" : "ml-6"}>
+                      Hero V2 (Scene 2)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v3-third")}
+                    className="gap-2"
+                  >
+                    {heroType === "v3-third" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v3-third" ? "ml-0" : "ml-6"}>
+                      Hero V3 (Scene 3)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v4-fourth")}
+                    className="gap-2"
+                  >
+                    {heroType === "v4-fourth" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v4-fourth" ? "ml-0" : "ml-6"}>
+                      Hero V4 (Scene 4)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v5-particles")}
+                    className="gap-2"
+                  >
+                    {heroType === "v5-particles" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v5-particles" ? "ml-0" : "ml-6"}>
+                      Hero V5 (Particles)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v6-spline-new")}
+                    className="gap-2"
+                  >
+                    {heroType === "v6-spline-new" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v6-spline-new" ? "ml-0" : "ml-6"}>
+                      Hero V6 (New Scene)
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setHeroType("v7-static-bg")}
+                    className="gap-2"
+                  >
+                    {heroType === "v7-static-bg" && <CheckIcon className="h-4 w-4" />}
+                    <span className={heroType === "v7-static-bg" ? "ml-0" : "ml-6"}>
+                      Hero V7 (Static BG)
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
             <div className="relative group">
               <Button 
@@ -396,6 +479,83 @@ export default function Header({ header }: { header: HeaderType }) {
 
                     {header.show_theme && <ThemeToggle />}
                   </div>
+
+                  {/* Hero Switcher (Mobile) */}
+                  <div className="mt-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="gap-2 w-full">
+                            <Sparkles className="h-4 w-4" />
+                            <span>Hero Switcher</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-full">
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v1-centered")}
+                            className="gap-2"
+                          >
+                            {heroType === "v1-centered" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v1-centered" ? "ml-0" : "ml-6"}>
+                              Hero V1 (Centered)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v2-new")}
+                            className="gap-2"
+                          >
+                            {heroType === "v2-new" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v2-new" ? "ml-0" : "ml-6"}>
+                              Hero V2 (Scene 2)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v3-third")}
+                            className="gap-2"
+                          >
+                            {heroType === "v3-third" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v3-third" ? "ml-0" : "ml-6"}>
+                              Hero V3 (Scene 3)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v4-fourth")}
+                            className="gap-2"
+                          >
+                            {heroType === "v4-fourth" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v4-fourth" ? "ml-0" : "ml-6"}>
+                              Hero V4 (Scene 4)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v5-particles")}
+                            className="gap-2"
+                          >
+                            {heroType === "v5-particles" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v5-particles" ? "ml-0" : "ml-6"}>
+                              Hero V5 (Particles)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v6-spline-new")}
+                            className="gap-2"
+                          >
+                            {heroType === "v6-spline-new" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v6-spline-new" ? "ml-0" : "ml-6"}>
+                              Hero V6 (New Scene)
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setHeroType("v7-static-bg")}
+                            className="gap-2"
+                          >
+                            {heroType === "v7-static-bg" && <CheckIcon className="h-4 w-4" />}
+                            <span className={heroType === "v7-static-bg" ? "ml-0" : "ml-6"}>
+                              Hero V7 (Static BG)
+                            </span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                 </div>
               </SheetContent>
             </Sheet>

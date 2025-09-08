@@ -96,7 +96,7 @@ export default function FeatureNotionStyle({ section }: { section: SectionType }
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-6"
           >
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">核心功能</span>
+            <span className="text-lg font-semibold text-primary">核心功能</span>
           </motion.div>
           
           <h2 className="text-4xl lg:text-5xl font-bold mb-4">

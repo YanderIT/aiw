@@ -209,6 +209,35 @@
       }
     ]
   },
+  "features": {
+    "sectionTitle": "Core Features",
+    "sectionSubtitle": "AI-powered application document services tailored for your success",
+    "personalStatement": {
+      "title": "Personal Statement (PS) Generator",
+      "description": "From brainstorming to final draft, AI-assisted throughout to create a personal statement that showcases your unique strengths."
+    },
+    "resume": {
+      "title": "Resume (CV) Generator",
+      "description": "Intelligently adjust resume content and format based on target positions and schools, ensuring every resume perfectly matches requirements."
+    },
+    "coverLetterSop": {
+      "title": "Cover Letter/SOP Generator",
+      "description": "Professional cover letter and statement of purpose generator to help you clearly express your motivation and demonstrate your fit."
+    },
+    "nativeTeacher": {
+      "title": "Native English Teacher Review",
+      "description": "Experienced native English teachers provide professional polishing to ensure your documents are authentic, fluent, and academically appropriate."
+    },
+    "freeRevision": {
+      "title": "One Free Revision per Document",
+      "description": "We promise one free revision service for each document, striving for perfection and excellence."
+    },
+    "aiHumanPolish": {
+      "title": "AI + Human Dual Polish",
+      "description": "Combining AI intelligent analysis with professional human review, double assurance of document quality for the best application materials."
+    },
+    "startNow": "Start Now"
+  },
   "feature": {
     "name": "feature",
     "title": "Key Features of Essmote AI",
@@ -341,31 +370,47 @@
     "name": "faq",
     "label": "FAQ",
     "title": "Frequently Asked Questions About Essmote AI",
-    "description": "Have another question? Contact us on Discord or by email.",
+    "description": "Have another question? Contact us anytime.",
     "items": [
       {
-        "title": "What exactly is Essmote AI and how does it work?",
-        "description": "Essmote AI is a comprehensive NextJS boilerplate designed specifically for building AI SaaS startups. It provides ready-to-use templates, infrastructure setup, and deployment tools that help you launch your AI business in hours instead of days."
+        "title": "Is it safe to use AI for essay writing? Will it be detected?",
+        "description": "We provide an assistive tool rather than a replacement for writing. Essmote AI helps you organize your thoughts and optimize expression, while the final document remains created by you, ensuring originality and uniqueness. We also implement anti-AI detection optimization to minimize risks."
       },
       {
-        "title": "Do I need advanced technical skills to use Essmote AI?",
-        "description": "While basic programming knowledge is helpful, Essmote AI is designed to be developer-friendly. Our templates and documentation make it easy to get started, even if you're not an expert in AI or cloud infrastructure."
+        "title": "What's the difference between Essmote AI and general LLMs like ChatGPT?",
+        "description": "Essmote AI is deeply optimized for study abroad application scenarios, with a rich database of successful essays and proprietary algorithms. Compared to general models, our output is more professional, more aligned with application logic, more natural in expression, and better meets admissions officers' expectations."
       },
       {
-        "title": "What types of AI SaaS can I build with Essmote AI?",
-        "description": "Essmote AI supports a wide range of AI applications, from content generation to data analysis tools. Our templates cover popular use cases like AI chatbots, content generators, image processing apps, and more."
+        "title": "What if I'm not satisfied with the generated content?",
+        "description": "Each document comes with one free revision. After generation, you can submit revision requests and we'll optimize and polish based on your feedback. Note: Generation quality depends on how specific and complete your input is. We recommend providing detailed background, experiences, and goals for better results."
       },
       {
-        "title": "How long does it typically take to launch with Essmote AI?",
-        "description": "With Essmote AI, you can have a working prototype in hours and a production-ready application in hours. Our one-click deployment and pre-configured infrastructure significantly reduce the traditional months-long development cycle."
+        "title": "How does human editing work?",
+        "description": "We have professional essay editors familiar with North American and UK university application standards. They adjust tone, logic, and details to make essays more natural, fluent, and aligned with admissions officers' reading preferences."
       },
       {
-        "title": "What's included in the Essmote AI infrastructure?",
-        "description": "Essmote AI provides a complete infrastructure stack including authentication, database setup, API integration, payment processing, and scalable cloud deployment. Everything is pre-configured following industry best practices."
+        "title": "Is my essay data secure?",
+        "description": "We take data security seriously. All essays are encrypted for storage and won't be accessed or leaked without authorization. Users can delete their essays at any time to ensure complete privacy control."
       },
       {
-        "title": "Can I customize the templates to match my brand?",
-        "description": "Absolutely! All Essmote AI templates are fully customizable. You can modify the design, features, and functionality to match your brand identity and specific business requirements while maintaining the robust underlying infrastructure."
+        "title": "Which schools and programs does Essmote AI support?",
+        "description": "Essmote AI covers mainstream study abroad countries and most common schools and programs. Our model has strong generalization capabilities and can generate customized content based on your specific requirements."
+      },
+      {
+        "title": "Can I control the direction of generation?",
+        "description": "Yes. You can specify writing style and highlight specific experiences or achievements you want to showcase. The AI will adjust according to your instructions to generate content that better meets your needs."
+      },
+      {
+        "title": "Can I use both AI generation and human editing together?",
+        "description": "Yes. You can first use AI to quickly generate a draft, then have human editors provide secondary optimization, creating a dual guarantee of \"AI efficiency + human quality.\""
+      },
+      {
+        "title": "Can I just use human editing without AI?",
+        "description": "Absolutely. Our human editing service is independent. You can directly submit your existing drafts or essays for teacher editing and optimization."
+      },
+      {
+        "title": "Are the editors native speakers?",
+        "description": "Yes. Our editors are all native professionals familiar with North American and UK university writing and admission standards. They provide optimizations that best match target institutions in terms of language habits, logical structure, and cultural expression."
       }
     ]
   },

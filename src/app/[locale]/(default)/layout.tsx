@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { getLandingPage } from "@/services/page";
 import Feedback from "@/components/feedback";
 import { GlobalLoadingWrapper } from "@/components/ui/global-loading-wrapper";
+import { HeroProvider } from "@/contexts/hero-context";
 
 export default async function DefaultLayout({
   children,
@@ -16,12 +17,12 @@ export default async function DefaultLayout({
   const page = await getLandingPage(locale);
 
   return (
-    <>
+    <HeroProvider>
       {page.header && <Header header={page.header} />}
       <main className="overflow-x-hidden">{children}</main>
       {page.footer && <Footer footer={page.footer} />}
       {/* <Feedback socialLinks={page.footer?.social?.items} /> */}
       <GlobalLoadingWrapper />
-    </>
+    </HeroProvider>
   );
 }

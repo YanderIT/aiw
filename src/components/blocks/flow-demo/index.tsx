@@ -159,7 +159,7 @@ function FlowDemo() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 mb-6">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">使用流程</span>
+            <span className="text-lg font-semibold text-primary">使用流程</span>
           </div>
           
           <h2 className="text-4xl lg:text-5xl font-bold mb-4">
