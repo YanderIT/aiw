@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader } from "lucide-react";
+import { Check, Loader, Tag, Percent } from "lucide-react";
 import { PricingItem, Pricing as PricingType } from "@/types/blocks/pricing";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 import { useAppContext } from "@/contexts/app";
+import DiscountCheckoutModal from "@/components/checkout/discount-checkout-modal";
 
 export default function Pricing({ pricing }: { pricing: PricingType }) {
   if (pricing.disabled) {
@@ -227,53 +228,46 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                       )}
                     </div>
                     <div className="flex flex-col gap-2">
+                      {/* Discount Hint Badge */}
+                      <div className="flex items-center justify-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                        <Tag className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm text-amber-700 font-medium">
+                          有折扣码？点击购买时输入更优惠
+                        </span>
+                      </div>
+
+                      {/* Chinese Payment Option */}
                       {item.cn_amount && item.cn_amount > 0 ? (
                         <div className="flex items-center gap-x-2 mt-2">
                           <span className="text-sm">人民币支付 👉</span>
-                          <div
-                            className="inline-block p-2 hover:cursor-pointer hover:bg-base-200 rounded-md"
-                            onClick={() => {
-                              if (isLoading) {
-                                return;
-                              }
-                              handleCheckout(item, true);
-                            }}
-                          >
-                            <img
-                              src="/imgs/cnpay.png"
-                              alt="cnpay"
-                              className="w-20 h-10 rounded-lg"
-                            />
-                          </div>
+                          <DiscountCheckoutModal item={item} cnPay={true}>
+                            <div className="inline-block p-2 hover:cursor-pointer hover:bg-base-200 rounded-md">
+                              <img
+                                src="/imgs/cnpay.png"
+                                alt="cnpay"
+                                className="w-20 h-10 rounded-lg"
+                              />
+                            </div>
+                          </DiscountCheckoutModal>
                         </div>
                       ) : null}
-                      {item.button && (
-                        <Button
-                          className="w-full flex items-center justify-center gap-2 font-semibold"
-                          disabled={isLoading}
-                          onClick={() => {
-                            if (isLoading) {
-                              return;
-                            }
-                            handleCheckout(item);
-                          }}
-                        >
-                          {(!isLoading ||
-                            (isLoading && productId !== item.product_id)) && (
-                            <p>{item.button.title}</p>
-                          )}
 
-                          {isLoading && productId === item.product_id && (
-                            <p>{item.button.title}</p>
-                          )}
-                          {isLoading && productId === item.product_id && (
-                            <Loader className="mr-2 h-4 w-4 animate-spin" />
-                          )}
-                          {item.button.icon && (
-                            <Icon name={item.button.icon} className="size-4" />
-                          )}
-                        </Button>
+                      {/* Main Purchase Button */}
+                      {item.button && (
+                        <DiscountCheckoutModal item={item}>
+                          <Button
+                            className="w-full flex items-center justify-center gap-2 font-semibold"
+                            disabled={isLoading}
+                          >
+                            {item.button.icon && (
+                              <Icon name={item.button.icon} className="size-4" />
+                            )}
+                            <span>{item.button.title}</span>
+                            <Percent className="w-4 h-4" />
+                          </Button>
+                        </DiscountCheckoutModal>
                       )}
+
                       {item.tip && (
                         <p className="text-muted-foreground text-sm mt-2">
                           {item.tip}

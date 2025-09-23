@@ -8,6 +8,7 @@ import { findUserByUuid } from "@/models/user";
 import { getSnowId } from "@/lib/hash";
 import { getPricingPage } from "@/services/page";
 import { PricingItem } from "@/types/blocks/pricing";
+import { validateDiscountCode, insertDiscountCodeUsage, updateDiscountCodeUsageCount } from "@/models/discount";
 
 export async function POST(req: Request) {
   try {
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
       product_name,
       valid_months,
       cancel_url,
+      discount_code,
     } = await req.json();
 
     if (!cancel_url) {
@@ -92,6 +94,29 @@ export async function POST(req: Request) {
       return respErr("invalid user");
     }
 
+    // 处理折扣码
+    let discountAmount = 0;
+    let bonusCredits = 0;
+    let discountCodeData = null;
+    let finalAmount = amount;
+
+    if (discount_code) {
+      const validation = await validateDiscountCode(discount_code, user_uuid, product_id, amount);
+      if (!validation.valid) {
+        return respErr(validation.message);
+      }
+      
+      discountAmount = validation.discountAmount || 0;
+      bonusCredits = validation.bonusCredits || 0;
+      discountCodeData = validation.discountCode;
+      finalAmount = amount - discountAmount;
+
+      // 确保最终金额不为负数
+      if (finalAmount < 0) {
+        finalAmount = 0;
+      }
+    }
+
     const order_no = getSnowId();
 
     const currentDate = new Date();
@@ -120,15 +145,19 @@ export async function POST(req: Request) {
       created_at: created_at,
       user_uuid: user_uuid,
       user_email: user_email,
-      amount: amount,
+      amount: finalAmount, // 使用折扣后的金额
       interval: interval,
       expired_at: expired_at,
       status: "created",
-      credits: credits,
+      credits: credits + bonusCredits, // 添加赠送积分
       currency: currency,
       product_id: product_id,
       product_name: product_name,
       valid_months: valid_months,
+      discount_code: discount_code,
+      discount_amount: discountAmount,
+      bonus_credits: bonusCredits,
+      original_amount: amount, // 保存原价
     };
     await insertOrder(order);
 
@@ -146,7 +175,7 @@ export async function POST(req: Request) {
             product_data: {
               name: product_name,
             },
-            unit_amount: amount,
+            unit_amount: finalAmount,
             recurring: is_subscription
               ? {
                   interval: interval,

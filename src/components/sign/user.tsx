@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +17,12 @@ import { User } from "@/types/user";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { NavItem } from "@/types/blocks/base";
+import { useUserCredits } from "@/hooks/useUserCredits";
+import { Coins } from "lucide-react";
 
 export default function SignUser({ user }: { user: User }) {
   const t = useTranslations();
+  const { credits, loading } = useUserCredits();
 
   const dropdownItems: NavItem[] = [
     {
@@ -45,34 +49,55 @@ export default function SignUser({ user }: { user: User }) {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer">
-          <AvatarImage src={user.avatar_url} alt={user.nickname} />
-          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-            {getInitials(user.nickname)}
-          </AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="mx-4 bg-background">
-        {dropdownItems.map((item, index) => (
-          <React.Fragment key={index}>
-            <DropdownMenuItem
-              key={index}
-              className="flex justify-center cursor-pointer"
-            >
-              {item.url ? (
-                <Link href={item.url as any} target={item.target}>
-                  {item.title}
-                </Link>
-              ) : (
-                <button onClick={item.onClick}>{item.title}</button>
-              )}
-            </DropdownMenuItem>
-            {index !== dropdownItems.length - 1 && <DropdownMenuSeparator />}
-          </React.Fragment>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      {/* 积分显示 */}
+      <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+        <Coins className="w-4 h-4" />
+        <span className="font-medium">
+          {loading ? "..." : credits}
+        </span>
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="cursor-pointer">
+            <AvatarImage src={user.avatar_url} alt={user.nickname} />
+            <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+              {getInitials(user.nickname)}
+            </AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="mx-4 bg-background min-w-[200px]">
+          {/* 用户信息 */}
+          <DropdownMenuItem className="flex-col items-start p-3">
+            <div className="font-medium">{user.nickname}</div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+              <Coins className="w-4 h-4" />
+              <span>剩余积分: {loading ? "加载中..." : credits}</span>
+            </div>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          {/* 菜单项 */}
+          {dropdownItems.slice(1).map((item, index) => (
+            <React.Fragment key={index}>
+              <DropdownMenuItem className="cursor-pointer">
+                {item.url ? (
+                  <Link href={item.url as any} target={item.target} className="w-full">
+                    {item.title}
+                  </Link>
+                ) : (
+                  <button onClick={item.onClick} className="w-full text-left">
+                    {item.title}
+                  </button>
+                )}
+              </DropdownMenuItem>
+              {index !== dropdownItems.slice(1).length - 1 && <DropdownMenuSeparator />}
+            </React.Fragment>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

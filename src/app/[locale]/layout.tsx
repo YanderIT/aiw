@@ -9,6 +9,7 @@ import { NextAuthSessionProvider } from "@/auth/session";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "@/providers/theme";
 import SignModal from "@/components/sign/modal";
+import NewcomerManager from "@/components/newcomer/newcomer-manager";
 
 export async function generateMetadata({
   params,
@@ -49,6 +50,7 @@ export default async function LocaleLayout({
           <ThemeProvider attribute="class" disableTransitionOnChange>
             {children}
             <SignModal />
+            <NewcomerManager />
           </ThemeProvider>
         </AppContextProvider>
       </NextAuthSessionProvider>

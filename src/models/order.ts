@@ -1,5 +1,6 @@
 import { Order } from "@/types/order";
 import { getSupabaseClient } from "@/models/db";
+import { insertDiscountCodeUsage, updateDiscountCodeUsageCount, findDiscountCodeByCode } from "@/models/discount";
 
 export enum OrderStatus {
   Created = "created",
@@ -270,4 +271,37 @@ export async function getOrderCountByDate(
   });
 
   return dateCountMap;
+}
+
+// Record discount code usage when order is paid
+export async function recordDiscountUsage(order: Order) {
+  if (!order.discount_code) {
+    return; // No discount code to record
+  }
+
+  try {
+    // Find the discount code
+    const discountCode = await findDiscountCodeByCode(order.discount_code);
+    if (!discountCode) {
+      console.error("找不到折扣码:", order.discount_code);
+      return;
+    }
+
+    // Record the usage
+    await insertDiscountCodeUsage({
+      discount_code_id: discountCode.id,
+      user_uuid: order.user_uuid,
+      order_no: order.order_no,
+      discount_amount: order.discount_amount || 0,
+      bonus_credits: order.bonus_credits || 0,
+    });
+
+    // Update the usage count
+    await updateDiscountCodeUsageCount(discountCode.id);
+
+    console.log("折扣码使用记录成功:", order.discount_code, "订单:", order.order_no);
+  } catch (error) {
+    console.error("记录折扣码使用失败:", error);
+    // Don't throw error to avoid affecting the main payment flow
+  }
 }

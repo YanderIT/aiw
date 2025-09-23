@@ -23,4 +23,8 @@ export interface Order {
   paid_at?: string;
   paid_email?: string;
   paid_detail?: string;
+  discount_code?: string;
+  discount_amount?: number;
+  bonus_credits?: number;
+  original_amount?: number;
 }

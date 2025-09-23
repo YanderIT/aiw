@@ -8,6 +8,7 @@ import { getIsoTimestr, getOneYearLaterTimestr } from "@/lib/time";
 
 import Stripe from "stripe";
 import { updateAffiliateForOrder } from "./affiliate";
+import { insertDiscountCodeUsage, updateDiscountCodeUsageCount, findDiscountCodeByCode } from "@/models/discount";
 
 export async function handleOrderSession(session: Stripe.Checkout.Session) {
   try {
@@ -37,6 +38,21 @@ export async function handleOrderSession(session: Stripe.Checkout.Session) {
       if (order.credits > 0) {
         // increase credits for paied order
         await updateCreditForOrder(order);
+      }
+
+      // handle discount code usage
+      if (order.discount_code) {
+        const discountCode = await findDiscountCodeByCode(order.discount_code);
+        if (discountCode) {
+          await insertDiscountCodeUsage({
+            discount_code_id: discountCode.id,
+            user_uuid: order.user_uuid,
+            order_no: order.order_no,
+            discount_amount: order.discount_amount || 0,
+            bonus_credits: order.bonus_credits || 0
+          });
+          await updateDiscountCodeUsageCount(discountCode.id);
+        }
       }
 
       // update affiliate for paied order
