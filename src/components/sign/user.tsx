@@ -73,7 +73,7 @@ export default function SignUser({ user }: { user: User }) {
             <div className="font-medium">{user.nickname}</div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
               <Coins className="w-4 h-4" />
-              <span>剩余积分: {loading ? "加载中..." : credits}</span>
+              <span>剩余次数: {loading ? "加载中..." : credits}</span>
             </div>
           </DropdownMenuItem>
           

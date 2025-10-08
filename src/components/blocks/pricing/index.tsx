@@ -1,14 +1,12 @@
 "use client";
 
-import { Check, Loader, Tag, Percent } from "lucide-react";
+import { Check, Tag, Percent } from "lucide-react";
 import { PricingItem, Pricing as PricingType } from "@/types/blocks/pricing";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/icon";
-import { Label } from "@/components/ui/label";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
 import { useAppContext } from "@/contexts/app";
@@ -21,7 +19,6 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
 
   const { user, setShowSignModal } = useAppContext();
 
-  const [group, setGroup] = useState(pricing.groups?.[0]?.name);
   const [isLoading, setIsLoading] = useState(false);
   const [productId, setProductId] = useState<string | null>(null);
 
@@ -94,7 +91,6 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
 
   useEffect(() => {
     if (pricing.items) {
-      setGroup(pricing.items[0].group);
       setProductId(pricing.items[0].product_id);
       setIsLoading(false);
     }
@@ -112,53 +108,10 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
           </p>
         </div>
         <div className="w-full flex flex-col items-center gap-2">
-          {pricing.groups && pricing.groups.length > 0 && (
-            <div className="flex h-12 mb-12 items-center rounded-md bg-muted p-1 text-lg">
-              <RadioGroup
-                value={group}
-                className={`h-full grid-cols-${pricing.groups.length}`}
-                onValueChange={(value) => {
-                  setGroup(value);
-                }}
-              >
-                {pricing.groups.map((item, i) => {
-                  return (
-                    <div
-                      key={i}
-                      className='h-full rounded-md transition-all has-[button[data-state="checked"]]:bg-white'
-                    >
-                      <RadioGroupItem
-                        value={item.name || ""}
-                        id={item.name}
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor={item.name}
-                        className="flex h-full cursor-pointer items-center justify-center px-7 font-semibold text-muted-foreground peer-data-[state=checked]:text-primary"
-                      >
-                        {item.title}
-                        {item.label && (
-                          <Badge
-                            variant="outline"
-                            className="border-primary bg-primary px-1.5 ml-1 text-primary-foreground"
-                          >
-                            {item.label}
-                          </Badge>
-                        )}
-                      </Label>
-                    </div>
-                  );
-                })}
-              </RadioGroup>
-            </div>
-          )}
           <div
             className="w-full mt-0 grid gap-4 md:gap-6 lg:gap-8 md:grid-cols-4"
           >
             {pricing.items?.map((item, index) => {
-              if (item.group && item.group !== group) {
-                return null;
-              }
 
               return (
                 <div
