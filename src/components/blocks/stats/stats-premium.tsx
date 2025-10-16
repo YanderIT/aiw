@@ -152,7 +152,7 @@ export default function StatsPremium({ section }: { section: SectionType }) {
         </div>
         
         {/* Linear-style Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
+        <div className="absolute inset-0 stats-bg-gradient" />
         
         {/* Subtle Light Beams */}
         <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-[#86f096]/10 to-transparent dark:via-[#86f096]/5" />
@@ -186,7 +186,7 @@ export default function StatsPremium({ section }: { section: SectionType }) {
             <span className="text-lg font-semibold text-[#3dcd77] dark:text-[#86f096]">平台数据</span>
           </motion.div>
           
-          <h2 className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4">
             {section.title || "我们的用户遍布世界名校"}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -248,33 +248,33 @@ function StatsCard({ stat, index, isInView }: StatsCardProps) {
         relative overflow-hidden rounded-xl
         transition-all duration-300
         p-7
-        ${stat.highlight ? 'ring-1 ring-gray-200 dark:ring-gray-700' : ''}
-        bg-white dark:bg-gray-900
-        border border-gray-200 dark:border-gray-800
+        ${stat.highlight ? 'ring-1 ring-gray-200 dark:ring-[#3dcd77]/20' : ''}
+        bg-white dark:bg-gray-800/50 dark:backdrop-blur-sm
+        border border-gray-200 dark:border-gray-700/50
         shadow-sm
-        hover:shadow-md
-        hover:border-gray-300 dark:hover:border-gray-700
+        hover:shadow-md dark:hover:shadow-[#3dcd77]/5
+        hover:border-gray-300 dark:hover:border-[#3dcd77]/30
         group
       `}>
         {/* Linear-style Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/3 dark:to-[#3dcd77]/3" />
+        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.04]">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/10 dark:to-[#3dcd77]/10" />
         </div>
 
         {/* Subtle Hover Gradient */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/3 dark:via-transparent dark:to-[#3dcd77]/3" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#86f096]/5 via-transparent to-[#3dcd77]/5 dark:from-[#86f096]/8 dark:via-transparent dark:to-[#3dcd77]/8" />
         </div>
 
         {/* Content */}
         <div className="relative">
           {/* Icon */}
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-4
-                         bg-gradient-to-br from-[#86f096]/10 to-[#3dcd77]/10 dark:from-[#86f096]/5 dark:to-[#3dcd77]/5
-                         border border-[#3dcd77]/20 dark:border-[#3dcd77]/10
-                         group-hover:from-[#86f096]/20 group-hover:to-[#3dcd77]/20 dark:group-hover:from-[#86f096]/10 dark:group-hover:to-[#3dcd77]/10
+                         bg-gradient-to-br from-[#86f096]/10 to-[#3dcd77]/10 dark:from-[#86f096]/15 dark:to-[#3dcd77]/15
+                         border border-[#3dcd77]/20 dark:border-[#3dcd77]/30
+                         group-hover:from-[#86f096]/20 group-hover:to-[#3dcd77]/20 dark:group-hover:from-[#86f096]/25 dark:group-hover:to-[#3dcd77]/25
                          transition-all duration-200">
-            <IconComponent className="w-4 h-4 text-[#027c50]" />
+            <IconComponent className="w-4 h-4 text-[#027c50] dark:text-[#86f096]" />
           </div>
 
           {/* Title */}
@@ -313,7 +313,7 @@ function StatsCard({ stat, index, isInView }: StatsCardProps) {
 
         {/* Subtle Corner Accent */}
         <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-[#86f096]/10 to-transparent dark:from-[#3dcd77]/10" />
+          <div className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-[#86f096]/10 to-transparent dark:from-[#86f096]/20 dark:to-transparent" />
         </div>
       </div>
     </motion.div>

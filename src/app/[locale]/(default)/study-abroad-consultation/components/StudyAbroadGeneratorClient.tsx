@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Square, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, User, GraduationCap, Target, Trophy, HelpCircle } from "lucide-react";
+import { CheckCircle, Square, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, User, GraduationCap, Target, Trophy, HelpCircle, FileText } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 
 import { StudyAbroadProvider, useStudyAbroad } from "./StudyAbroadContext";
 
 import BasicInfoModule from "./modules/BasicInfoModule";
+import PolishingDetailsModule from "./modules/PolishingDetailsModule";
 import AcademicBackgroundModule from "./modules/AcademicBackgroundModule";
 import TargetProgramModule from "./modules/TargetProgramModule";
 import BackgroundExperienceModule from "./modules/BackgroundExperienceModule";
@@ -39,30 +40,50 @@ function ConfirmationPage() {
   } = useStudyAbroad();
 
   const validateData = () => {
-    const { basicInfo, academicBackground, targetProgram, consultationNeeds } = data;
-    
+    const { basicInfo, polishingDetails, academicBackground, targetProgram, consultationNeeds } = data;
+
     if (!basicInfo.full_name || !basicInfo.phone || !basicInfo.email) {
       toast.error('请填写完整的基本信息');
       return false;
     }
-    
-    if (!academicBackground.current_degree || !academicBackground.current_school || 
+
+    if (!polishingDetails.uploaded_document_name || !polishingDetails.polishing_requirements) {
+      toast.error('请上传文档并填写润色要求');
+      return false;
+    }
+
+    if (!polishingDetails.return_method) {
+      toast.error('请选择返还方式');
+      return false;
+    }
+
+    if (polishingDetails.return_method === 'email' && !polishingDetails.return_email) {
+      toast.error('请填写接收邮箱');
+      return false;
+    }
+
+    if (polishingDetails.return_method === 'wechat' && !polishingDetails.return_wechat) {
+      toast.error('请填写微信号');
+      return false;
+    }
+
+    if (!academicBackground.current_degree || !academicBackground.current_school ||
         !academicBackground.major || !academicBackground.gpa || !academicBackground.graduation_date) {
       toast.error('请填写完整的学术背景信息');
       return false;
     }
-    
-    if (!targetProgram.target_degree || !targetProgram.target_country || 
+
+    if (!targetProgram.target_degree || !targetProgram.target_country ||
         !targetProgram.target_major || !targetProgram.target_schools || !targetProgram.application_year) {
       toast.error('请填写完整的申请目标信息');
       return false;
     }
-    
+
     if (!consultationNeeds.main_concerns || !consultationNeeds.service_expectations) {
       toast.error('请填写咨询需求');
       return false;
     }
-    
+
     return true;
   };
 
@@ -112,7 +133,7 @@ function ConfirmationPage() {
 
       <div className="bg-muted/30 rounded-xl p-6">
         <h3 className="text-lg font-medium text-foreground mb-4">信息汇总</h3>
-        
+
         <div className="space-y-4">
           <div className="bg-background rounded-lg p-4">
             <h4 className="font-medium mb-2 flex items-center gap-2">
@@ -124,6 +145,32 @@ function ConfirmationPage() {
               <div>电话：{data.basicInfo.phone || '未填写'}</div>
               <div>邮箱：{data.basicInfo.email || '未填写'}</div>
               <div>微信：{data.basicInfo.wechat || '未填写'}</div>
+            </div>
+          </div>
+
+          <div className="bg-background rounded-lg p-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              文档润色
+            </h4>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div>上传文档：{data.polishingDetails.uploaded_document_name || '未上传'}</div>
+              <div>
+                润色要求：
+                <p className="mt-1 text-foreground">
+                  {data.polishingDetails.polishing_requirements || '未填写'}
+                </p>
+              </div>
+              <div>
+                返还方式：
+                {data.polishingDetails.return_method === 'email' && '邮件'}
+                {data.polishingDetails.return_method === 'wechat' && '微信'}
+                {!data.polishingDetails.return_method && '未选择'}
+                {data.polishingDetails.return_method === 'email' && data.polishingDetails.return_email &&
+                  ` (${data.polishingDetails.return_email})`}
+                {data.polishingDetails.return_method === 'wechat' && data.polishingDetails.return_wechat &&
+                  ` (${data.polishingDetails.return_wechat})`}
+              </div>
             </div>
           </div>
 
@@ -208,6 +255,12 @@ function StudyAbroadGeneratorContent() {
       title: "基本信息",
       icon: User,
       component: BasicInfoModule,
+    },
+    {
+      id: "polishingDetails",
+      title: "文档润色",
+      icon: FileText,
+      component: PolishingDetailsModule,
     },
     {
       id: "academicBackground",

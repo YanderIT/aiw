@@ -9,6 +9,14 @@ export interface StudyAbroadData {
     email: string;
     wechat: string;
   };
+  polishingDetails: {
+    uploaded_document_name: string;
+    uploaded_document_url: string;
+    polishing_requirements: string;
+    return_method: 'email' | 'wechat' | '';
+    return_email: string;
+    return_wechat: string;
+  };
   academicBackground: {
     current_degree: string;
     current_school: string;
@@ -43,6 +51,7 @@ export interface StudyAbroadData {
 interface StudyAbroadContextType {
   data: StudyAbroadData;
   updateBasicInfo: (data: Partial<StudyAbroadData['basicInfo']>) => void;
+  updatePolishingDetails: (data: Partial<StudyAbroadData['polishingDetails']>) => void;
   updateAcademicBackground: (data: Partial<StudyAbroadData['academicBackground']>) => void;
   updateTargetProgram: (data: Partial<StudyAbroadData['targetProgram']>) => void;
   updateBackgroundExperience: (data: Partial<StudyAbroadData['backgroundExperience']>) => void;
@@ -63,6 +72,14 @@ const initialData: StudyAbroadData = {
     phone: '',
     email: '',
     wechat: ''
+  },
+  polishingDetails: {
+    uploaded_document_name: '',
+    uploaded_document_url: '',
+    polishing_requirements: '',
+    return_method: '',
+    return_email: '',
+    return_wechat: ''
   },
   academicBackground: {
     current_degree: '',
@@ -116,6 +133,17 @@ export function StudyAbroadProvider({ children }: { children: React.ReactNode })
       if (cached) {
         try {
           const parsedData = JSON.parse(cached);
+          // Migrate old data that doesn't have polishingDetails
+          if (!parsedData.polishingDetails) {
+            parsedData.polishingDetails = {
+              uploaded_document_name: '',
+              uploaded_document_url: '',
+              polishing_requirements: '',
+              return_method: '',
+              return_email: '',
+              return_wechat: ''
+            };
+          }
           setData(parsedData);
         } catch (error) {
           console.error('Failed to load cached data:', error);
@@ -136,6 +164,13 @@ export function StudyAbroadProvider({ children }: { children: React.ReactNode })
     setData(prev => ({
       ...prev,
       basicInfo: { ...prev.basicInfo, ...newData }
+    }));
+  }, []);
+
+  const updatePolishingDetails = useCallback((newData: Partial<StudyAbroadData['polishingDetails']>) => {
+    setData(prev => ({
+      ...prev,
+      polishingDetails: { ...prev.polishingDetails, ...newData }
     }));
   }, []);
 
@@ -182,6 +217,14 @@ export function StudyAbroadProvider({ children }: { children: React.ReactNode })
         email: 'zhangsan@example.com',
         wechat: 'zhangsan_wx'
       },
+      polishingDetails: {
+        uploaded_document_name: 'personal-statement-draft.pdf',
+        uploaded_document_url: '/temp/mock-document.pdf',
+        polishing_requirements: '希望老师重点关注语法错误和表达流畅度，特别是第二段关于研究经历的部分。',
+        return_method: 'wechat',
+        return_email: '',
+        return_wechat: 'zhangsan_wx'
+      },
       academicBackground: {
         current_degree: '本科',
         current_school: '清华大学',
@@ -217,6 +260,7 @@ export function StudyAbroadProvider({ children }: { children: React.ReactNode })
   const value: StudyAbroadContextType = {
     data,
     updateBasicInfo,
+    updatePolishingDetails,
     updateAcademicBackground,
     updateTargetProgram,
     updateBackgroundExperience,

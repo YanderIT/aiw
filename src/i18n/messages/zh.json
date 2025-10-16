@@ -110,14 +110,14 @@
     }
   },
   "my_credits": {
-    "title": "我的积分",
+    "title": "剩余次数",
     "left_tip": "剩余次数: {left_credits}",
     "no_credits": "没有积分记录",
     "recharge": "充值",
     "table": {
       "trans_no": "交易号",
       "trans_type": "交易类型",
-      "credits": "积分",
+      "credits": "次数",
       "updated_at": "更新时间",
       "status": "状态"
     }

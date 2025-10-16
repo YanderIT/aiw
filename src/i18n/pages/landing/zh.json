@@ -31,7 +31,7 @@
       ]
     },
     "show_sign": true,
-    "show_theme": false,
+    "show_theme": true,
     "show_locale": false
   },
   "hero": {
@@ -311,7 +311,7 @@
       },
       {
         "title": "AI润色用户",
-        "label": "6500+",
+        "label": "1500+",
         "description": "使用过AI润色"
       },
       {

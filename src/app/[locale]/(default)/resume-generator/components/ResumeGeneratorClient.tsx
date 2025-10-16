@@ -378,7 +378,7 @@ function ResumeGeneratorContent() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">文书生成器</h1>
+              <h1 className="text-3xl font-bold text-foreground">简历模块</h1>
               <p className="text-muted-foreground mt-2 text-lg">
                 分模块填写您的信息，自由选择要包含的内容
               </p>
@@ -393,7 +393,7 @@ function ResumeGeneratorContent() {
           <div className="col-span-3">
             <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
-                文书模块
+                简历模块
               </h3>
               <div className="space-y-3">
                 {modules.map((module) => {
@@ -464,7 +464,7 @@ function ResumeGeneratorContent() {
                   >
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
                     <div className="flex-1 text-left">
-                      <div className="font-medium text-sm">确认并生成文书</div>
+                      <div className="font-medium text-sm">确认并生成简历</div>
                     </div>
                     <ArrowRight className="w-4 h-4 flex-shrink-0 opacity-60" />
                   </button>

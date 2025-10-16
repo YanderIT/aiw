@@ -16,71 +16,26 @@ export default async function CreationCenterPage() {
     redirect("/auth/signin");
   }
 
-  const categories = [
-    { id: "all", name: "精选", active: true },
-    { id: "statement", name: "陈述文书", active: false },
-    { id: "recommendation", name: "推荐信", active: false },
-    { id: "application", name: "申请", active: false },
-    { id: "resume", name: "简历", active: false },
-    { id: "cover", name: "求职", active: false },
-    { id: "academic", name: "留学专业服务", active: false },
-  ];
-
-  const featuredTools = [
-    {
-      icon: "one-on-one-consulting",
-      title: "留学1对1咨询",
-      description: "您此时此刻的疑惑可能无数人都曾经历过，不妨和过来人聊一聊，我们会根据您的问题匹配最专业对口的老师以确保您有所收获",
-      price: null,
-      category: "featured",
-      url: "/study-abroad-consultation"
-    },
+  const allTools = [
     {
       icon: "resume-generate",
       title: "简历生成",
       description: "AI智能简历生成器，根据您的个人信息、教育背景、工作经验等自动生成专业的简历模板，支持多种格式导出",
       price: 80,
-      category: "resume",
       url: "/resume-generator"
-    }
-  ];
-
-  const documentTools = [
+    },
     {
       icon: "personal-statement-write",
       title: "个人陈述撰写",
       description: "专业的Personal Statement撰写服务，展现您的独特背景、学术热情和职业目标，让您的申请脱颖而出",
       price: 100,
-      category: "statement",
       url: "/personal-statement"
     },
-    // {
-    //   icon: "purpose-statement-write",
-    //   title: "目的陈述撰写",
-    //   description: "目的陈述适合个人检查专业院校的申请专业理由，协助我们进行针对性的查询意向重点处理",
-    //   price: 100,
-    //   category: "statement"
-    // },
-    // {
-    //   icon: "personal-statement-polish",
-    //   title: "个人陈述润色",
-    //   description: "用户需要提供已有的个人陈述进行润色质量检查，我们针对该文档进行专业化处理，并根据目前文档内容提供专业化建议",
-    //   price: 100,
-    //   category: "statement"
-    // },
-    // {
-    //   icon: "personal-statement-evaluate",
-    //   title: "个人陈述评估",
-    //   description: "不满意自己的个人陈述？个人陈述整体评估功能？让AI帮您检查文档情况",
-    //   price: 60,
-    //   category: "statement"
-    // },
     {
       icon: "sop-statement",
       title: "SOP 目的陈述撰写",
       description: "专业的Statement of Purpose撰写服务，帮助您清晰表达学术目标和研究兴趣，展现个人动机和未来规划",
       price: 120,
-      category: "statement",
       url: "/sop"
     },
     {
@@ -88,48 +43,23 @@ export default async function CreationCenterPage() {
       title: "Cover Letter撰写",
       description: "专业的Cover Letter撰写服务，帮助您清晰表达学术目标和研究兴趣，展现个人动机和未来规划",
       price: 90,
-      category: "statement",
       url: "/cover-letter"
-    }
-  ];
-
-  const recommendationTools = [
+    },
     {
       icon: "recommendation-letter-write",
       title: "推荐信撰写",
       description: "我们提供针对性的推荐信工具，支持科研推荐/实习/理科等专业推荐场景",
       price: 100,
-      category: "recommendation",
       url: "/recommendation-letter"
     },
-    // {
-    //   icon: "recommendation-letter-polish",
-    //   title: "推荐信润色",
-    //   description: "用户需要提供已有的推荐信进行润色质量检查，我们ITN的专业顾问为工具提供专业化修改建议",
-    //   price: 100,
-    //   category: "recommendation"
-    // },
-    // {
-    //   icon: "recommendation-letter-evaluate",
-    //   title: "推荐信评估",
-    //   description: "还不满意——针对推荐信进行整体具体评估？让AI帮您检查评估？",
-    //   price: 50,
-    //   category: "recommendation"
-    // }
-  ];
-
-  const resumeTools = [
     {
-      icon: "resume-generate",
-      title: "简历生成",
-      description: "AI智能简历生成器，根据您的个人信息、教育背景、工作经验等自动生成专业的简历模板，支持多种格式导出",
-      price: 80,
-      category: "resume",
-      url: "/resume-generator"
+      icon: "document-polish",
+      title: "人工润色",
+      description: "专业的母语老师人工润色服务，为您的文书提供地道、流畅的语言表达，确保符合学术规范",
+      price: 150,
+      url: "/study-abroad-consultation"
     }
   ];
-
-  const allTools = [...featuredTools, ...documentTools, ...recommendationTools, ...resumeTools];
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,76 +95,18 @@ export default async function CreationCenterPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Featured Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">精选</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredTools.map((tool, index) => (
-              <CreationToolCard
-                key={index}
-                icon={tool.icon}
-                title={tool.title}
-                description={tool.description}
-                price={tool.price}
-                url={tool.url}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Document Tools Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">陈述文书</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {documentTools.map((tool, index) => (
-              <CreationToolCard
-                key={index}
-                icon={tool.icon}
-                title={tool.title}
-                description={tool.description}
-                price={tool.price}
-                url={tool.url}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Recommendation Tools Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">推荐信</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {recommendationTools.map((tool, index) => (
-              <CreationToolCard
-                key={index}
-                icon={tool.icon}
-                title={tool.title}
-                description={tool.description}
-                price={tool.price}
-                url={tool.url}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Resume Tools Section */}
-        <div>
-          <h2 className="text-2xl font-bold text-foreground mb-6">简历</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {resumeTools.map((tool, index) => (
-              <CreationToolCard
-                key={index}
-                icon={tool.icon}
-                title={tool.title}
-                description={tool.description}
-                price={tool.price}
-                url={tool.url}
-                index={index}
-              />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {allTools.map((tool: any, index: number) => (
+            <CreationToolCard
+              key={index}
+              icon={tool.icon}
+              title={tool.title}
+              description={tool.description}
+              price={tool.price}
+              url={tool.url}
+              index={index}
+            />
+          ))}
         </div>
       </div>
     </div>

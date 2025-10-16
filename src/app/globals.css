@@ -203,16 +203,29 @@
   
   /* Grid pattern for feature cards */
   .bg-grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(to right, rgb(0 0 0 / 0.02) 1px, transparent 1px),
       linear-gradient(to bottom, rgb(0 0 0 / 0.02) 1px, transparent 1px);
     background-size: 24px 24px;
   }
-  
+
   .dark .bg-grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(to right, rgb(255 255 255 / 0.02) 1px, transparent 1px),
       linear-gradient(to bottom, rgb(255 255 255 / 0.02) 1px, transparent 1px);
+  }
+
+  /* Stats section background */
+  .stats-bg-gradient {
+    background: linear-gradient(to bottom, rgba(249, 250, 251, 0.5), rgb(255, 255, 255), rgba(249, 250, 251, 0.3));
+  }
+
+  .dark .stats-bg-gradient {
+    background: linear-gradient(to bottom,
+      oklch(0.2478 0 0),
+      oklch(0.2478 0 0),
+      oklch(0.2478 0 0)
+    ) !important;
   }
 }
 

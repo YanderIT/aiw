@@ -102,7 +102,7 @@ export default function UserSection({ user, collapsed = false, credits }: UserSe
           className="cursor-pointer"
         >
           <CreditCard className="mr-2 h-4 w-4" />
-          <span>我的积分</span>
+          <span>剩余次数</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => router.push("/settings")}

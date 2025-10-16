@@ -230,7 +230,7 @@ export function CreationToolCard({
             </p>
 
             {/* Price badge with no "积分" text */}
-            {price && (
+            {/* {price && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -248,7 +248,7 @@ export function CreationToolCard({
                   <span className="font-bold text-green-700 dark:text-green-300 text-base">{price}</span>
                 </motion.div>
               </motion.div>
-            )}
+            )} */}
           </div>
         </div>
 

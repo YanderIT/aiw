@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { CheckCircle, Clock, Phone, Mail, MessageCircle, User, GraduationCap, Target, Trophy, HelpCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Clock, Phone, Mail, MessageCircle, User, GraduationCap, Target, Trophy, HelpCircle, ArrowLeft, FileText } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { apiRequest } from '@/lib/api-client';
@@ -141,6 +142,66 @@ export default function StudyAbroadResultClient({ documentUuid }: StudyAbroadRes
                   <MessageCircle className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">微信：</span>
                   <span>{formData.basicInfo?.wechat || '-'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                文档润色
+              </h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">上传文档：</span>
+                  <span>{formData.polishingDetails?.uploaded_document_name || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">润色要求：</span>
+                  <p className="mt-1 text-foreground bg-muted/30 p-3 rounded-lg">
+                    {formData.polishingDetails?.polishing_requirements || '-'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">返还方式：</span>
+                  <div className="mt-2">
+                    {formData.polishingDetails?.return_method === 'email' && (
+                      <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg">
+                        <Mail className="w-4 h-4 text-blue-600" />
+                        <span>邮件返还</span>
+                        <span className="ml-2 text-blue-600">{formData.polishingDetails?.return_email}</span>
+                      </div>
+                    )}
+                    {formData.polishingDetails?.return_method === 'wechat' && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 bg-green-50 dark:bg-green-950/30 p-3 rounded-lg">
+                          <MessageCircle className="w-4 h-4 text-green-600" />
+                          <span>微信返还</span>
+                          <span className="ml-2 text-green-600">{formData.polishingDetails?.return_wechat}</span>
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-4">
+                          <p className="text-sm text-muted-foreground mb-3">
+                            请添加客服微信，润色完成后我们将通过微信发送给您
+                          </p>
+                          <div className="flex justify-center">
+                            <div className="bg-white p-4 rounded-lg shadow-sm">
+                              <Image
+                                src="/imgs/wechat-qr-placeholder.svg"
+                                alt="WeChat QR Code"
+                                width={150}
+                                height={150}
+                                className="rounded"
+                              />
+                              <p className="text-center text-xs text-muted-foreground mt-2">
+                                扫码添加客服微信
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
