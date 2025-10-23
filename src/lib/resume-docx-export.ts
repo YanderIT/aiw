@@ -334,8 +334,8 @@ const appendIfTruthy = <T>(collection: T[], item: T | null | undefined) => {
   }
 };
 
-const DITTO_TEXT_COLOR = '333333';
-const DITTO_SECONDARY_COLOR = '666666';
+const DITTO_TEXT_COLOR = '000000';
+const DITTO_SECONDARY_COLOR = '000000';
 
 type HeaderLine = {
   text?: string;
@@ -460,16 +460,102 @@ const createMainEntryHeaderTable = ({
   });
 };
 
-const wrapWithAccent = (
-  content: Array<Paragraph | Table>,
-  accentColor: string,
-  options: { gap?: number } = {}
-): Table | null => {
-  if (!content.length) {
+const wrapWithAccent = ({
+  header,
+  body,
+  accentColor,
+  gap = 160,
+  thickWidth = 260,
+  thinWidth = 60
+}: {
+  header?: Paragraph | Table | null;
+  body: Array<Paragraph | Table>;
+  accentColor: string;
+  gap?: number;
+  thickWidth?: number;
+  thinWidth?: number;
+}): Table | null => {
+  if (!header && body.length === 0) {
     return null;
   }
 
-  const gap = options.gap ?? 160;
+  const blankParagraph = new Paragraph({ text: '', spacing: { before: 0, after: 0 } });
+
+  const baseCellBorders = {
+    top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+    bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+    left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+    right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
+  } as const;
+
+  const accentBorders = {
+    top: { style: BorderStyle.NONE, size: 0, color: accentColor },
+    bottom: { style: BorderStyle.NONE, size: 0, color: accentColor },
+    left: { style: BorderStyle.NONE, size: 0, color: accentColor },
+    right: { style: BorderStyle.NONE, size: 0, color: accentColor }
+  } as const;
+
+  const rows: TableRow[] = [];
+
+  if (header) {
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: thickWidth, type: WidthType.DXA },
+            shading: { fill: accentColor },
+            borders: accentBorders,
+            children: [blankParagraph]
+          }),
+          new TableCell({
+            width: { size: thinWidth, type: WidthType.DXA },
+            shading: { fill: accentColor },
+            borders: accentBorders,
+            children: [blankParagraph]
+          }),
+          new TableCell({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            margins: { left: gap, right: 0, top: 0, bottom: 0 },
+            borders: baseCellBorders,
+            children: [header]
+          })
+        ]
+      })
+    );
+  }
+
+  if (body.length) {
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: thickWidth, type: WidthType.DXA },
+            borders: baseCellBorders,
+            children: [blankParagraph]
+          }),
+          new TableCell({
+            width: { size: thinWidth, type: WidthType.DXA },
+            shading: { fill: accentColor },
+            borders: accentBorders,
+            children: [blankParagraph]
+          }),
+          new TableCell({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            margins: { left: gap, right: 0, top: 0, bottom: 0 },
+            borders: baseCellBorders,
+            children: [
+              ...body,
+              new Paragraph({ text: '', spacing: { before: 0, after: 20 } })
+            ]
+          })
+        ]
+      })
+    );
+  }
+
+  if (!rows.length) {
+    return null;
+  }
 
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -481,40 +567,7 @@ const wrapWithAccent = (
       insideH: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
       insideV: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
     },
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            width: { size: 0.31, type: WidthType.PERCENTAGE },
-            shading: { fill: accentColor },
-            margins: { left: 0, right: 0, top: 0, bottom: 0 },
-            borders: {
-              top: { style: BorderStyle.NONE, size: 0, color: accentColor },
-              bottom: { style: BorderStyle.NONE, size: 0, color: accentColor },
-              left: { style: BorderStyle.NONE, size: 0, color: accentColor },
-              right: { style: BorderStyle.NONE, size: 0, color: accentColor }
-            },
-            verticalAlign: VerticalAlign.TOP,
-            children: [new Paragraph({ text: '', spacing: { before: 0, after: 0 } })]
-          }),
-          new TableCell({
-            width: { size: 97, type: WidthType.PERCENTAGE },
-            margins: { left: gap, right: 0, top: 0, bottom: 0 },
-            borders: {
-              top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-              bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-              left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-              right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
-            },
-            verticalAlign: VerticalAlign.TOP,
-            children: [
-              ...content,
-              new Paragraph({ text: '', spacing: { before: 0, after: 20 } })
-            ]
-          })
-        ]
-      })
-    ]
+    rows
   });
 };
 
@@ -640,10 +693,7 @@ const buildDittoDocument = (
     }
 
     return sections.experience.items.flatMap((item, index) => {
-      const entryContent: Array<Paragraph | Table> = [];
-      appendIfTruthy(
-        entryContent,
-        createMainEntryHeaderTable({
+      const header = createMainEntryHeaderTable({
           leftLines: [
             { text: item.company, bold: true, fontSize: 28 },
             { text: item.position, bold: true, fontSize: 24 }
@@ -654,9 +704,9 @@ const buildDittoDocument = (
           ],
           spacingBefore: index === 0 ? 60 : 80,
           spacingAfter: 12
-        })
-      );
-      entryContent.push(
+        });
+      const body: Array<Paragraph | Table> = [];
+      body.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -665,7 +715,7 @@ const buildDittoDocument = (
           asHyphen: true
         })
       );
-      const wrapped = wrapWithAccent(entryContent, accentColor);
+      const wrapped = wrapWithAccent({ header, body, accentColor });
       return wrapped ? [wrapped] : [];
     });
   };
@@ -676,10 +726,7 @@ const buildDittoDocument = (
     }
 
     return sections.education.items.flatMap((item, index) => {
-      const entryContent: Array<Paragraph | Table> = [];
-      appendIfTruthy(
-        entryContent,
-        createMainEntryHeaderTable({
+      const header = createMainEntryHeaderTable({
           leftLines: [
             { text: item.institution, bold: true, fontSize: 28 },
             { text: item.location, bold: true, fontSize: 24 }
@@ -694,9 +741,9 @@ const buildDittoDocument = (
           ],
           spacingBefore: index === 0 ? 60 : 80,
           spacingAfter: 12
-        })
-      );
+        });
 
+      const body: Array<Paragraph | Table> = [];
       const detailLine = [
         item.score ? `GPA: ${toPlainText(item.score)}` : '',
         toPlainText(item.summary)
@@ -705,7 +752,7 @@ const buildDittoDocument = (
         .join(' • ');
       if (detailLine) {
         appendIfTruthy(
-          entryContent,
+          body,
           createPlainParagraph(detailLine, {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -717,7 +764,7 @@ const buildDittoDocument = (
 
       if (item.courses) {
         appendIfTruthy(
-          entryContent,
+          body,
           createPlainParagraph(
             item.courses
               .split(',')
@@ -734,7 +781,7 @@ const buildDittoDocument = (
         );
       }
 
-      const wrapped = wrapWithAccent(entryContent, accentColor);
+      const wrapped = wrapWithAccent({ header, body, accentColor });
       return wrapped ? [wrapped] : [];
     });
   };
@@ -745,20 +792,17 @@ const buildDittoDocument = (
     }
 
     return sections.projects.items.flatMap((item, index) => {
-      const entryContent: Array<Paragraph | Table> = [];
-      appendIfTruthy(
-        entryContent,
-        createMainEntryHeaderTable({
+      const header = createMainEntryHeaderTable({
           leftLines: [{ text: item.name, bold: true, fontSize: 28 }],
           rightLines: [{ text: item.date, bold: true, fontSize: 26 }],
           spacingBefore: index === 0 ? 60 : 80,
           spacingAfter: 12
-        })
-      );
+        });
 
+      const body: Array<Paragraph | Table> = [];
       if (item.description) {
         appendIfTruthy(
-          entryContent,
+          body,
           createPlainParagraph(item.description, {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -771,7 +815,7 @@ const buildDittoDocument = (
 
       if (item.keywords && item.keywords.length > 0) {
         appendIfTruthy(
-          entryContent,
+          body,
           createPlainParagraph(item.keywords.join(' • '), {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -781,7 +825,7 @@ const buildDittoDocument = (
         );
       }
 
-      entryContent.push(
+      body.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -791,7 +835,7 @@ const buildDittoDocument = (
         })
       );
 
-      const wrapped = wrapWithAccent(entryContent, accentColor);
+      const wrapped = wrapWithAccent({ header, body, accentColor });
       return wrapped ? [wrapped] : [];
     });
   };
@@ -802,10 +846,7 @@ const buildDittoDocument = (
     }
 
     return sections.activities.items.flatMap((item, index) => {
-      const entryContent: Array<Paragraph | Table> = [];
-      appendIfTruthy(
-        entryContent,
-        createMainEntryHeaderTable({
+      const header = createMainEntryHeaderTable({
           leftLines: [
             { text: item.name, bold: true, fontSize: 28 },
             { text: item.role, bold: true, fontSize: 24 }
@@ -816,10 +857,10 @@ const buildDittoDocument = (
           ],
           spacingBefore: index === 0 ? 60 : 80,
           spacingAfter: 15
-        })
-      );
+        });
 
-      entryContent.push(
+      const body: Array<Paragraph | Table> = [];
+      body.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -829,7 +870,7 @@ const buildDittoDocument = (
         })
       );
 
-      const wrapped = wrapWithAccent(entryContent, accentColor);
+      const wrapped = wrapWithAccent({ header, body, accentColor });
       return wrapped ? [wrapped] : [];
     });
   };
@@ -840,19 +881,16 @@ const buildDittoDocument = (
     }
 
     return sections.awards.items.flatMap((item, index) => {
-      const entryContent: Array<Paragraph | Table> = [];
-      appendIfTruthy(
-        entryContent,
-        createMainEntryHeaderTable({
+      const header = createMainEntryHeaderTable({
           leftLines: [{ text: item.title ?? '', bold: true, fontSize: 26 }],
           rightLines: [{ text: item.date, bold: true, fontSize: 24 }],
           spacingBefore: index === 0 ? 40 : 60,
           spacingAfter: 10
-        })
-      );
+        });
 
+      const body: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        entryContent,
+        body,
         createPlainParagraph(item.awarder, {
           spacingBefore: 0,
           spacingAfter: 10,
@@ -861,7 +899,7 @@ const buildDittoDocument = (
         })
       );
 
-      entryContent.push(
+      body.push(
         ...createBulletParagraphs(item.summary, {
           color: accentColor,
           spacingBeforeFirst: 10,
@@ -871,7 +909,7 @@ const buildDittoDocument = (
         })
       );
 
-      const wrapped = wrapWithAccent(entryContent, accentColor);
+      const wrapped = wrapWithAccent({ header, body, accentColor });
       return wrapped ? [wrapped] : [];
     });
   };
