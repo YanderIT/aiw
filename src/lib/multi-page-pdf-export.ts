@@ -1,12 +1,17 @@
 import html2canvas from 'yd-html2canvas';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
+import { log } from 'console';
 
 interface ExportOptions {
   filename?: string;
   quality?: number;
   scale?: number;
   margin?: number;
+  downloadImage?: boolean;
+  imageFilename?: string;
+  imageFormat?: 'png' | 'jpeg';
+  imageQuality?: number;
 }
 
 /**
@@ -31,7 +36,11 @@ export class MultiPagePDFExporter {
       filename = `简历_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.pdf`,
       quality = 0.95,
       scale = 2,
-      margin = 2
+      margin = 2,
+      downloadImage = false,
+      imageFilename,
+      imageFormat = 'png',
+      imageQuality
     } = options;
 
     try {
@@ -48,7 +57,9 @@ export class MultiPagePDFExporter {
         height: element.style.height,
         transform: element.style.transform,
         overflow: element.style.overflow,
-        pageBreakInside: element.style.pageBreakInside
+        transition: element.style.transition,
+        minHeight: element.style.minHeight,
+        // pageBreakInside: element.style.pageBreakInside
       };
 
       // 设置导出样式
@@ -56,10 +67,23 @@ export class MultiPagePDFExporter {
       element.style.height = 'auto';
       element.style.transform = 'none';
       element.style.overflow = 'visible';
-      element.style.pageBreakInside = 'avoid';
+      // 禁用过渡，避免缩放动画导致尺寸测量不准确
+      element.style.transition = 'none';
+      element.style.minHeight = '';
+      // element.style.pageBreakInside = 'avoid';
 
-      // 等待样式应用
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // 等待样式应用到布局（两帧确保浏览器完成重排）
+      await new Promise<void>(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve))
+      );
+
+      const rect = element.getBoundingClientRect();
+      const computedWidth = Math.ceil(
+        Math.max(rect.width, element.scrollWidth, element.offsetWidth)
+      );
+      const computedHeight = Math.ceil(
+        Math.max(rect.height, element.scrollHeight, element.offsetHeight) + 20
+      );
 
       // 生成完整内容的canvas
       const canvas = await html2canvas(element, {
@@ -67,16 +91,33 @@ export class MultiPagePDFExporter {
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        width: element.scrollWidth,
-        height: element.scrollHeight,
+        width: computedWidth,
+        height: computedHeight,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
+        windowWidth: computedWidth,
+        windowHeight: computedHeight
       });
 
       // 恢复原始样式
       Object.assign(element.style, originalStyle);
+
+      if (downloadImage) {
+        const fallbackBaseName = filename.replace(/\.pdf$/i, '');
+        const resolvedImageFilename =
+          imageFilename ??
+          `${fallbackBaseName}.${imageFormat === 'jpeg' ? 'jpg' : 'png'}`;
+
+        try {
+          await this.downloadCanvasImage(canvas, {
+            filename: resolvedImageFilename,
+            format: imageFormat,
+            quality: imageQuality ?? (imageFormat === 'jpeg' ? quality : undefined)
+          });
+        } catch (imageError) {
+          console.warn('导出图片失败:', imageError);
+        }
+      }
 
       // 创建PDF并分页
       await this.createMultiPagePDF(canvas, filename, margin, quality);
@@ -139,7 +180,7 @@ export class MultiPagePDFExporter {
       // 计算当前页的内容区域
       const startY = pageIndex * pageContentHeightPx;
       const endY = Math.min(startY + pageContentHeightPx, canvasHeight);
-      const currentPageHeight = endY - startY;
+      const currentPageHeight = endY - startY + 20;
 
       // 创建当前页的canvas
       const pageCanvas = document.createElement('canvas');
@@ -158,6 +199,7 @@ export class MultiPagePDFExporter {
 
       // 转换为图片并添加到PDF
       const imgData = pageCanvas.toDataURL('image/jpeg', quality);
+      console.log('ida',imgData)
       const imgHeight = (currentPageHeight / this.MM_TO_PX_RATIO) * scale;
       
       // 居中放置
@@ -172,12 +214,42 @@ export class MultiPagePDFExporter {
       pdf.text(
         `${pageIndex + 1} / ${totalPages}`,
         pdfWidth - margin - 20,
-        pdfHeight - margin + 5
+        pdfHeight - margin - 5
       );
     }
 
     // 保存PDF
     pdf.save(filename);
+  }
+
+  private static async downloadCanvasImage(
+    canvas: HTMLCanvasElement,
+    options: { filename: string; format: 'png' | 'jpeg'; quality?: number }
+  ): Promise<void> {
+    const { filename, format, quality } = options;
+
+    await new Promise<void>((resolve, reject) => {
+      canvas.toBlob(
+        blob => {
+          if (!blob) {
+            reject(new Error('无法生成图片数据'));
+            return;
+          }
+
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          resolve();
+        },
+        `image/${format === 'jpeg' ? 'jpeg' : 'png'}`,
+        format === 'jpeg' ? quality : undefined
+      );
+    });
   }
 
   /**

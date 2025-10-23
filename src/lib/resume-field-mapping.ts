@@ -19,6 +19,21 @@ function formatDateToMMYYYY(dateStr: string): string {
     return `${month}/${year}`;
   }
   
+  // Handle formats like "September 2023"
+  const monthNameMatch = dateStr.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})/i);
+  if (monthNameMatch) {
+    const monthName = monthNameMatch[1].toLowerCase();
+    const monthIndex = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ].indexOf(monthName);
+    const year = monthNameMatch[2];
+    if (monthIndex >= 0) {
+      const month = (monthIndex + 1).toString().padStart(2, '0');
+      return `${month}/${year}`;
+    }
+  }
+  
   // If parsing fails, try to extract month and year from the string
   // Handle formats like "2023-07", "07/2023", "July 2023", etc.
   const monthYearMatch = dateStr.match(/(\d{1,2})[-/](\d{4})|(\d{4})[-/](\d{1,2})/);
@@ -234,6 +249,101 @@ export interface StandardResumeData {
 
 // Field mapping function - converts your data to standardized format
 export function mapToStandardFormat(data: ResumeData, selectedTemplate: string = 'kakuna'): StandardResumeData {
+  const parseLanguageEntry = (entry: string) => {
+    if (!entry) return null;
+    const trimmed = entry.trim();
+    if (!trimmed) return null;
+
+    const dashParts = trimmed.split(/\s[-–—]\s/);
+    if (dashParts.length > 1) {
+      return {
+        name: dashParts[0].trim(),
+        level: dashParts.slice(1).join(' – ').trim(),
+      };
+    }
+
+    const parenMatch = trimmed.match(/^(.+?)\s*\((.+)\)$/);
+    if (parenMatch) {
+      return {
+        name: parenMatch[1].trim(),
+        level: parenMatch[2].trim(),
+      };
+    }
+
+    return {
+      name: trimmed,
+      level: '',
+    };
+  };
+
+  const buildLanguageItems = () => {
+    type AggregatedLanguage = {
+      name: string;
+      descriptions: string[];
+      level: number;
+      order: number;
+    };
+
+    const aggregated = new Map<string, AggregatedLanguage>();
+    let orderCounter = 0;
+
+    const addLanguage = (name: string, description: string, level: number) => {
+      if (!name) return;
+      const key = name.toLowerCase();
+      if (!aggregated.has(key)) {
+        aggregated.set(key, {
+          name,
+          descriptions: [],
+          level,
+          order: orderCounter++,
+        });
+      }
+      const entry = aggregated.get(key)!;
+      if (description) {
+        if (!entry.descriptions.includes(description)) {
+          entry.descriptions.push(description);
+        }
+      }
+      entry.level = Math.max(entry.level, level);
+    };
+
+    if (data.skillsLanguage.english_level) {
+      addLanguage('English', data.skillsLanguage.english_level.trim(), 0);
+    }
+
+    if (data.skillsLanguage.native_language) {
+      data.skillsLanguage.native_language
+        .split(/[,;\n]+/)
+        .map(parseLanguageEntry)
+        .filter((entry): entry is { name: string; level: string } => !!entry)
+        .forEach((entry) => {
+          addLanguage(entry.name, entry.level || 'Native Speaker', 5);
+        });
+    }
+
+    if (data.skillsLanguage.other_languages) {
+      data.skillsLanguage.other_languages
+        .split(/[,;\n]+/)
+        .map(parseLanguageEntry)
+        .filter((entry): entry is { name: string; level: string } => !!entry)
+        .forEach((entry) => {
+          addLanguage(entry.name, entry.level, 0);
+        });
+    }
+
+    return Array.from(aggregated.values())
+      .sort((a, b) => a.order - b.order)
+      .map((entry, index) => ({
+        id: `lang-${index}`,
+        name: entry.name,
+        description: entry.descriptions.join(' · '),
+        level: entry.level,
+        visible: true,
+      }));
+  };
+
+  const languageItems = buildLanguageItems();
+
   return {
     basics: {
       name: data.header.full_name || '',
@@ -415,30 +525,8 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
       languages: {
         id: 'languages',
         name: 'Languages',
-        items: [
-          ...(data.skillsLanguage.english_level ? [{
-            id: 'lang-en',
-            name: 'English',
-            description: data.skillsLanguage.english_level,
-            level: 0,
-            visible: true
-          }] : []),
-          ...(data.skillsLanguage.native_language ? [{
-            id: 'lang-native',
-            name: data.skillsLanguage.native_language,
-            description: 'Native',
-            level: 5,
-            visible: true
-          }] : []),
-          ...(data.skillsLanguage.other_languages ? [{
-            id: 'lang-other',
-            name: 'Other Languages',
-            description: data.skillsLanguage.other_languages,
-            level: 0,
-            visible: true
-          }] : [])
-        ],
-        visible: data.moduleSelection.skillsLanguage && !!(data.skillsLanguage.english_level || data.skillsLanguage.native_language || data.skillsLanguage.other_languages),
+        items: languageItems,
+        visible: data.moduleSelection.skillsLanguage && languageItems.length > 0,
         columns: 1
       },
       certifications: {

@@ -1,36 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { StandardResumeData } from "@/lib/resume-field-mapping";
 import { cn, isEmptyString } from "./shared/utils";
 import { Rating } from "./shared/components";
 import { getThemeColor, getThemeFromScale } from "./shared/theme-colors";
-
-// Page break component
-const PageBreak = ({ pageNumber, themeColor }: { pageNumber: number; themeColor: string }) => {
-  return (
-    <div className="page-break-indicator" style={{
-      display: 'flex',
-      alignItems: 'center',
-      margin: '10px 0',
-      color: themeColor,
-      fontSize: '12px',
-      fontWeight: 'bold'
-    }}>
-      <div style={{
-        flex: 1,
-        height: '2px',
-        backgroundColor: themeColor,
-        marginRight: '10px'
-      }}></div>
-      <span>Page {pageNumber}</span>
-      <div style={{
-        flex: 1,
-        height: '2px',
-        backgroundColor: themeColor,
-        marginLeft: '10px'
-      }}></div>
-    </div>
-  );
-};
 
 const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) => {
   const { basics } = resume;
@@ -376,25 +348,16 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
       case 'languages':
         return sections.languages?.visible && sections.languages?.items?.length > 0 && (
           <Section section={sections.languages} title="Languages" theme={theme}>
-            <div className="flex flex-wrap gap-3">
+            <div className="space-y-2">
               {sections.languages?.items?.map((item) => (
-                <div key={item.id}>
-                  {item.name === 'Other Languages' && item.description ? (
-                    item.description.split(',').map((lang: string, index: number) => (
-                      <span key={index} className="inline-block mr-3 mb-1">
-                        <span className="font-bold text-xl">{lang.trim()}</span>
-                      </span>
-                    ))
-                  ) : (
-                    <div>
-                      <span className="font-bold text-xl">{item.name}</span>
-                      {item.description && item.description !== 'Native' && (
-                        <span className="text-base text-black"> – {item.description}</span>
-                      )}
-                      {item.description === 'Native' && (
-                        <span className="text-base text-black"> – Native Speaker</span>
-                      )}
-                    </div>
+                <div
+                  key={item.id}
+                  className="text-base text-black"
+                  style={{ display: "block" }}
+                >
+                  <span className="font-bold text-xl">{item.name}</span>
+                  {item.description && (
+                    <span className="text-base text-black"> – {item.description}</span>
                   )}
                 </div>
               ))}
@@ -431,50 +394,15 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
 }) => {
   // 判断是否是新的色阶格式（如 "blue-500"）或旧的格式（如 "blue"）
   const theme = themeColor.includes('-') ? getThemeFromScale(themeColor) : getThemeColor(themeColor);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pageBreaks, setPageBreaks] = useState<number[]>([]);
-  const A4_HEIGHT_PX = 297 * 3.78; // Convert mm to pixels (1mm ≈ 3.78px at 96dpi)
-
-  useEffect(() => {
-    const calculatePageBreaks = () => {
-      if (!containerRef.current) return;
-
-      const containerHeight = containerRef.current.scrollHeight;
-      const pageCount = Math.ceil(containerHeight / A4_HEIGHT_PX);
-
-      if (pageCount > 1) {
-        const breaks = [];
-        for (let i = 1; i < pageCount; i++) {
-          breaks.push(i * A4_HEIGHT_PX);
-        }
-        setPageBreaks(breaks);
-      } else {
-        setPageBreaks([]);
-      }
-    };
-
-    // Calculate on mount
-    calculatePageBreaks();
-
-    // Use ResizeObserver to recalculate when content changes
-    const resizeObserver = new ResizeObserver(calculatePageBreaks);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [resume, themeColor]);
 
   return (
     <div
-      ref={containerRef}
       className="mx-auto bg-white shadow-lg resume-content"
       style={{
         width: '210mm',
         minHeight: '297mm',
         padding: '32px',
+        paddingBottom: '48px',
         fontSize: '16px',
         lineHeight: '1.6',
         color: '#333333',
@@ -484,20 +412,6 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
       <Header resume={resume} theme={theme} />
       <MainContent resume={resume} theme={theme} layoutConfiguration={layoutConfiguration} />
 
-      {/* Page break indicators */}
-      {pageBreaks.map((breakHeight, index) => (
-        <div
-          key={index}
-          className="absolute left-0 right-0 pointer-events-none"
-          style={{
-            top: `${breakHeight}px`,
-            zIndex: 10
-          }}
-        >
-          <PageBreak pageNumber={index + 2} themeColor={theme.primary} />
-        </div>
-      ))}
-
       {/* CSS for page breaks and scrolling */}
       <style jsx global>{`
         @media print {
@@ -506,9 +420,6 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
           }
           section {
             break-inside: avoid;
-          }
-          .page-break-indicator {
-            display: none;
           }
         }
         

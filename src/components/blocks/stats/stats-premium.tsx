@@ -86,8 +86,8 @@ const statsConfig = [
   },
   {
     icon: Users,
-    title: "6500+ 注册用户",
-    value: 6500,
+    title: "1500+ 注册用户",
+    value: 1500,
     suffix: "+",
     unit: "累计注册用户数",
     color: "purple",

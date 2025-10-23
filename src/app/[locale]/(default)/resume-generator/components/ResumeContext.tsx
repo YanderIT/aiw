@@ -249,6 +249,8 @@ interface ResumeContextType {
   setGenerationLoading: (loading: boolean) => void;
   setGenerationError: (error: string | null) => void;
   setLanguagePreference: (language: "English" | "Chinese") => void;
+  // 新增：一键填充测试数据
+  fillMockData: () => void;
   // 新增：文档管理
   documentState: DocumentState;
   saveDocument: () => Promise<void>;
@@ -301,6 +303,117 @@ const defaultResumeData: ResumeData = {
   selectedTemplate: "ditto",
   themeColor: "sky-500",
   // 默认布局配置：基于 ditto 模板的结构
+  layoutConfiguration: {
+    mainSections: ["experience", "education", "research", "activities"],
+    sidebarSections: [
+      "profiles",
+      "skills",
+      "certifications",
+      "awards",
+      "languages",
+    ],
+  },
+};
+
+const mockResumeData: ResumeData = {
+  header: {
+    full_name: "Alex Chen",
+    city: "San Francisco",
+    country: "United States",
+    email: "alex.chen@example.com",
+    phone: "+1 (415) 555-1234",
+    linkedin: "linkedin.com/in/alex-chen",
+    github: "github.com/alexchen",
+    profilePicture: undefined,
+  },
+  education: {
+    school_name: "Massachusetts Institute of Technology",
+    edu_city: "Cambridge",
+    edu_country: "United States",
+    degree: "B.S. Computer Science and Engineering",
+    edu_start_date: "2019-09",
+    edu_end_date: "2023-06",
+    gpa_or_rank: "GPA: 3.8/4.0 (Dean's List)",
+    relevant_courses:
+      "Algorithms, Distributed Systems, Machine Learning, Computer Systems, Product Design",
+  },
+  workExperience: [
+    {
+      company: "Stripe",
+      job_title: "Software Engineer Intern",
+      work_city: "San Francisco",
+      work_country: "United States",
+      work_start_date: "2022-06",
+      work_end_date: "2022-09",
+      responsibilities:
+        "- Built analytics dashboards with React and TypeScript, reducing load times by 25%\n- Partnered with backend teams to redesign payment reconciliation workflows, cutting manual review by 30%\n- Introduced automated linting and release scripts that decreased deployment errors across the team",
+    },
+    {
+      company: "Microsoft Research",
+      job_title: "Research Assistant",
+      work_city: "Redmond",
+      work_country: "United States",
+      work_start_date: "2021-06",
+      work_end_date: "2021-08",
+      responsibilities:
+        "- Supported intelligent document understanding research with dataset curation and benchmarking\n- Automated weekly experiment reporting pipelines using Python, surfacing metrics to SharePoint dashboards\n- Co-authored a draft on multimodal information extraction with a focus on explainability",
+    },
+  ],
+  research: [
+    {
+      project_title: "Multimodal Information Retrieval System",
+      lab_or_unit: "MIT Interactive Intelligence Lab",
+      res_start_date: "2022-10",
+      res_end_date: "2023-05",
+      project_background:
+        "Designed a semantic retrieval system for long-form educational videos to improve knowledge discovery.",
+      your_contributions:
+        "Prototyped model architectures, built preprocessing and evaluation pipelines, and improved retrieval precision by 12%.",
+      tools_used: "PyTorch, Hugging Face Transformers, Milvus",
+      outcomes:
+        "Published one conference paper at the Northeast Computing Symposium and received the MIT iQuHACK research award.",
+    },
+  ],
+  activities: [
+    {
+      activity_name: "MIT Hack4Impact",
+      role: "Technology Lead",
+      act_city: "Cambridge",
+      act_country: "United States",
+      act_start_date: "2020-09",
+      act_end_date: "2023-06",
+      description:
+        "Led a 15-person engineering team delivering 8 nonprofit-focused web applications and mentoring student developers.",
+    },
+  ],
+  awards: [
+    {
+      award_name: "ACM ICPC Regional Contest",
+      award_year: "2022",
+      award_issuer: "Association for Computing Machinery",
+      award_rank: "Regional Champion",
+      certificate_name: "ACM ICPC Regional Champion Certificate",
+      certificate_issuer: "Association for Computing Machinery",
+    },
+  ],
+  skillsLanguage: {
+    skills:
+      "JavaScript/TypeScript, React, Node.js, Python, Data Visualization, RESTful API Design",
+    english_level: "TOEFL 114 / IELTS 8.0",
+    native_language: "English",
+    other_languages: "Mandarin Chinese (fluent)",
+  },
+  moduleSelection: {
+    header: true,
+    education: true,
+    workExperience: true,
+    research: true,
+    activities: true,
+    awards: true,
+    skillsLanguage: true,
+  },
+  selectedTemplate: "ditto",
+  themeColor: "sky-500",
   layoutConfiguration: {
     mainSections: ["experience", "education", "research", "activities"],
     sidebarSections: [
@@ -689,6 +802,32 @@ export function ResumeProvider({
       ...prev,
       skillsLanguage: { ...prev.skillsLanguage, ...newData },
     }));
+  };
+
+  const fillMockData = () => {
+    setData({
+      ...mockResumeData,
+      header: { ...mockResumeData.header },
+      education: { ...mockResumeData.education },
+      workExperience: mockResumeData.workExperience.map((item) => ({
+        ...item,
+      })),
+      research: mockResumeData.research.map((item) => ({
+        ...item,
+      })),
+      activities: mockResumeData.activities.map((item) => ({
+        ...item,
+      })),
+      awards: mockResumeData.awards.map((item) => ({
+        ...item,
+      })),
+      skillsLanguage: { ...mockResumeData.skillsLanguage },
+      moduleSelection: { ...mockResumeData.moduleSelection },
+      layoutConfiguration: {
+        mainSections: [...mockResumeData.layoutConfiguration.mainSections],
+        sidebarSections: [...mockResumeData.layoutConfiguration.sidebarSections],
+      },
+    });
   };
 
   // 新增：获取选中模块的数据
@@ -1135,8 +1274,9 @@ export function ResumeProvider({
     removeActivity,
     updateAwardsData,
     addAward,
-    removeAward,
-    updateSkillsLanguageData,
+   removeAward,
+   updateSkillsLanguageData,
+    fillMockData,
     toggleModuleSelection,
     isModuleSelected,
     isModuleRequired,

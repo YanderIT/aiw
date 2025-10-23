@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
@@ -25,10 +25,16 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import html2canvas from "yd-html2canvas";
-import { jsPDF } from "jspdf";
 import { exportMultiPagePDF } from "@/lib/multi-page-pdf-export";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportResumeDocx } from "@/lib/resume-docx-export";
 
 // Import context and modules
 import { ResumeProvider, useResume } from "../../components/ResumeContext";
@@ -223,6 +229,17 @@ function ResumeResultContent() {
 
   // 使用 context 中的模板选择，而不是本地 state
   const selectedTemplate = data.selectedTemplate;
+  const standardResumeData = useMemo(
+    () => mapToStandardFormat(data, selectedTemplate),
+    [data, selectedTemplate]
+  );
+
+  const themePalette = useMemo(() => {
+    const themeKey = data.themeColor || "sky-500";
+    return themeKey.includes("-")
+      ? getThemeFromScale(themeKey)
+      : getThemeColor(themeKey);
+  }, [data.themeColor]);
 
   // 计算适合屏幕的默认缩放比例
   const calculateDefaultZoom = () => {
@@ -673,31 +690,53 @@ function ResumeResultContent() {
     });
   };
 
-  // 导出简历（多页支持）
-  const exportResume = async () => {
+  // 导出简历
+  const exportResume = async (format: "pdf" | "docx") => {
     if (isExporting) return;
+
+    const baseFilename = `简历_${new Date()
+      .toLocaleDateString("zh-CN")
+      .replace(/\//g, "-")}`;
+    const toastId = format === "pdf" ? "pdf-export" : "docx-export";
 
     setIsExporting(true);
 
     try {
-      // 检查简历容器是否存在
       const resumeContainer = document.getElementById("resume-container");
       if (!resumeContainer) {
         toast.error("未找到简历内容，请确保简历已正确加载");
         return;
       }
 
-      // 使用新的多页PDF导出功能
-      await exportMultiPagePDF("resume-container", {
-        filename: `简历_${new Date().toLocaleDateString("zh-CN").replace(/\//g, "-")}.pdf`,
-        quality: 0.95,
-        scale: 2,
-        margin: 0
-      });
+      if (format === "pdf") {
+        await exportMultiPagePDF("resume-container", {
+          filename: `${baseFilename}.pdf`,
+          quality: 0.95,
+          scale: 2,
+          margin: 0,
+        });
+      } else {
+        toast.loading("正在生成 Word 文件，请稍候...", {
+          id: toastId,
+        });
 
+        await exportResumeDocx(standardResumeData, {
+          filename: `${baseFilename}.docx`,
+          themePrimary: themePalette.primary,
+        });
+
+        toast.success("Word 导出成功！您可以继续在本地修改该文件。", {
+          id: toastId,
+        });
+      }
     } catch (error) {
-      console.error("PDF导出失败:", error);
-      toast.error(`PDF导出失败: ${error instanceof Error ? error.message : '未知错误'}`, { id: "pdf-export" });
+      console.error("简历导出失败:", error);
+      toast.error(
+        `导出失败: ${
+          error instanceof Error ? error.message : "未知错误"
+        }`,
+        { id: toastId }
+      );
     } finally {
       setIsExporting(false);
     }
@@ -916,20 +955,46 @@ function ResumeResultContent() {
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={exportResume}
-                          disabled={isExporting}
-                          className="bg-white/80 border-white/20 shadow-sm hover:bg-white hover:shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isExporting ? (
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                          ) : (
-                            <Download className="w-3 h-3 mr-1" />
-                          )}
-                          {isExporting ? "导出中..." : "导出"}
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={isExporting}
+                              className="bg-white/80 border-white/20 shadow-sm hover:bg-white hover:shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isExporting ? (
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              ) : (
+                                <Download className="w-3 h-3 mr-1" />
+                              )}
+                              {isExporting ? "导出中..." : "导出"}
+                              <ChevronDown className="w-3 h-3 ml-1 opacity-70" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-44"
+                          >
+                            <DropdownMenuLabel>选择导出格式</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => void exportResume("pdf")}
+                              disabled={isExporting}
+                              className="cursor-pointer"
+                            >
+                              <Download className="w-3 h-3 mr-2" />
+                              PDF（推荐）
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => void exportResume("docx")}
+                              disabled={isExporting}
+                              className="cursor-pointer"
+                            >
+                              <FileText className="w-3 h-3 mr-2" />
+                              Word (.docx)
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
@@ -953,10 +1018,6 @@ function ResumeResultContent() {
                           {(() => {
                             const TemplateComponent =
                               getTemplateComponent(selectedTemplate);
-                            const standardResumeData = mapToStandardFormat(
-                              data,
-                              selectedTemplate
-                            );
 
                             return (
                               <div

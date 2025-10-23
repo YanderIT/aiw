@@ -561,6 +561,98 @@ const MainContent = ({
     );
   };
 
+  const renderProjectSection = (title: string) => {
+    const projectsSection = sections.projects;
+
+    return (
+      <Section section={projectsSection} title={title}>
+        {projectsSection?.items?.map((item) => (
+          <div key={item.id} className="relative pl-4">
+            {/* 标题部分的粗竖线 */}
+            <div
+              className="absolute left-0 top-0 w-1"
+              style={{
+                backgroundColor: theme.primary,
+                height:
+                  item.summary && !isEmptyString(item.summary)
+                    ? item.keywords && item.keywords.length > 0
+                      ? "82px"
+                      : "52px"
+                    : "100%",
+              }}
+            ></div>
+            {/* Summary部分的细竖线 - 相对于粗线居中 */}
+            {item.summary && !isEmptyString(item.summary) && (
+              <div
+                className="absolute"
+                style={{
+                  backgroundColor: theme.primary,
+                  top:
+                    item.keywords && item.keywords.length > 0
+                      ? "82px"
+                      : "52px",
+                  bottom: "0",
+                  left: "1.5px",
+                  width: "1px",
+                }}
+              ></div>
+            )}
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <div
+                  className="font-extrabold"
+                  style={{ fontSize: "18px", color: "#333333" }}
+                >
+                  {item.name}
+                </div>
+                {item.description && (
+                  <div
+                    className="font-bold"
+                    style={{ fontSize: "16px", color: "#333333" }}
+                  >
+                    {item.description}
+                  </div>
+                )}
+              </div>
+              <div className="whitespace-nowrap ml-4">
+                <div
+                  className="font-extrabold"
+                  style={{ fontSize: "18px", color: "#333333" }}
+                >
+                  {item.date}
+                </div>
+              </div>
+            </div>
+            {item.keywords && item.keywords.length > 0 && (
+              <div
+                className="mb-2"
+                style={{
+                  fontSize: "13px",
+                  color: theme.accent,
+                  lineHeight: "1.6",
+                }}
+              >
+                {item.keywords.map((keyword) => keyword.trim()).join(" • ")}
+              </div>
+            )}
+            {item.summary && !isEmptyString(item.summary) && (
+              <div
+                style={{
+                  fontSize: "14px",
+                  color: "#333333",
+                  lineHeight: "1.6",
+                }}
+                className="whitespace-pre-line"
+              >
+                {item.summary}
+              </div>
+            )}
+          </div>
+        ))}
+      </Section>
+    );
+  };
+
   // 定义各个模块的渲染函数
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
@@ -736,95 +828,10 @@ const MainContent = ({
             ))}
           </Section>
         );
+      case "research":
+        return renderProjectSection("Research Experience");
       case "projects":
-        const projectsSection = sections.projects;
-        return (
-          <Section section={projectsSection} title="Projects">
-            {projectsSection?.items?.map((item) => (
-              <div key={item.id} className="relative pl-4">
-                {/* 标题部分的粗竖线 */}
-                <div
-                  className="absolute left-0 top-0 w-1"
-                  style={{
-                    backgroundColor: theme.primary,
-                    height:
-                      item.summary && !isEmptyString(item.summary)
-                        ? item.keywords && item.keywords.length > 0
-                          ? "82px"
-                          : "52px"
-                        : "100%",
-                  }}
-                ></div>
-                {/* Summary部分的细竖线 - 相对于粗线居中 */}
-                {item.summary && !isEmptyString(item.summary) && (
-                  <div
-                    className="absolute"
-                    style={{
-                      backgroundColor: theme.primary,
-                      top:
-                        item.keywords && item.keywords.length > 0
-                          ? "82px"
-                          : "52px",
-                      bottom: "0",
-                      left: "1.5px",
-                      width: "1px",
-                    }}
-                  ></div>
-                )}
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <div
-                      className="font-extrabold"
-                      style={{ fontSize: "18px", color: "#333333" }}
-                    >
-                      {item.name}
-                    </div>
-                    {item.description && (
-                      <div
-                        className="font-bold"
-                        style={{ fontSize: "16px", color: "#333333" }}
-                      >
-                        {item.description}
-                      </div>
-                    )}
-                  </div>
-                  <div className="whitespace-nowrap ml-4">
-                    <div
-                      className="font-extrabold"
-                      style={{ fontSize: "18px", color: "#333333" }}
-                    >
-                      {item.date}
-                    </div>
-                  </div>
-                </div>
-                {item.keywords && item.keywords.length > 0 && (
-                  <div
-                    className="mb-2"
-                    style={{
-                      fontSize: "13px",
-                      color: theme.accent,
-                      lineHeight: "1.6",
-                    }}
-                  >
-                    {item.keywords.map((keyword) => keyword.trim()).join(" • ")}
-                  </div>
-                )}
-                {item.summary && !isEmptyString(item.summary) && (
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#333333",
-                      lineHeight: "1.6",
-                    }}
-                    className="whitespace-pre-line"
-                  >
-                    {item.summary}
-                  </div>
-                )}
-              </div>
-            ))}
-          </Section>
-        );
+        return renderProjectSection("Projects");
       case "activities":
         return (
           <Section section={sections.activities} title="Activities">

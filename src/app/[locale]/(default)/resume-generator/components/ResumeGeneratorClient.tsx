@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2 } from "lucide-react";
 import { useRouter } from '@/i18n/navigation';
 import { GlobalLoading } from "@/components/ui/loading";
+import { toast } from "sonner";
 
 // Import context
 import { ResumeProvider, useResume } from "./ResumeContext";
@@ -306,7 +307,49 @@ function ConfirmationPage() {
 function ResumeGeneratorContent() {
   const t = useTranslations();
   const [activeModule, setActiveModule] = useState("header");
-  const { isModuleSelected, isModuleRequired, toggleModuleSelection, getCompletedModulesCount, getConfirmationData } = useResume();
+  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
+  const [showDevMode, setShowDevMode] = useState(false);
+  const { 
+    isModuleSelected, 
+    isModuleRequired, 
+    toggleModuleSelection, 
+    getCompletedModulesCount, 
+    getConfirmationData,
+    fillMockData,
+    saveToCache
+  } = useResume();
+  const isDevEnvironment = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        setShowDevMode((prev) => {
+          const next = !prev;
+          if (next) {
+            setIsDevelopmentMode(true);
+          }
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
+
+  useEffect(() => {
+    const shouldEnableDevTools =
+      isDevEnvironment ||
+      (typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1"));
+
+    if (shouldEnableDevTools) {
+      setShowDevMode(true);
+      setIsDevelopmentMode(true);
+    }
+  }, [isDevEnvironment]);
 
   const modules: ResumeModule[] = [
     {
@@ -392,6 +435,82 @@ function ResumeGeneratorContent() {
           {/* Left Sidebar - Module Navigation */}
           <div className="col-span-3">
             <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+              {(showDevMode || isDevEnvironment) && (
+                <div className="mb-6 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">开发者工具</span>
+                    </div>
+                    {!isDevEnvironment && (
+                      <button
+                        onClick={() => setShowDevMode(false)}
+                        className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300"
+                        aria-label="关闭开发者工具"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+
+                  {isDevEnvironment ? (
+                    <Button
+                      onClick={() => {
+                        fillMockData();
+                        toast.success("已填充简历测试数据");
+                        saveToCache();
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="w-full gap-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700"
+                    >
+                      <Wand2 className="w-3 h-3" />
+                      一键填充测试数据
+                    </Button>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-muted-foreground">开发模式</span>
+                        <button
+                          onClick={() => setIsDevelopmentMode((prev) => !prev)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                            isDevelopmentMode ? "bg-primary" : "bg-muted"
+                          }`}
+                          aria-label="切换开发模式"
+                        >
+                          <span
+                            className={`${
+                              isDevelopmentMode ? "translate-x-5" : "translate-x-1"
+                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                          />
+                        </button>
+                      </div>
+
+                      {isDevelopmentMode && (
+                        <Button
+                          onClick={() => {
+                            fillMockData();
+                            toast.success("已填充简历测试数据");
+                            saveToCache();
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-2"
+                        >
+                          <Wand2 className="w-3 h-3" />
+                          一键填充测试数据
+                        </Button>
+                      )}
+                    </>
+                  )}
+
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {isDevEnvironment
+                      ? "开发环境：点击按钮快速加入示例数据"
+                      : "提示：使用 Ctrl/Cmd + Shift + D 切换开发者工具"}
+                  </div>
+                </div>
+              )}
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
                 简历模块
               </h3>
