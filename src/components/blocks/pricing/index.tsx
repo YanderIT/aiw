@@ -2,7 +2,7 @@
 
 import { Check, Tag, Percent } from "lucide-react";
 import { PricingItem, Pricing as PricingType } from "@/types/blocks/pricing";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,53 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [productId, setProductId] = useState<string | null>(null);
+  const pricingItems = pricing.items ?? [];
+
+  const groupsWithItems = useMemo(() => {
+    if (pricing.groups && pricing.groups.length > 0) {
+      const grouped = pricing.groups
+        .map((group, index) => {
+          const items = pricingItems.filter(
+            (item) => item.group && item.group === group.name,
+          );
+
+          return {
+            key: group.name ?? `group-${index}`,
+            title: group.title ?? group.label,
+            items,
+          };
+        })
+        .filter(({ items }) => items.length > 0);
+
+      const ungrouped = pricingItems.filter((item) => {
+        if (!item.group) {
+          return true;
+        }
+
+        return !pricing.groups?.some((group) => group.name === item.group);
+      });
+
+      if (ungrouped.length > 0) {
+        grouped.push({
+          key: "ungrouped",
+          title: undefined,
+          items: ungrouped,
+        });
+      }
+
+      if (grouped.length > 0) {
+        return grouped;
+      }
+    }
+
+    return [
+      {
+        key: "all",
+        title: undefined,
+        items: pricingItems,
+      },
+    ];
+  }, [pricing.groups, pricingItems]);
 
   const handleCheckout = async (item: PricingItem, cn_pay: boolean = false) => {
     try {
@@ -90,11 +137,11 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
   };
 
   useEffect(() => {
-    if (pricing.items) {
-      setProductId(pricing.items[0].product_id);
+    if (pricingItems.length > 0) {
+      setProductId(pricingItems[0].product_id);
       setIsLoading(false);
     }
-  }, [pricing.items]);
+  }, [pricingItems]);
 
   return (
     <section id={pricing.name} className="py-16">
@@ -107,131 +154,139 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
             {pricing.description}
           </p>
         </div>
-        <div className="w-full flex flex-col items-center gap-2">
-          <div
-            className="w-full mt-0 grid gap-4 md:gap-6 lg:gap-8 md:grid-cols-4"
-          >
-            {pricing.items?.map((item, index) => {
-
-              return (
-                <div
-                  key={index}
-                  className={`rounded-lg p-6 ${
-                    item.is_featured
-                      ? "border-primary border-2 bg-card text-card-foreground"
-                      : "border-muted border"
-                  }`}
-                >
-                  <div className="flex h-full flex-col justify-between gap-5">
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        {item.title && (
-                          <h3 className="text-xl font-semibold">
-                            {item.title}
-                          </h3>
-                        )}
-                        <div className="flex-1"></div>
-                        {item.label && (
-                          <Badge
-                            variant="outline"
-                            className="border-primary bg-primary px-1.5 text-primary-foreground"
-                          >
-                            {item.label}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-end gap-2 mb-4">
-                        {item.original_price && (
-                          <span className="text-xl text-muted-foreground font-semibold line-through">
-                            {item.original_price}
-                          </span>
-                        )}
-                        {item.price && (
-                          <span className="text-5xl font-semibold">
-                            {item.price}
-                          </span>
-                        )}
-                        {item.unit && (
-                          <span className="block font-semibold">
-                            {item.unit}
-                          </span>
-                        )}
-                      </div>
-                      {item.description && (
-                        <p className="text-muted-foreground">
-                          {item.description}
-                        </p>
-                      )}
-                      {item.features_title && (
-                        <p className="mb-3 mt-6 font-semibold">
-                          {item.features_title}
-                        </p>
-                      )}
-                      {item.features && (
-                        <ul className="flex flex-col gap-3">
-                          {item.features.map((feature, fi) => {
-                            return (
-                              <li className="flex gap-2" key={`feature-${fi}`}>
-                                <Check className="mt-1 size-4 shrink-0" />
-                                {feature}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {/* Discount Hint Badge */}
-                      <div className="flex items-center justify-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                        <Tag className="w-4 h-4 text-amber-600" />
-                        <span className="text-sm text-amber-700 font-medium">
-                          有折扣码？点击购买时输入更优惠
-                        </span>
-                      </div>
-
-                      {/* Chinese Payment Option */}
-                      {item.cn_amount && item.cn_amount > 0 ? (
-                        <div className="flex items-center gap-x-2 mt-2">
-                          <span className="text-sm">人民币支付 👉</span>
-                          <DiscountCheckoutModal item={item} cnPay={true}>
-                            <div className="inline-block p-2 hover:cursor-pointer hover:bg-base-200 rounded-md">
-                              <img
-                                src="/imgs/cnpay.png"
-                                alt="cnpay"
-                                className="w-20 h-10 rounded-lg"
-                              />
-                            </div>
-                          </DiscountCheckoutModal>
-                        </div>
-                      ) : null}
-
-                      {/* Main Purchase Button */}
-                      {item.button && (
-                        <DiscountCheckoutModal item={item}>
-                          <Button
-                            className="w-full flex items-center justify-center gap-2 font-semibold"
-                            disabled={isLoading}
-                          >
-                            {item.button.icon && (
-                              <Icon name={item.button.icon} className="size-4" />
-                            )}
-                            <span>{item.button.title}</span>
-                            <Percent className="w-4 h-4" />
-                          </Button>
-                        </DiscountCheckoutModal>
-                      )}
-
-                      {item.tip && (
-                        <p className="text-muted-foreground text-sm mt-2">
-                          {item.tip}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+        <div className="flex w-full flex-col gap-10">
+          {groupsWithItems.map(({ key, title, items }) => (
+            <div key={key} className="flex w-full flex-col gap-4">
+              {title ? (
+                <div className="text-center lg:text-left">
+                  <p className="text-base font-semibold text-muted-foreground">
+                    {title}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+              ) : null}
+              <div className="grid w-full gap-4 md:gap-6 lg:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+                {items.map((item, index) => {
+                  return (
+                    <div
+                      key={`${key}-${index}`}
+                      className={`rounded-lg p-6 ${
+                        item.is_featured
+                          ? "border-primary border-2 bg-card text-card-foreground"
+                          : "border-muted border"
+                      }`}
+                    >
+                      <div className="flex h-full flex-col justify-between gap-5">
+                        <div>
+                          <div className="mb-4 flex items-center gap-2">
+                            {item.title && (
+                              <h3 className="text-xl font-semibold">
+                                {item.title}
+                              </h3>
+                            )}
+                            <div className="flex-1" />
+                            {item.label && (
+                              <Badge
+                                variant="outline"
+                                className="border-primary bg-primary px-1.5 text-primary-foreground"
+                              >
+                                {item.label}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="mb-4 flex items-end gap-2">
+                            {item.original_price && (
+                              <span className="text-xl font-semibold text-muted-foreground line-through">
+                                {item.original_price}
+                              </span>
+                            )}
+                            {item.price && (
+                              <span className="text-5xl font-semibold">
+                                {item.price}
+                              </span>
+                            )}
+                            {item.unit && (
+                              <span className="block font-semibold">
+                                {item.unit}
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <p className="text-muted-foreground">
+                              {item.description}
+                            </p>
+                          )}
+                          {item.features_title && (
+                            <p className="mb-3 mt-6 font-semibold">
+                              {item.features_title}
+                            </p>
+                          )}
+                          {item.features && (
+                            <ul className="flex flex-col gap-3">
+                              {item.features.map((feature, fi) => {
+                                return (
+                                  <li className="flex gap-2" key={`feature-${fi}`}>
+                                    <Check className="mt-1 size-4 shrink-0" />
+                                    {feature}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {/* Discount Hint Badge */}
+                          <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
+                            <Tag className="h-4 w-4 text-amber-600" />
+                            <span className="text-sm font-medium text-amber-700">
+                              有折扣码？点击购买时输入更优惠
+                            </span>
+                          </div>
+
+                          {/* Chinese Payment Option */}
+                          {item.cn_amount && item.cn_amount > 0 ? (
+                            <div className="mt-2 flex items-center gap-x-2">
+                              <span className="text-sm">人民币支付 👉</span>
+                              <DiscountCheckoutModal item={item} cnPay={true}>
+                                <div className="inline-block rounded-md p-2 hover:cursor-pointer hover:bg-base-200">
+                                  <img
+                                    src="/imgs/cnpay.png"
+                                    alt="cnpay"
+                                    className="h-10 w-20 rounded-lg"
+                                  />
+                                </div>
+                              </DiscountCheckoutModal>
+                            </div>
+                          ) : null}
+
+                          {/* Main Purchase Button */}
+                          {item.button && (
+                            <DiscountCheckoutModal item={item}>
+                              <Button
+                                className="flex w-full items-center justify-center gap-2 font-semibold"
+                                disabled={isLoading}
+                              >
+                                {item.button.icon && (
+                                  <Icon name={item.button.icon} className="size-4" />
+                                )}
+                                <span>{item.button.title}</span>
+                                <Percent className="h-4 w-4" />
+                              </Button>
+                            </DiscountCheckoutModal>
+                          )}
+
+                          {item.tip && (
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              {item.tip}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

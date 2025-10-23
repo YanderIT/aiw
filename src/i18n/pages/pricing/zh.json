@@ -4,6 +4,16 @@
     "label": "定价",
     "title": "文书服务定价",
     "description": "选择适合您的AI文书生成服务套餐，轻松搞定留学申请文书。",
+    "groups": [
+      {
+        "name": "single",
+        "title": "单次服务"
+      },
+      {
+        "name": "package",
+        "title": "套餐服务"
+      }
+    ],
     "items": [
       {
         "title": "个人陈述（PS）",
@@ -31,7 +41,8 @@
         "product_id": "ps-single",
         "product_name": "个人陈述（PS）",
         "credits": 1,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "single"
       },
       {
         "title": "目的陈述（SOP）",
@@ -59,7 +70,8 @@
         "product_id": "sop-single",
         "product_name": "目的陈述（SOP）",
         "credits": 1,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "single"
       },
       {
         "title": "推荐信",
@@ -87,7 +99,8 @@
         "product_id": "recommendation-single",
         "product_name": "推荐信",
         "credits": 1,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "single"
       },
       {
         "title": "Cover Letter",
@@ -115,7 +128,8 @@
         "product_id": "coverletter-single",
         "product_name": "Cover Letter",
         "credits": 1,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "single"
       },
       {
         "title": "简历（Resume）",
@@ -143,7 +157,8 @@
         "product_id": "resume-single",
         "product_name": "简历（Resume）",
         "credits": 1,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "single"
       },
       {
         "title": "新人专享包",
@@ -174,7 +189,8 @@
         "product_id": "newcomer-package",
         "product_name": "新人专享包",
         "credits": 2,
-        "valid_months": 3
+        "valid_months": 3,
+        "group": "package"
       },
       {
         "title": "单校直通套装",
@@ -204,7 +220,8 @@
         "product_id": "single-school-package",
         "product_name": "单校直通套装",
         "credits": 5,
-        "valid_months": 6
+        "valid_months": 6,
+        "group": "package"
       },
       {
         "title": "多校申请包",
@@ -235,7 +252,8 @@
         "product_id": "multi-school-package",
         "product_name": "多校申请包",
         "credits": 10,
-        "valid_months": 12
+        "valid_months": 12,
+        "group": "package"
       },
       {
         "title": "灵活通用包（10次）",
@@ -265,7 +283,8 @@
         "product_id": "flexible-package-10",
         "product_name": "灵活通用包（10次）",
         "credits": 10,
-        "valid_months": 12
+        "valid_months": 12,
+        "group": "package"
       },
       {
         "title": "全能组合包（20次）",
@@ -295,7 +314,8 @@
         "product_id": "all-in-one-package-20",
         "product_name": "全能组合包（20次）",
         "credits": 20,
-        "valid_months": 12
+        "valid_months": 12,
+        "group": "package"
       }
     ]
   }
