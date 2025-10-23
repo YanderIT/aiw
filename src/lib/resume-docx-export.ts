@@ -335,7 +335,7 @@ const appendIfTruthy = <T>(collection: T[], item: T | null | undefined) => {
 };
 
 const DITTO_TEXT_COLOR = '333333';
-const DITTO_SECONDARY_COLOR = '333333';
+const DITTO_SECONDARY_COLOR = '666666';
 
 type HeaderLine = {
   text?: string;
@@ -460,6 +460,64 @@ const createMainEntryHeaderTable = ({
   });
 };
 
+const wrapWithAccent = (
+  content: Array<Paragraph | Table>,
+  accentColor: string,
+  options: { gap?: number } = {}
+): Table | null => {
+  if (!content.length) {
+    return null;
+  }
+
+  const gap = options.gap ?? 160;
+
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      insideH: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      insideV: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
+    },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 0.31, type: WidthType.PERCENTAGE },
+            shading: { fill: accentColor },
+            margins: { left: 0, right: 0, top: 0, bottom: 0 },
+            borders: {
+              top: { style: BorderStyle.NONE, size: 0, color: accentColor },
+              bottom: { style: BorderStyle.NONE, size: 0, color: accentColor },
+              left: { style: BorderStyle.NONE, size: 0, color: accentColor },
+              right: { style: BorderStyle.NONE, size: 0, color: accentColor }
+            },
+            verticalAlign: VerticalAlign.TOP,
+            children: [new Paragraph({ text: '', spacing: { before: 0, after: 0 } })]
+          }),
+          new TableCell({
+            width: { size: 97, type: WidthType.PERCENTAGE },
+            margins: { left: gap, right: 0, top: 0, bottom: 0 },
+            borders: {
+              top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+              bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+              left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+              right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
+            },
+            verticalAlign: VerticalAlign.TOP,
+            children: [
+              ...content,
+              new Paragraph({ text: '', spacing: { before: 0, after: 20 } })
+            ]
+          })
+        ]
+      })
+    ]
+  });
+};
+
 const createDittoSectionHeading = (title: string, isFirst: boolean): Paragraph =>
   new Paragraph({
     children: [
@@ -485,7 +543,7 @@ const createDittoSidebarHeading = (title: string, isFirst: boolean): Paragraph =
         color: DITTO_TEXT_COLOR
       })
     ],
-    spacing: { before: isFirst ? 40 : 120, after: 40 }
+    spacing: { before: isFirst ? 40 : 180, after: 40 }
   });
 
 const buildDittoDocument = (
@@ -582,12 +640,12 @@ const buildDittoDocument = (
     }
 
     return sections.experience.items.flatMap((item, index) => {
-      const paragraphs: Array<Paragraph | Table> = [];
+      const entryContent: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createMainEntryHeaderTable({
           leftLines: [
-            { text: item.company, bold: true, fontSize: 26 },
+            { text: item.company, bold: true, fontSize: 28 },
             { text: item.position, bold: true, fontSize: 24 }
           ],
           rightLines: [
@@ -598,7 +656,7 @@ const buildDittoDocument = (
           spacingAfter: 12
         })
       );
-      paragraphs.push(
+      entryContent.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -607,7 +665,8 @@ const buildDittoDocument = (
           asHyphen: true
         })
       );
-      return paragraphs;
+      const wrapped = wrapWithAccent(entryContent, accentColor);
+      return wrapped ? [wrapped] : [];
     });
   };
 
@@ -617,12 +676,12 @@ const buildDittoDocument = (
     }
 
     return sections.education.items.flatMap((item, index) => {
-      const paragraphs: Array<Paragraph | Table> = [];
+      const entryContent: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createMainEntryHeaderTable({
           leftLines: [
-            { text: item.institution, bold: true, fontSize: 26 },
+            { text: item.institution, bold: true, fontSize: 28 },
             { text: item.location, bold: true, fontSize: 24 }
           ],
           rightLines: [
@@ -646,7 +705,7 @@ const buildDittoDocument = (
         .join(' • ');
       if (detailLine) {
         appendIfTruthy(
-          paragraphs,
+          entryContent,
           createPlainParagraph(detailLine, {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -658,7 +717,7 @@ const buildDittoDocument = (
 
       if (item.courses) {
         appendIfTruthy(
-          paragraphs,
+          entryContent,
           createPlainParagraph(
             item.courses
               .split(',')
@@ -675,7 +734,8 @@ const buildDittoDocument = (
         );
       }
 
-      return paragraphs;
+      const wrapped = wrapWithAccent(entryContent, accentColor);
+      return wrapped ? [wrapped] : [];
     });
   };
 
@@ -685,9 +745,9 @@ const buildDittoDocument = (
     }
 
     return sections.projects.items.flatMap((item, index) => {
-      const paragraphs: Array<Paragraph | Table> = [];
+      const entryContent: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createMainEntryHeaderTable({
           leftLines: [{ text: item.name, bold: true, fontSize: 28 }],
           rightLines: [{ text: item.date, bold: true, fontSize: 26 }],
@@ -698,7 +758,7 @@ const buildDittoDocument = (
 
       if (item.description) {
         appendIfTruthy(
-          paragraphs,
+          entryContent,
           createPlainParagraph(item.description, {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -711,7 +771,7 @@ const buildDittoDocument = (
 
       if (item.keywords && item.keywords.length > 0) {
         appendIfTruthy(
-          paragraphs,
+          entryContent,
           createPlainParagraph(item.keywords.join(' • '), {
             spacingBefore: 0,
             spacingAfter: 20,
@@ -721,7 +781,7 @@ const buildDittoDocument = (
         );
       }
 
-      paragraphs.push(
+      entryContent.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -731,7 +791,8 @@ const buildDittoDocument = (
         })
       );
 
-      return paragraphs;
+      const wrapped = wrapWithAccent(entryContent, accentColor);
+      return wrapped ? [wrapped] : [];
     });
   };
 
@@ -741,9 +802,9 @@ const buildDittoDocument = (
     }
 
     return sections.activities.items.flatMap((item, index) => {
-      const paragraphs: Array<Paragraph | Table> = [];
+      const entryContent: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createMainEntryHeaderTable({
           leftLines: [
             { text: item.name, bold: true, fontSize: 28 },
@@ -758,7 +819,7 @@ const buildDittoDocument = (
         })
       );
 
-      paragraphs.push(
+      entryContent.push(
         ...createBulletParagraphs(item.summary, {
           color: DITTO_SECONDARY_COLOR,
           spacingBeforeFirst: 15,
@@ -768,7 +829,8 @@ const buildDittoDocument = (
         })
       );
 
-      return paragraphs;
+      const wrapped = wrapWithAccent(entryContent, accentColor);
+      return wrapped ? [wrapped] : [];
     });
   };
 
@@ -778,19 +840,19 @@ const buildDittoDocument = (
     }
 
     return sections.awards.items.flatMap((item, index) => {
-      const paragraphs: Array<Paragraph | Table> = [];
+      const entryContent: Array<Paragraph | Table> = [];
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createMainEntryHeaderTable({
-          leftLines: [{ text: item.title ?? '', bold: true, fontSize: 22 }],
-          rightLines: [{ text: item.date, bold: true, fontSize: 22 }],
+          leftLines: [{ text: item.title ?? '', bold: true, fontSize: 26 }],
+          rightLines: [{ text: item.date, bold: true, fontSize: 24 }],
           spacingBefore: index === 0 ? 40 : 60,
           spacingAfter: 10
         })
       );
 
       appendIfTruthy(
-        paragraphs,
+        entryContent,
         createPlainParagraph(item.awarder, {
           spacingBefore: 0,
           spacingAfter: 10,
@@ -799,7 +861,7 @@ const buildDittoDocument = (
         })
       );
 
-      paragraphs.push(
+      entryContent.push(
         ...createBulletParagraphs(item.summary, {
           color: accentColor,
           spacingBeforeFirst: 10,
@@ -809,7 +871,8 @@ const buildDittoDocument = (
         })
       );
 
-      return paragraphs;
+      const wrapped = wrapWithAccent(entryContent, accentColor);
+      return wrapped ? [wrapped] : [];
     });
   };
 
