@@ -193,21 +193,23 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                               </Badge>
                             )}
                           </div>
-                          <div className="mb-4 flex items-end gap-2">
-                            {item.original_price && (
-                              <span className="text-xl font-semibold text-muted-foreground line-through">
-                                {item.original_price}
-                              </span>
-                            )}
-                            {item.price && (
-                              <span className="text-5xl font-semibold">
-                                {item.price}
-                              </span>
-                            )}
+                          <div className="mb-4">
+                            <div className="flex items-end gap-2">
+                              {item.original_price && (
+                                <span className="text-xl font-semibold text-muted-foreground line-through">
+                                  {item.original_price}
+                                </span>
+                              )}
+                              {item.price && (
+                                <span className="text-5xl font-semibold">
+                                  {item.price}
+                                </span>
+                              )}
+                            </div>
                             {item.unit && (
-                              <span className="block font-semibold">
+                              <div className="mt-1 text-sm font-medium text-muted-foreground">
                                 {item.unit}
-                              </span>
+                              </div>
                             )}
                           </div>
                           {item.description && (
@@ -216,42 +218,43 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                             </p>
                           )}
                           {item.features_title && (
-                            <p className="mb-3 mt-6 font-semibold">
+                            <p className="mb-3 mt-6 text-base font-bold text-foreground">
                               {item.features_title}
                             </p>
                           )}
                           {item.features && (
-                            <ul className="flex flex-col gap-3">
+                            <ul className="flex flex-col gap-2.5">
                               {item.features.map((feature, fi) => {
                                 return (
-                                  <li className="flex gap-2" key={`feature-${fi}`}>
-                                    <Check className="mt-1 size-4 shrink-0" />
-                                    {feature}
+                                  <li className="flex gap-2 text-sm" key={`feature-${fi}`}>
+                                    <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                                    <span className="text-foreground/90">{feature}</span>
                                   </li>
                                 );
                               })}
                             </ul>
                           )}
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-3">
                           {/* Discount Hint Badge */}
-                          <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2">
-                            <Tag className="h-4 w-4 text-amber-600" />
-                            <span className="text-sm font-medium text-amber-700">
+                          <div className="flex items-center justify-center gap-2 rounded-lg border border-amber-200/80 bg-amber-50/50 px-3 py-2.5 dark:border-amber-800/30 dark:bg-amber-950/20">
+                            <Tag className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-500" />
+                            <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
                               有折扣码？点击购买时输入更优惠
                             </span>
                           </div>
 
                           {/* Chinese Payment Option */}
                           {item.cn_amount && item.cn_amount > 0 ? (
-                            <div className="mt-2 flex items-center gap-x-2">
-                              <span className="text-sm">人民币支付 👉</span>
+                            <div className="flex items-center gap-x-2.5 rounded-md bg-muted/30 px-3 py-2">
+                              <span className="text-sm font-medium text-foreground/80">人民币支付</span>
+                              <span className="text-foreground/60">👉</span>
                               <DiscountCheckoutModal item={item} cnPay={true}>
-                                <div className="inline-block rounded-md p-2 hover:cursor-pointer hover:bg-base-200">
+                                <div className="inline-block rounded-md p-1.5 transition-all hover:cursor-pointer hover:bg-muted/60">
                                   <img
                                     src="/imgs/cnpay.png"
                                     alt="cnpay"
-                                    className="h-10 w-20 rounded-lg"
+                                    className="h-8 w-16 rounded"
                                   />
                                 </div>
                               </DiscountCheckoutModal>
@@ -262,7 +265,7 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                           {item.button && (
                             <DiscountCheckoutModal item={item}>
                               <Button
-                                className="flex w-full items-center justify-center gap-2 font-semibold"
+                                className="flex w-full items-center justify-center gap-2 font-semibold shadow-sm transition-all hover:shadow-md"
                                 disabled={isLoading}
                               >
                                 {item.button.icon && (
@@ -275,7 +278,7 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                           )}
 
                           {item.tip && (
-                            <p className="mt-2 text-sm text-muted-foreground">
+                            <p className="text-center text-xs text-muted-foreground">
                               {item.tip}
                             </p>
                           )}

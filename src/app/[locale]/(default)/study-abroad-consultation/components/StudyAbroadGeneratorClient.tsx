@@ -328,7 +328,7 @@ function StudyAbroadGeneratorContent() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">留学1对1咨询</h1>
+              <h1 className="text-3xl font-bold text-foreground">母语老师对订润色</h1>
               <p className="text-muted-foreground mt-2 text-lg">
                 填写您的信息，获得专业的留学申请指导
               </p>

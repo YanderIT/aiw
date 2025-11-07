@@ -48,14 +48,15 @@ export default function PolishingDetailsModule() {
       const formData = new FormData();
       formData.append('file', file);
 
-      // Upload file to API
-      const response = await fetch('/api/upload', {
+      // Upload file to document upload API
+      const response = await fetch('/api/upload/document', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('文件上传失败');
+        const errorData = await response.json();
+        throw new Error(errorData.error || '文件上传失败');
       }
 
       const result = await response.json();
@@ -63,13 +64,14 @@ export default function PolishingDetailsModule() {
       // Update context with file info
       updatePolishingDetails({
         uploaded_document_name: file.name,
-        uploaded_document_url: result.url || file.name,
+        uploaded_document_url: result.url,
       });
 
       toast.success('文件上传成功');
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('文件上传失败，请重试');
+      const errorMessage = error instanceof Error ? error.message : '文件上传失败，请重试';
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }
