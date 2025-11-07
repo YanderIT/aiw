@@ -177,37 +177,39 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                     >
                       <div className="flex h-full flex-col justify-between gap-5">
                         <div>
-                          <div className="mb-4 flex items-center gap-2">
-                            {item.title && (
-                              <h3 className="text-xl font-semibold">
-                                {item.title}
-                              </h3>
-                            )}
-                            <div className="flex-1" />
+                          <div className="mb-4 flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              {item.title && (
+                                <h3 className="text-xl font-semibold">
+                                  {item.title}
+                                </h3>
+                              )}
+                              {!item.label && <div className="flex-1" />}
+                            </div>
                             {item.label && (
-                              <Badge
-                                variant="outline"
-                                className="border-primary bg-primary px-1.5 text-primary-foreground"
-                              >
-                                {item.label}
-                              </Badge>
+                              <div className="flex">
+                                <Badge
+                                  variant="outline"
+                                  className="border-primary bg-primary px-1.5 text-primary-foreground"
+                                >
+                                  {item.label}
+                                </Badge>
+                              </div>
                             )}
                           </div>
-                          <div className="mb-4">
-                            <div className="flex items-end gap-2">
-                              {item.original_price && (
-                                <span className="text-xl font-semibold text-muted-foreground line-through">
-                                  {item.original_price}
-                                </span>
-                              )}
-                              {item.price && (
-                                <span className="text-5xl font-semibold">
-                                  {item.price}
-                                </span>
-                              )}
-                            </div>
+                          <div className="mb-4 flex flex-col gap-1">
+                            {item.original_price && (
+                              <div className="text-lg font-semibold text-muted-foreground line-through">
+                                {item.original_price}
+                              </div>
+                            )}
+                            {item.price && (
+                              <div className="text-5xl font-semibold">
+                                {item.price}
+                              </div>
+                            )}
                             {item.unit && (
-                              <div className="mt-1 text-sm font-medium text-muted-foreground">
+                              <div className="text-sm font-medium text-muted-foreground">
                                 {item.unit}
                               </div>
                             )}
