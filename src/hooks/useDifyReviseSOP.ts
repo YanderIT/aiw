@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useDify } from './useDify';
+import type { StreamingCallbacks } from '@/services/dify-sse';
 
 interface ReviseParams {
   revise_type: string; // "0"代表保持原本，"1"代表扩写，"2"代表缩写
@@ -13,12 +15,15 @@ interface ReviseParams {
 
 export function useDifyReviseSOP() {
   const [isRevising, setIsRevising] = useState(false);
+  const { runWorkflowStreamingWithCallbacks } = useDify({
+    functionType: 'revise-sop'
+  });
 
   const runRevision = async (params: ReviseParams) => {
     setIsRevising(true);
-    
+
     console.log('[SOP Revision] Starting revision with params:', params);
-    
+
     try {
       const response = await fetch('/api/dify/revise-sop', {
         method: 'POST',
@@ -48,8 +53,51 @@ export function useDifyReviseSOP() {
     }
   };
 
+  // Streaming revision function
+  const runRevisionStreaming = useCallback(async (
+    params: ReviseParams,
+    callbacks: StreamingCallbacks
+  ) => {
+    setIsRevising(true);
+
+    console.log('[SOP Revision Streaming] Starting revision with params:', params);
+
+    try {
+      await runWorkflowStreamingWithCallbacks(
+        {
+          inputs: params,
+          response_mode: 'streaming',
+          user: `revise-sop-${Date.now()}`
+        },
+        {
+          ...callbacks,
+          onWorkflowStarted: (data) => {
+            console.log('[SOP Revision Streaming] Workflow started:', data.workflow_run_id);
+            callbacks.onWorkflowStarted?.(data);
+          },
+          onError: (msg: string, code?: string) => {
+            console.error('[SOP Revision Streaming] Error:', msg, code);
+            setIsRevising(false);
+            callbacks.onError?.(msg, code);
+          },
+          onWorkflowFinished: (data) => {
+            console.log('[SOP Revision Streaming] Workflow finished');
+            setIsRevising(false);
+            callbacks.onWorkflowFinished?.(data);
+          }
+        },
+        'revise-sop'
+      );
+    } catch (error) {
+      console.error('[SOP Revision Streaming] Revision failed:', error);
+      setIsRevising(false);
+      throw error;
+    }
+  }, [runWorkflowStreamingWithCallbacks]);
+
   return {
     runRevision,
+    runRevisionStreaming,
     isRevising
   };
 }

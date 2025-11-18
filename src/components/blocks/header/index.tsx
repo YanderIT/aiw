@@ -174,9 +174,9 @@ export default function Header({ header }: { header: HeaderType }) {
 
 
             <div className="relative group">
-              <Button 
-                variant="ghost" 
-                className="relative bg-background/40 backdrop-blur-md border border-border/30 shadow-sm hover:shadow-lg transition-all duration-500 font-semibold rounded-full px-6 overflow-visible hover:bg-background/50"
+              <Button
+                variant="ghost"
+                className="relative cursor-pointer bg-background/40 backdrop-blur-md border border-border/30 shadow-sm hover:shadow-lg transition-all duration-500 font-semibold rounded-full px-6 overflow-visible hover:bg-background/50"
                 onClick={handleCreationCenterClick}
               >
                 {/* Glass gradient overlay */}
@@ -355,9 +355,9 @@ export default function Header({ header }: { header: HeaderType }) {
                 <div className="flex-1"></div>
                 <div className="border-t pt-4">
                   <div className="mt-2 flex flex-col gap-3">
-                    <Button 
-                      variant="ghost" 
-                      className="bg-gradient-to-r from-blue-500/15 to-cyan-400/15 backdrop-blur-md border border-blue-200/30 shadow-lg hover:from-blue-500/25 hover:to-cyan-400/25 hover:shadow-blue-200/50 transition-all duration-300 font-semibold rounded-full relative overflow-hidden"
+                    <Button
+                      variant="ghost"
+                      className="cursor-pointer bg-gradient-to-r from-blue-500/15 to-cyan-400/15 backdrop-blur-md border border-blue-200/30 shadow-lg hover:from-blue-500/25 hover:to-cyan-400/25 hover:shadow-blue-200/50 transition-all duration-300 font-semibold rounded-full relative overflow-hidden"
                       onClick={handleCreationCenterClick}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>

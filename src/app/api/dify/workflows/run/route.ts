@@ -19,25 +19,47 @@ export async function POST(req: NextRequest) {
     }
 
     if (response_mode === 'streaming') {
-      // 流式响应
-      const stream = new ReadableStream({
-        start(controller) {
-          difyService.runWorkflowStreaming(
-            { inputs, response_mode, user },
-            (chunk) => {
-              controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
-            },
-            functionType
-          ).then(() => {
-            controller.close();
-          }).catch((error) => {
-            controller.enqueue(`data: ${JSON.stringify({ error: error.message })}\n\n`);
-            controller.close();
-          });
-        }
+      // 流式响应 - 直接从Dify API获取流并转发给前端
+      // 从环境变量获取API密钥
+      const API_KEY_MAP: Record<string, string | undefined> = {
+        'recommendation-letter': process.env.DIFY_API_KEY_RECOMMENDATION_LETTER,
+        'cover-letter': process.env.DIFY_API_KEY_COVER_LETTER,
+        'resume-generator': process.env.DIFY_API_KEY_RESUME_GENERATOR,
+        'sop': process.env.DIFY_API_KEY_SOP,
+        'personal-statement': process.env.DIFY_API_KEY_PERSONAL_STATEMENT,
+        'revise-recommendation-letter': process.env.DIFY_API_KEY_REVISE_RECOMMENDATION_LETTER,
+        'revise-sop': process.env.DIFY_API_KEY_REVISE_SOP,
+        'revise-personal-statement': process.env.DIFY_API_KEY_REVISE_PERSONAL_STATEMENT,
+        'revise-cover-letter': process.env.DIFY_API_KEY_REVISE_COVER_LETTER,
+        'default': process.env.DIFY_API_KEY,
+      };
+
+      const apiKey = API_KEY_MAP[functionType] || API_KEY_MAP['default'];
+      if (!apiKey) {
+        return respErr(`功能类型 '${functionType}' 的 API Key 未配置`);
+      }
+
+      const baseUrl = process.env.DIFY_BASE_URL || 'https://api.dify.ai/v1';
+
+      const difyResponse = await fetch(`${baseUrl}/workflows/run`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs,
+          response_mode: 'streaming',
+          user,
+        }),
       });
 
-      return new Response(stream, {
+      if (!difyResponse.ok) {
+        return respErr(`Dify API 错误: ${difyResponse.status}`);
+      }
+
+      // 直接转发Dify的流式响应
+      return new Response(difyResponse.body, {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',

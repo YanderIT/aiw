@@ -13,19 +13,19 @@ interface ReviseParams {
   language: string; // 语言设置
 }
 
-export function useDifyReviseCoverLetter() {
+export function useDifyReviseRecommendationLetter() {
   const [isRevising, setIsRevising] = useState(false);
   const { runWorkflowStreamingWithCallbacks } = useDify({
-    functionType: 'revise-cover-letter'
+    functionType: 'revise-recommendation-letter'
   });
 
   const runRevision = async (params: ReviseParams) => {
     setIsRevising(true);
 
-    console.log('[Cover Letter Revision] Starting revision with params:', params);
+    console.log('[Recommendation Letter Revision] Starting revision with params:', params);
 
     try {
-      const response = await fetch('/api/dify/revise-cover-letter', {
+      const response = await fetch('/api/dify/revise-recommendation-letter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,20 +33,20 @@ export function useDifyReviseCoverLetter() {
         body: JSON.stringify(params),
       });
 
-      console.log('[Cover Letter Revision] Response status:', response.status);
-      console.log('[Cover Letter Revision] Response ok:', response.ok);
+      console.log('[Recommendation Letter Revision] Response status:', response.status);
+      console.log('[Recommendation Letter Revision] Response ok:', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[Cover Letter Revision] API error response:', errorText);
-        throw new Error(`Cover Letter Revision API request failed: ${response.status} - ${errorText}`);
+        console.error('[Recommendation Letter Revision] API error response:', errorText);
+        throw new Error(`Recommendation Letter Revision API request failed: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('[Cover Letter Revision] Revision response data:', data);
+      console.log('[Recommendation Letter Revision] Revision response data:', data);
       return data.content || "";
     } catch (error) {
-      console.error('[Cover Letter Revision] Revision failed:', error);
+      console.error('[Recommendation Letter Revision] Revision failed:', error);
       throw error;
     } finally {
       setIsRevising(false);
@@ -60,36 +60,36 @@ export function useDifyReviseCoverLetter() {
   ) => {
     setIsRevising(true);
 
-    console.log('[Cover Letter Revision Streaming] Starting revision with params:', params);
+    console.log('[Recommendation Letter Revision Streaming] Starting revision with params:', params);
 
     try {
       await runWorkflowStreamingWithCallbacks(
         {
           inputs: params,
           response_mode: 'streaming',
-          user: `revise-cover-letter-${Date.now()}`
+          user: `revise-recommendation-letter-${Date.now()}`
         },
         {
           ...callbacks,
           onWorkflowStarted: (data) => {
-            console.log('[Cover Letter Revision Streaming] Workflow started:', data.workflow_run_id);
+            console.log('[Recommendation Letter Revision Streaming] Workflow started:', data.workflow_run_id);
             callbacks.onWorkflowStarted?.(data);
           },
           onError: (msg: string, code?: string) => {
-            console.error('[Cover Letter Revision Streaming] Error:', msg, code);
+            console.error('[Recommendation Letter Revision Streaming] Error:', msg, code);
             setIsRevising(false);
             callbacks.onError?.(msg, code);
           },
           onWorkflowFinished: (data) => {
-            console.log('[Cover Letter Revision Streaming] Workflow finished');
+            console.log('[Recommendation Letter Revision Streaming] Workflow finished');
             setIsRevising(false);
             callbacks.onWorkflowFinished?.(data);
           }
         },
-        'revise-cover-letter'
+        'revise-recommendation-letter'
       );
     } catch (error) {
-      console.error('[Cover Letter Revision Streaming] Revision failed:', error);
+      console.error('[Recommendation Letter Revision Streaming] Revision failed:', error);
       setIsRevising(false);
       throw error;
     }

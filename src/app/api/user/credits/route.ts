@@ -3,7 +3,11 @@ import { respData, respErr } from "@/lib/resp";
 import { getUserUuid } from "@/services/user";
 import { getSupabaseClient } from "@/models/db";
 
+// DISABLED: Credits API endpoint - commented out to prevent API calls
 export async function GET(req: NextRequest) {
+  return respErr("积分功能已禁用");
+
+  /* ORIGINAL CODE - DISABLED
   try {
     const userUuid = await getUserUuid();
     if (!userUuid) {
@@ -11,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    
+
     // 获取用户的有效积分总数
     const { data: credits, error } = await supabase
       .from("credits")
@@ -36,4 +40,5 @@ export async function GET(req: NextRequest) {
     console.error("获取用户积分失败:", error);
     return respErr("获取积分失败: " + error.message);
   }
+  */
 }

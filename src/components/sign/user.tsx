@@ -22,7 +22,8 @@ import { Coins } from "lucide-react";
 
 export default function SignUser({ user }: { user: User }) {
   const t = useTranslations();
-  const { credits, loading } = useUserCredits();
+  // DISABLED: Credits feature - commented out to prevent API calls
+  // const { credits, loading } = useUserCredits();
 
   const dropdownItems: NavItem[] = [
     {
@@ -50,13 +51,14 @@ export default function SignUser({ user }: { user: User }) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* 积分显示 */}
+      {/* DISABLED: 积分显示 - Credits display hidden
       <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
         <Coins className="w-4 h-4" />
         <span className="font-medium">
           {loading ? "..." : credits}
         </span>
       </div>
+      */}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -71,10 +73,12 @@ export default function SignUser({ user }: { user: User }) {
           {/* 用户信息 */}
           <DropdownMenuItem className="flex-col items-start p-3">
             <div className="font-medium">{user.nickname}</div>
+            {/* DISABLED: 积分显示 - Credits display hidden
             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
               <Coins className="w-4 h-4" />
               <span>剩余次数: {loading ? "加载中..." : credits}</span>
             </div>
+            */}
           </DropdownMenuItem>
           
           <DropdownMenuSeparator />

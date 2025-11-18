@@ -1,13 +1,15 @@
 import { useState, useCallback } from 'react';
-import { 
-  DifyWorkflowRunRequest, 
-  DifyWorkflowRunResponse, 
-  DifyWorkflowStatus, 
+import {
+  DifyWorkflowRunRequest,
+  DifyWorkflowRunResponse,
+  DifyWorkflowStatus,
   DifyFileUploadResponse,
   DifyWorkflowLogsQuery,
   DifyWorkflowLogsResponse,
   DifyFunctionType
 } from '@/types/dify';
+import type { StreamingCallbacks } from '@/services/dify-sse';
+import { sendWorkflowStreamingMessage } from '@/services/dify-sse';
 
 interface UseDifyOptions {
   baseUrl?: string;
@@ -241,6 +243,38 @@ export function useDify(options: UseDifyOptions = {}) {
     }
   }, [baseUrl, defaultFunctionType]);
 
+  // 官方推荐的 SSE 流式调用（使用回调接口）
+  const runWorkflowStreamingWithCallbacks = useCallback(async (
+    request: DifyWorkflowRunRequest,
+    callbacks: Required<
+      Pick<
+        StreamingCallbacks,
+        'onWorkflowStarted' | 'onNodeStarted' | 'onNodeFinished' | 'onWorkflowFinished'
+      >
+    > &
+      Pick<StreamingCallbacks, 'onError' | 'onTextChunk'>,
+    functionType?: DifyFunctionType
+  ): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await sendWorkflowStreamingMessage(
+        {
+          ...request,
+          function_type: functionType || defaultFunctionType,
+        },
+        callbacks
+      );
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '流式调用失败';
+      setError(errorMessage);
+      callbacks.onError?.(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [defaultFunctionType]);
+
   return {
     loading,
     error,
@@ -250,5 +284,6 @@ export function useDify(options: UseDifyOptions = {}) {
     uploadFile,
     getWorkflowLogs,
     runWorkflowStreaming,
+    runWorkflowStreamingWithCallbacks, // 新增：官方推荐的 SSE 流式调用
   };
 } 

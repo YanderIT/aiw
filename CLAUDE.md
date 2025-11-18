@@ -434,3 +434,475 @@ await runWorkflowStreaming(
 3. **Error Handling**: Check API key availability before calling
 4. **Streaming Parsing**: Handle SSE format with proper line splitting
 5. **Field Mapping**: Document expected output structure for each function type
+
+## Server-Sent Events (SSE) Streaming Architecture
+
+### Overview
+
+The SSE streaming architecture provides real-time, typewriter-style content generation for document features. Instead of waiting for the entire response to complete (blocking mode), SSE streams content as it's generated, providing immediate user feedback and a better experience.
+
+**Benefits:**
+- **Real-time Feedback**: Users see content appear word-by-word as the AI generates it
+- **Better UX**: Loading states transition immediately to content display on first chunk
+- **Progress Visibility**: Users know the AI is working, reducing perceived wait time
+- **Flexible**: Can handle both text streaming and structured outputs
+
+**When to Use:**
+- ✅ Long-form document generation (SOP, cover letters, personal statements)
+- ✅ Features where users benefit from seeing incremental progress
+- ❌ Quick operations where streaming overhead isn't worth it
+- ❌ Structured-only outputs with no user-visible text
+
+### Architecture Components
+
+#### 1. Service Layer (`src/services/dify-sse.ts`)
+
+Core SSE handling service following the official Dify template:
+
+```typescript
+// Event type definitions
+export type IOnTextChunk = (
+  text: string,
+  isFirstChunk: boolean,
+  moreInfo: { messageId?: string; fromVariable?: string }
+) => void;
+
+export interface StreamingCallbacks {
+  onWorkflowStarted?: (data: WorkflowStartedResponse) => void;
+  onNodeStarted?: (data: NodeStartedResponse) => void;
+  onNodeFinished?: (data: NodeFinishedResponse) => void;
+  onTextChunk?: IOnTextChunk;
+  onWorkflowFinished?: (data: WorkflowFinishedResponse) => void;
+  onError?: (msg: string, code?: string) => void;
+}
+
+// Main streaming function
+export const sendWorkflowStreamingMessage = async (
+  url: string,
+  options: RequestInit,
+  callbacks: StreamingCallbacks
+): Promise<void> => {
+  // Fetch with stream
+  const response = await fetch(url, options);
+
+  // Process ReadableStream
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let isFirstMessage = true;
+
+  // Read stream chunks
+  while (true) {
+    const { done, value } = await reader!.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = JSON.parse(line.slice(6));
+
+        // Handle text_chunk events
+        if (data.event === 'text_chunk') {
+          const text = data.data?.text || data.text || '';
+          callbacks.onTextChunk?.(text, isFirstMessage, {
+            messageId: data.task_id,
+            fromVariable: data.data?.from_variable_selector?.[1]
+          });
+          isFirstMessage = false;
+        }
+
+        // Handle other events
+        if (data.event === 'workflow_started') {
+          callbacks.onWorkflowStarted?.(data);
+        }
+        // ... etc
+      }
+    }
+  }
+};
+```
+
+**Key Features:**
+- Uses native `ReadableStream` API (not EventSource)
+- Handles SSE format: `data: {json}\n\n`
+- Unicode character conversion for proper text display
+- First chunk detection flag
+
+#### 2. Hook Layer (`src/hooks/useDify.ts`)
+
+Extends the useDify hook with streaming callback support:
+
+```typescript
+const runWorkflowStreamingWithCallbacks = useCallback(async (
+  request: DifyWorkflowRunRequest,
+  callbacks: Required<
+    Pick<StreamingCallbacks, 'onWorkflowStarted' | 'onNodeStarted' | 'onNodeFinished' | 'onWorkflowFinished'>
+  > & Pick<StreamingCallbacks, 'onError' | 'onTextChunk'>,
+  functionType?: DifyFunctionType
+): Promise<void> => {
+  const apiKey = getApiKey(functionType || defaultFunctionType);
+
+  await sendWorkflowStreamingMessage(
+    '/api/dify/workflows/run',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({ ...request, functionType: functionType || defaultFunctionType })
+    },
+    callbacks
+  );
+}, [defaultFunctionType]);
+
+return { runWorkflowStreamingWithCallbacks, /* ... */ };
+```
+
+#### 3. API Route Pattern (`src/app/api/dify/workflows/run/route.ts`)
+
+Direct stream forwarding from Dify API:
+
+```typescript
+if (response_mode === 'streaming') {
+  const difyResponse = await fetch(`${baseUrl}/workflows/run`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ inputs, response_mode: 'streaming', user }),
+  });
+
+  // IMPORTANT: Forward the stream directly, don't await json()
+  return new Response(difyResponse.body, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+}
+```
+
+**Critical:** Don't call `.json()` on the response - forward the body stream directly.
+
+#### 4. Component Integration Pattern
+
+Reference implementation: `src/app/[locale]/(default)/sop/result/[uuid]/components/SOPResultClient.tsx`
+
+```typescript
+// 1. Add streaming states
+const [isStreamingText, setIsStreamingText] = useState(false);
+const [firstChunkReceived, setFirstChunkReceived] = useState(false);
+const [currentNodeName, setCurrentNodeName] = useState('');
+const contentEndRef = useRef<HTMLDivElement>(null);
+
+// 2. Text accumulation (official template pattern)
+const chunks: string[] = [];
+
+// 3. Call streaming with callbacks
+await runWorkflowStreamingWithCallbacks(
+  {
+    inputs: { /* your data */ },
+    response_mode: 'streaming',
+    user: 'user-id'
+  },
+  {
+    onWorkflowStarted: (data) => {
+      setWorkflowRunId(data.workflow_run_id);
+      console.log('[Streaming] Workflow started');
+    },
+
+    onNodeStarted: (data) => {
+      setCurrentNodeName(data.data.title || data.data.node_type);
+    },
+
+    onTextChunk: (text: string, isFirst: boolean) => {
+      // First chunk closes loading immediately
+      if (isFirst && !firstChunkReceived) {
+        setFirstChunkReceived(true);
+        setGenerationLoading(false);
+        setIsStreamingText(true);
+      }
+
+      // Accumulate chunks
+      chunks.push(text);
+      const fullText = chunks.join('');
+
+      // Update display (triggers re-render for typewriter effect)
+      updateGeneratedContent(fullText);
+    },
+
+    onNodeFinished: (data) => {
+      // text_chunk already handled text, this is for metadata
+      console.log('[Streaming] Node finished:', data.data.title);
+    },
+
+    onWorkflowFinished: (data) => {
+      setIsStreamingText(false);
+      setCurrentNodeName('');
+
+      // Get final content from outputs (fallback if no text_chunk events)
+      const finalContent = data.data.outputs?.text ||
+                          data.data.outputs?.output ||
+                          '';
+
+      if (finalContent && !firstChunkReceived) {
+        updateGeneratedContent(finalContent);
+      }
+
+      // Save to database with smart word count
+      const wordCount = smartWordCount(finalContent, languagePreference);
+      await fetch('/api/documents', {
+        method: 'PUT',
+        body: JSON.stringify({
+          uuid: documentUuid,
+          content: finalContent,
+          word_count: wordCount.count.toString()
+        })
+      });
+    },
+
+    onError: (msg, code) => {
+      setGenerationError(msg);
+      setGenerationLoading(false);
+      setIsStreamingText(false);
+    }
+  },
+  'sop' // function type
+);
+
+// 4. Update loading condition
+// ONLY show loader if generating AND no chunks received yet
+if (generationState.isGenerating && !firstChunkReceived) {
+  return <AIGeneratingLoader currentNodeName={currentNodeName} />;
+}
+
+// 5. Show streaming indicator
+{isStreamingText && (
+  <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+    <span className="text-sm text-muted-foreground">
+      {currentNodeName || 'AI 正在生成内容...'}
+    </span>
+    <Badge variant="secondary" className="ml-auto">
+      {wordCountInfo.count} {wordCountInfo.label}
+    </Badge>
+  </div>
+)}
+
+// 6. Auto-scroll during streaming
+useEffect(() => {
+  if (isStreamingText && contentEndRef.current) {
+    contentEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+}, [displayContent, isStreamingText]);
+
+// Add ref at end of content
+<div ref={contentEndRef} />
+```
+
+### Event Types & Flow
+
+SSE events arrive in this order:
+
+1. **`workflow_started`**: Workflow execution begins
+   - Contains: `workflow_run_id`, `task_id`
+   - Action: Store IDs, update UI to show workflow started
+
+2. **`node_started`**: Each workflow node begins processing
+   - Contains: `node_id`, `node_type`, `title`, `inputs`
+   - Action: Display current node name to user
+
+3. **`text_chunk`**: Individual text pieces stream in (THIS IS KEY!)
+   - Contains: `text` (single word or character), `from_variable_selector`
+   - Action: Accumulate chunks, update display, close loading on first chunk
+   - **Pattern**: Text arrives as individual words like `"From"`, `" the"`, `" moment"`, etc.
+
+4. **`node_finished`**: Node completes
+   - Contains: `outputs`, `execution_metadata`
+   - Action: Log completion, extract metadata (NOT primary text source)
+
+5. **`workflow_finished`**: Complete workflow finishes
+   - Contains: `status`, `outputs`, `total_tokens`, `elapsed_time`
+   - Action: Final cleanup, save to database, show success message
+
+### Key Implementation Patterns
+
+#### Pattern 1: Text Accumulation Strategy
+
+```typescript
+// ✅ CORRECT: Array accumulation (official template pattern)
+const chunks: string[] = [];
+
+onTextChunk: (text, isFirst) => {
+  chunks.push(text);              // Add to array
+  const fullText = chunks.join(''); // Join for display
+  updateGeneratedContent(fullText); // Trigger React re-render
+}
+
+// ❌ WRONG: String concatenation (can cause memory issues)
+let fullText = '';
+onTextChunk: (text, isFirst) => {
+  fullText += text; // Don't do this
+}
+```
+
+#### Pattern 2: First Chunk Detection
+
+```typescript
+// ✅ CORRECT: Close loading immediately on first chunk
+onTextChunk: (text, isFirst) => {
+  if (isFirst && !firstChunkReceived) {
+    setFirstChunkReceived(true);
+    setGenerationLoading(false);  // Close loader NOW
+    setIsStreamingText(true);      // Show streaming indicator
+  }
+  // ... accumulate text
+}
+
+// ❌ WRONG: Waiting for workflow_started or other events
+onWorkflowStarted: (data) => {
+  setGenerationLoading(false); // Too early! No text yet
+}
+```
+
+#### Pattern 3: Loading Condition
+
+```typescript
+// ✅ CORRECT: Check both generating AND no chunks received
+if (generationState.isGenerating && !firstChunkReceived) {
+  return <AIGeneratingLoader />;
+}
+
+// ❌ WRONG: Only checking isGenerating
+if (generationState.isGenerating) {
+  return <AIGeneratingLoader />; // Will show loader even after chunks arrive
+}
+```
+
+#### Pattern 4: Smart Word Count Integration
+
+```typescript
+import { smartWordCount } from '@/lib/word-count';
+
+// Define AFTER displayContent to avoid initialization order errors
+const displayContent = currentVersion > 1
+  ? versions.find(v => v.version === currentVersion)?.content
+  : generationState.generatedContent || '';
+
+// Smart word count with useMemo optimization
+const wordCountInfo = useMemo(() => {
+  return smartWordCount(displayContent, generationState.languagePreference);
+}, [displayContent, generationState.languagePreference]);
+
+// Use in UI and database
+<Badge>{wordCountInfo.count} {wordCountInfo.label}</Badge>
+
+// Database save
+word_count: wordCountInfo.count.toString()
+```
+
+The `smartWordCount` function:
+- **English**: Counts words (space-separated)
+- **Chinese**: Counts characters (excluding spaces)
+- Returns: `{ count: number, type: 'words' | 'characters', label: 'words' | '字' }`
+
+### Integration Checklist for New Features
+
+When adding SSE to a new feature (cover-letter, personal-statement, etc.):
+
+- [ ] **Step 1: Add Streaming States**
+  ```typescript
+  const [isStreamingText, setIsStreamingText] = useState(false);
+  const [firstChunkReceived, setFirstChunkReceived] = useState(false);
+  const [currentNodeName, setCurrentNodeName] = useState('');
+  const contentEndRef = useRef<HTMLDivElement>(null);
+  ```
+
+- [ ] **Step 2: Import Required Utilities**
+  ```typescript
+  import { smartWordCount } from '@/lib/word-count';
+  const { runWorkflowStreamingWithCallbacks } = useDify({ functionType: 'your-feature' });
+  ```
+
+- [ ] **Step 3: Implement Callbacks**
+  - Copy callback pattern from SOPResultClient
+  - Update function type
+  - Adjust content extraction based on your feature's output structure
+
+- [ ] **Step 4: Update Loading Logic**
+  ```typescript
+  if (isGenerating && !firstChunkReceived) {
+    return <Loader />;
+  }
+  ```
+
+- [ ] **Step 5: Add Streaming Indicator UI**
+  - Show current node name
+  - Display real-time word count
+  - Add loading spinner
+
+- [ ] **Step 6: Implement Auto-scroll**
+  ```typescript
+  useEffect(() => {
+    if (isStreamingText && contentEndRef.current) {
+      contentEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [displayContent, isStreamingText]);
+  ```
+
+- [ ] **Step 7: Update Database Saves**
+  - Use `smartWordCount` for all word count saves
+  - Save final content in `onWorkflowFinished`
+
+- [ ] **Step 8: Handle Variable Initialization Order**
+  - Define `displayContent` BEFORE `wordCountInfo`
+  - Use `useMemo` for `wordCountInfo` to optimize
+
+### Common Pitfalls & Solutions
+
+1. **ReferenceError: Cannot access 'displayContent' before initialization**
+   - **Cause**: Using `displayContent` in `wordCountInfo` useMemo before it's declared
+   - **Fix**: Move `wordCountInfo` definition AFTER `displayContent`
+
+2. **Loading persists after text starts streaming**
+   - **Cause**: Not updating loading state on first chunk
+   - **Fix**: Set `setGenerationLoading(false)` in `onTextChunk` when `isFirst === true`
+
+3. **Text doesn't appear during streaming**
+   - **Cause**: Processing text in `onNodeFinished` instead of `onTextChunk`
+   - **Fix**: Use `onTextChunk` callback for real-time text display
+
+4. **Incorrect word count for Chinese documents**
+   - **Cause**: Using `displayContent.length` which counts all characters
+   - **Fix**: Use `smartWordCount(content, language)` which handles both English and Chinese
+
+5. **Stream connection errors**
+   - **Cause**: Calling `.json()` on streaming response in API route
+   - **Fix**: Forward `response.body` directly with proper headers
+
+6. **TypeScript errors on callbacks**
+   - **Cause**: Missing type annotations on callback parameters
+   - **Fix**: Explicitly type all parameters: `onTextChunk: (text: string, isFirst: boolean) => {}`
+
+7. **Memory issues with long documents**
+   - **Cause**: String concatenation in loop
+   - **Fix**: Use array accumulation: `chunks.push(text); chunks.join('')`
+
+### Files Reference
+
+**Core Implementation:**
+- `src/services/dify-sse.ts` - SSE service layer
+- `src/hooks/useDify.ts` - React hook with streaming support
+- `src/lib/word-count.ts` - Language-aware word counting
+
+**Example Integration:**
+- `src/app/[locale]/(default)/sop/result/[uuid]/components/SOPResultClient.tsx` - Complete reference implementation
+
+**API Configuration:**
+- `src/app/api/dify/workflows/run/route.ts` - Stream forwarding API route

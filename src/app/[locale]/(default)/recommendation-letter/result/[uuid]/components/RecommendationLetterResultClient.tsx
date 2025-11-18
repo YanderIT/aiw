@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,7 +52,18 @@ import FinalRecommendationIcon from "../../../components/icons/FinalRecommendati
 
 // Import Dify Hooks
 import { useDify } from '@/hooks/useDify';
-import { useDifyRevise } from '@/hooks/useDifyRevise';
+import { useDifyReviseRecommendationLetter } from '@/hooks/useDifyReviseRecommendationLetter';
+import { exportMarkdownToPDF } from '@/lib/markdown-pdf-export';
+import { exportTextToDOCX } from '@/lib/text-document-export';
+import { smartWordCount } from '@/lib/word-count';
+import type { StreamingCallbacks } from '@/services/dify-sse';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 // Import revision components
 import RevisionModal from "../../../components/RevisionModal";
@@ -68,15 +79,15 @@ export interface RecommendationLetterModule {
 }
 
 // AI生成Loading组件
-const AIGeneratingLoader = () => {
+const AIGeneratingLoader = ({ currentNodeName }: { currentNodeName?: string }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number}>>([]);
-  
+
   const steps = [
-    { icon: Sparkles, text: "分析您的推荐信内容...", color: "text-green-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
-    { icon: Zap, text: "运用AI智能生成技术...", color: "text-green-500", bgColor: "bg-yellow-100 dark:bg-yellow-900/30" },
-    { icon: Stars, text: "优化推荐信结构和语言...", color: "text-green-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
-    { icon: FileText, text: "完成推荐信生成...", color: "text-green-500", bgColor: "bg-green-100 dark:bg-green-900/30" }
+    { icon: Sparkles, text: currentNodeName || "分析您的推荐信内容...", color: "text-green-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+    { icon: Zap, text: currentNodeName || "运用AI智能生成技术...", color: "text-green-500", bgColor: "bg-yellow-100 dark:bg-yellow-900/30" },
+    { icon: Stars, text: currentNodeName || "优化推荐信结构和语言...", color: "text-green-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+    { icon: FileText, text: currentNodeName || "完成推荐信生成...", color: "text-green-500", bgColor: "bg-green-100 dark:bg-green-900/30" }
   ];
 
   useEffect(() => {
@@ -264,9 +275,21 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
   // 正在保存修改
   const [isSavingRevision, setIsSavingRevision] = useState(false);
 
+  // Generation streaming states
+  const [isStreamingText, setIsStreamingText] = useState(false);
+  const [firstChunkReceived, setFirstChunkReceived] = useState(false);
+  const [currentNodeName, setCurrentNodeName] = useState('');
+  const contentEndRef = useRef<HTMLDivElement>(null);
+
+  // Revision streaming states
+  const [isRevisionStreaming, setIsRevisionStreaming] = useState(false);
+  const [revisionFirstChunkReceived, setRevisionFirstChunkReceived] = useState(false);
+  const [revisionCurrentNodeName, setRevisionCurrentNodeName] = useState('');
+  const [isRevisionLoading, setIsRevisionLoading] = useState(false);
+
   // Dify Hooks for API calls
-  const { runWorkflow } = useDify({ functionType: 'recommendation-letter' });
-  const { runRevision, isRevising } = useDifyRevise();
+  const { runWorkflow, runWorkflowStreamingWithCallbacks } = useDify({ functionType: 'recommendation-letter' });
+  const { runRevision, runRevisionStreaming, isRevising } = useDifyReviseRecommendationLetter();
 
   // 使用数据库版本内容或 Context 中的生成内容，如果没有则使用占位符
   const getCurrentDbVersion = () => {
@@ -278,8 +301,14 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
   };
   
   const displayContent = getCurrentDbVersion();
-  
 
+  // Language preference for word count (get from data or default to Chinese)
+  const languagePreference = getSelectedData().language || 'Chinese';
+
+  // Smart word count with useMemo optimization
+  const wordCountInfo = useMemo(() => {
+    return smartWordCount(displayContent, languagePreference);
+  }, [displayContent, languagePreference]);
 
   const modules: RecommendationLetterModule[] = [
     {
@@ -354,74 +383,126 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
   };
 
   const handleGenerate = useCallback(async () => {
-    console.log('handleGenerate called');
+    console.log('[Recommendation Letter Generation] handleGenerate called');
     setGenerationLoading(true);
     setGenerationError(null);
+    setFirstChunkReceived(false);
+    setIsStreamingText(false);
+    setCurrentNodeName('');
 
     try {
       // 获取选中模块的数据
       const selectedData = getSelectedData();
-      console.log('Selected data for generation:', selectedData);
+      console.log('[Recommendation Letter Generation] Selected data for generation:', selectedData);
 
-      // 确保 Loading 动画至少显示 2 秒
-      const [result] = await Promise.all([
-        runWorkflow({
+      // Text accumulation array
+      const chunks: string[] = [];
+      let workflowRunId = '';
+
+      await runWorkflowStreamingWithCallbacks(
+        {
           inputs: selectedData,
-          response_mode: 'blocking',
-          user: 'recommendation-letter-user'
-        }),
-        new Promise(resolve => setTimeout(resolve, 2000)) // 最少显示 2 秒
-      ]);
-
-      console.log('API response:', result);
-
-      // 从返回结果中提取生成的推荐信内容
-      // API返回结构: { code: 0, message: "ok", data: { data: { outputs: { text: "..." } } } }
-      const generatedContent = (result as any).data?.data?.outputs?.text || 
-                             (result as any).data?.outputs?.text || 
-                             (result as any).outputs?.text || 
-                             "推荐信生成失败，请重试";
-
-      updateGeneratedContent(generatedContent);
-      
-      // 更新数据库中的文档内容
-      try {
-        const updateResponse = await fetch('/api/documents', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
+          response_mode: 'streaming',
+          user: `recommendation-letter-${Date.now()}`
+        },
+        {
+          onWorkflowStarted: (data) => {
+            workflowRunId = data.workflow_run_id;
+            console.log('[Recommendation Letter Generation Streaming] Workflow started:', workflowRunId);
           },
-          body: JSON.stringify({
-            uuid: documentUuid,
-            content: generatedContent,
-            ai_workflow_id: (result as any).workflow_run_id,
-            word_count: generatedContent.length.toString()
-          }),
-        });
 
-        if (!updateResponse.ok) {
-          console.error('Failed to update document in database');
-        } else {
-          // 更新成功后，重新加载版本历史
-          await loadDocumentVersions();
-        }
-      } catch (updateError) {
-        console.error('Error updating document:', updateError);
-      }
-      
-      toast.success("推荐信已生成！");
+          onNodeStarted: (data) => {
+            const nodeName = data.data.title || data.data.node_type;
+            setCurrentNodeName(nodeName);
+            console.log('[Recommendation Letter Generation Streaming] Node started:', nodeName);
+          },
+
+          onTextChunk: (text: string, isFirst: boolean) => {
+            // First chunk closes loading immediately
+            if (isFirst && !firstChunkReceived) {
+              setFirstChunkReceived(true);
+              setGenerationLoading(false);
+              setIsStreamingText(true);
+              console.log('[Recommendation Letter Generation Streaming] First chunk received, closing loader');
+            }
+
+            // Accumulate chunks
+            chunks.push(text);
+            const fullText = chunks.join('');
+
+            // Update display (triggers re-render for typewriter effect)
+            updateGeneratedContent(fullText);
+          },
+
+          onNodeFinished: (data) => {
+            console.log('[Recommendation Letter Generation Streaming] Node finished:', data.data.title);
+          },
+
+          onWorkflowFinished: async (data) => {
+            setIsStreamingText(false);
+            setCurrentNodeName('');
+
+            // Get final content from outputs (fallback if no text_chunk events)
+            const finalContent = data.data.outputs?.text ||
+                                data.data.outputs?.output ||
+                                chunks.join('');
+
+            console.log('[Recommendation Letter Generation Streaming] Workflow finished');
+
+            if (finalContent && !firstChunkReceived) {
+              updateGeneratedContent(finalContent);
+            }
+
+            // Save to database with smart word count
+            const wordCount = smartWordCount(finalContent, languagePreference);
+            try {
+              const updateResponse = await fetch('/api/documents', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  uuid: documentUuid,
+                  content: finalContent,
+                  ai_workflow_id: workflowRunId,
+                  word_count: wordCount.count.toString()
+                }),
+              });
+
+              if (!updateResponse.ok) {
+                console.error('Failed to update document in database');
+              } else {
+                // 更新成功后，重新加载版本历史
+                await loadDocumentVersions();
+              }
+            } catch (updateError) {
+              console.error('Error updating document:', updateError);
+            }
+
+            toast.success("推荐信已生成！");
+          },
+
+          onError: (msg: string, code?: string) => {
+            console.error('[Recommendation Letter Generation Streaming] Error:', msg, code);
+            setGenerationError(msg);
+            setGenerationLoading(false);
+            setIsStreamingText(false);
+            toast.error(`生成失败: ${msg}`);
+          }
+        },
+        'recommendation-letter'
+      );
 
     } catch (error) {
-      console.error('生成推荐信失败:', error);
+      console.error('[Recommendation Letter Generation] Generation failed:', error);
       const errorMessage = error instanceof Error ? error.message : '生成失败，请重试';
-      
+
       setGenerationError(errorMessage);
-      toast.error(`API 调用失败: ${errorMessage}`);
-      
-    } finally {
       setGenerationLoading(false);
+      setIsStreamingText(false);
+      toast.error(`API 调用失败: ${errorMessage}`);
     }
-  }, [getSelectedData, runWorkflow, updateGeneratedContent, setGenerationLoading, setGenerationError, documentUuid]);
+  }, [getSelectedData, runWorkflowStreamingWithCallbacks, updateGeneratedContent, setGenerationLoading, setGenerationError, documentUuid, languagePreference, firstChunkReceived]);
 
   // 页面加载时的初始化逻辑
   useEffect(() => {
@@ -574,17 +655,48 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
     }
   };
 
-  const handleExport = () => {
-    const blob = new Blob([displayContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recommendation-letter-${data.basicInfo.student_full_name || 'student'}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("推荐信已导出");
+  const handleExport = async (format: 'txt' | 'pdf' | 'docx') => {
+    const baseFilename = `recommendation-letter-${data.basicInfo.student_full_name || 'student'}`;
+
+    try {
+      switch (format) {
+        case 'txt': {
+          const blob = new Blob([displayContent], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${baseFilename}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success("TXT 文件已导出");
+          break;
+        }
+        case 'pdf': {
+          await exportMarkdownToPDF(displayContent, {
+            filename: `${baseFilename}.pdf`,
+            title: 'Recommendation Letter',
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en',
+            quality: 0.95,
+            scale: 2,
+            margin: 20
+          });
+          break;
+        }
+        case 'docx': {
+          await exportTextToDOCX(displayContent, {
+            filename: `${baseFilename}.docx`,
+            title: 'Recommendation Letter',
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en'
+          });
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('导出失败:', error);
+      toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
   };
 
   const handleSave = () => {
@@ -621,12 +733,15 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
   
   const handleFullRevision = async (settings: any) => {
     setShowFullRevisionModal(false);
-    setGenerationLoading(true);
-    
+    setIsRevisionLoading(true);
+    setRevisionFirstChunkReceived(false);
+    setIsRevisionStreaming(false);
+    setRevisionCurrentNodeName('');
+
     try {
       // 获取语言设置
       const selectedData = getSelectedData();
-      
+
       // 风格选项定义（与 FullRevisionModal 中的一致）
       const STYLE_OPTIONS = [
         { value: 'concise', label: '更精炼' },
@@ -639,62 +754,132 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
         { value: 'humanized', label: '更人性化' },
         { value: 'clarity', label: '更清晰' },
       ];
-      
+
       // 将风格值转换为中文标签
       const styleLabels = settings.styles?.map((styleValue: string) => {
         const option = STYLE_OPTIONS.find(opt => opt.value === styleValue);
         return option ? option.label : styleValue;
       }) || [];
-      
-      // 调用 DIFY API 进行全文重写
+
+      // 调用 DIFY API 进行全文重写 - 使用 streaming
       const params = {
         revise_type: (settings.wordControl === 'keep' ? 0 : (settings.wordControl === 'expand' ? 1 : 2)).toString(),
         style: styleLabels.join(';'), // 使用分号拼接中文标签
-        original_word_count: displayContent.length.toString(),
-        word_count: (settings.targetWordCount || displayContent.length).toString(),
+        original_word_count: wordCountInfo.count.toString(),
+        word_count: (settings.targetWordCount || wordCountInfo.count).toString(),
         detail: settings.direction || '',
         original_context: displayContent,
         whole: '0', // 整篇重写
-        language: selectedData.language || 'zh' // 添加语言参数
+        language: selectedData.language || 'Chinese' // 添加语言参数
       };
-      
-      const revisedContent = await runRevision(params);
-      
-      // 创建修改版本并保存到数据库
-      const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: revisedContent,
-          revision_settings: settings
-        }),
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to create revision');
-      }
+      console.log('[Recommendation Letter Revision] Starting streaming revision with params:', params);
 
-      const { data: revision } = await response.json();
-      
-      // 立即更新修改状态，禁用修改按钮
-      setServerRevisionStatus(true);
-      
-      // 先设置新版本ID，再加载版本历史
-      if (revision.uuid) {
-        setCurrentDbVersionId(revision.uuid);
-      }
-      
-      // 重新加载版本历史
-      await loadDocumentVersions();
-      
-      toast.success("推荐信已成功修改！");
+      // Text accumulation array
+      const chunks: string[] = [];
+
+      await runRevisionStreaming(
+        params,
+        {
+          onWorkflowStarted: (data) => {
+            console.log('[Recommendation Letter Revision Streaming] Workflow started:', data.workflow_run_id);
+          },
+
+          onNodeStarted: (data) => {
+            const nodeName = data.data.title || data.data.node_type;
+            setRevisionCurrentNodeName(nodeName);
+            console.log('[Recommendation Letter Revision Streaming] Node started:', nodeName);
+          },
+
+          onTextChunk: (text: string, isFirst: boolean) => {
+            // First chunk closes loading immediately
+            if (isFirst && !revisionFirstChunkReceived) {
+              setRevisionFirstChunkReceived(true);
+              setIsRevisionLoading(false);
+              setIsRevisionStreaming(true);
+              console.log('[Recommendation Letter Revision Streaming] First chunk received, closing loader');
+            }
+
+            // Accumulate chunks
+            chunks.push(text);
+            const fullText = chunks.join('');
+
+            // Update display (triggers re-render for typewriter effect)
+            updateGeneratedContent(fullText);
+          },
+
+          onNodeFinished: (data) => {
+            console.log('[Recommendation Letter Revision Streaming] Node finished:', data.data.title);
+          },
+
+          onWorkflowFinished: async (data) => {
+            setIsRevisionStreaming(false);
+            setRevisionCurrentNodeName('');
+
+            // Get final content from outputs (fallback if no text_chunk events)
+            const finalContent = data.data.outputs?.text ||
+                                data.data.outputs?.output ||
+                                chunks.join('');
+
+            console.log('[Recommendation Letter Revision Streaming] Workflow finished');
+
+            if (finalContent && !revisionFirstChunkReceived) {
+              updateGeneratedContent(finalContent);
+            }
+
+            // 创建修改版本并保存到数据库
+            try {
+              const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  content: finalContent,
+                  revision_settings: settings
+                }),
+              });
+
+              if (!response.ok) {
+                throw new Error('Failed to create revision');
+              }
+
+              const { data: revision } = await response.json();
+
+              // 立即更新修改状态，禁用修改按钮
+              setServerRevisionStatus(true);
+
+              // 先设置新版本ID，再加载版本历史
+              if (revision.uuid) {
+                setCurrentDbVersionId(revision.uuid);
+              }
+
+              // 重新加载版本历史
+              await loadDocumentVersions();
+
+              toast.success("推荐信已成功修改！");
+            } catch (saveError) {
+              console.error('Error saving revision:', saveError);
+              toast.error("修改保存失败");
+            }
+          },
+
+          onError: (msg: string, code?: string) => {
+            console.error('[Recommendation Letter Revision Streaming] Error:', msg, code);
+            setGenerationError(msg);
+            setIsRevisionLoading(false);
+            setIsRevisionStreaming(false);
+            toast.error(`修改失败: ${msg}`);
+          }
+        }
+      );
+
     } catch (error) {
+      console.error('[Recommendation Letter Revision] Revision failed:', error);
       toast.error("修改失败，请重试");
       setGenerationError("修改失败");
-    } finally {
-      setGenerationLoading(false);
+      setIsRevisionLoading(false);
+      setIsRevisionStreaming(false);
     }
   };
   
@@ -789,6 +974,13 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
 
   const currentModule = modules.find(m => m.id === activeTab);
   const ActiveComponent = currentModule?.component || BasicInfoModule;
+
+  // Auto-scroll during streaming
+  useEffect(() => {
+    if ((isStreamingText || isRevisionStreaming) && contentEndRef.current) {
+      contentEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [displayContent, isStreamingText, isRevisionStreaming]);
 
   return (<>
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5">
@@ -1020,19 +1212,35 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                       <Copy className="w-5 h-5 mr-2" />
                       复制
                     </Button>
-                    
- 
-                     
-                    <Button
-                      variant="outline"
-                      size="default"
-                      onClick={handleExport}
-                      disabled={generationState.isGenerating}
-                      className="bg-background hover:bg-muted text-base px-4 py-2"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      导出
-                    </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          disabled={generationState.isGenerating}
+                          className="bg-background hover:bg-muted text-base px-4 py-2"
+                        >
+                          <Download className="w-5 h-5 mr-2" />
+                          导出
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleExport('txt')}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          导出为 TXT
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          导出为 PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('docx')}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          导出为 DOCX
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button 
                       variant="outline" 
                       size="default" 
@@ -1069,10 +1277,37 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
                   </div>
-                ) : generationState.isGenerating ? (
-                  <AIGeneratingLoader />
+                ) : ((generationState.isGenerating && !firstChunkReceived) ||
+                     (isRevisionLoading && !revisionFirstChunkReceived)) ? (
+                  <AIGeneratingLoader currentNodeName={currentNodeName || revisionCurrentNodeName} />
                 ) : isPreviewMode ? (
                   <div className="w-full h-full min-h-[500px] overflow-y-auto prose prose-slate dark:prose-invert max-w-none">
+                    {/* Streaming indicator - Generation (blue theme) */}
+                    {isStreamingText && (
+                      <div className="flex items-center gap-2 p-3 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <Loader2 className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm text-blue-700 dark:text-blue-300">
+                          {currentNodeName || 'AI 正在生成内容...'}
+                        </span>
+                        <Badge variant="secondary" className="ml-auto bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200">
+                          {wordCountInfo.count} {wordCountInfo.label}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Streaming indicator - Revision (orange theme) */}
+                    {isRevisionStreaming && (
+                      <div className="flex items-center gap-2 p-3 mb-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                        <Loader2 className="w-4 h-4 animate-spin text-orange-600 dark:text-orange-400" />
+                        <span className="text-sm text-orange-700 dark:text-orange-300">
+                          {revisionCurrentNodeName || 'AI 正在修改内容...'}
+                        </span>
+                        <Badge variant="secondary" className="ml-auto bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200">
+                          {wordCountInfo.count} {wordCountInfo.label}
+                        </Badge>
+                      </div>
+                    )}
+
                     {/* 如果开启了修改功能，显示可编辑的段落 */}
                     {!(serverRevisionStatus !== null ? serverRevisionStatus : hasUsedFreeRevision()) && generationState.generatedContent && !isLoadingVersions ? (
                       <div className="space-y-4">
@@ -1094,6 +1329,9 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
                     ) : (
                       <Markdown content={displayContent} />
                     )}
+
+                    {/* Auto-scroll anchor */}
+                    <div ref={contentEndRef} />
                   </div>
                 ) : (
                   <div className="w-full h-full min-h-[500px]">
@@ -1122,7 +1360,7 @@ function RecommendationLetterResultContent({ documentUuid }: RecommendationLette
       isOpen={showFullRevisionModal}
       onClose={() => setShowFullRevisionModal(false)}
       onConfirm={handleFullRevision}
-      currentWordCount={displayContent.length}
+      currentWordCount={wordCountInfo.count}
     />
     
     {/* 版本对比弹窗 */}

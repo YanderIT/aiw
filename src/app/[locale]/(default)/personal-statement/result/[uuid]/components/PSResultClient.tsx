@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,9 @@ import { toast } from "sonner";
 import { PSProvider, usePS } from "../../../components/PSContext";
 import { useDify } from '@/hooks/useDify';
 import { useDifyRevisePS } from '@/hooks/useDifyRevisePS';
+import { exportMarkdownToPDF } from '@/lib/markdown-pdf-export';
+import { exportTextToDOCX } from '@/lib/text-document-export';
+import { smartWordCount } from '@/lib/word-count';
 import RevisionModal from "../../../components/RevisionModal";
 import FullRevisionModal, { RevisionSettings } from "../../../components/FullRevisionModal";
 import ParagraphRevision from "../../../components/ParagraphRevision";
@@ -35,9 +38,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // AI生成Loading组件
-const AIGeneratingLoader = () => {
+const AIGeneratingLoader = ({ currentNodeName }: { currentNodeName?: string }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  
+
   const steps = [
     { icon: Sparkles, text: "分析您的PS内容...", color: "text-green-500" },
     { icon: Zap, text: "运用AI智能生成技术...", color: "text-green-500" },
@@ -47,7 +50,7 @@ const AIGeneratingLoader = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length);
+      setCurrentStep((prev: number) => (prev + 1) % steps.length);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -65,7 +68,7 @@ const AIGeneratingLoader = () => {
 
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-4">
-          {steps.map((step, index) => {
+          {steps.map((step: { icon: any; text: string; color: string }, index: number) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
             return (
@@ -81,7 +84,7 @@ const AIGeneratingLoader = () => {
           })}
         </div>
         <p className="text-lg font-medium text-foreground animate-pulse">
-          {steps[currentStep].text}
+          {currentNodeName || steps[currentStep].text}
         </p>
         <p className="text-sm text-muted-foreground">
           请稍候，AI正在为您生成专业的个人陈述...
@@ -103,11 +106,24 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     loadFromCache
   } = usePS();
 
-  const { runWorkflow } = useDify({ functionType: 'personal-statement' });
+  const { runWorkflow, runWorkflowStreamingWithCallbacks } = useDify({ functionType: 'personal-statement' });
   
   const [hasGenerated, setHasGenerated] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  
+
+  // Streaming states
+  const [useStreaming, setUseStreaming] = useState(true);
+  const [currentNodeName, setCurrentNodeName] = useState('');
+  const [isStreamingText, setIsStreamingText] = useState(false);
+  const [firstChunkReceived, setFirstChunkReceived] = useState(false);
+  const contentEndRef = useRef<HTMLDivElement>(null);
+
+  // Revision streaming states
+  const [isRevisionStreaming, setIsRevisionStreaming] = useState(false);
+  const [revisionFirstChunkReceived, setRevisionFirstChunkReceived] = useState(false);
+  const [revisionCurrentNodeName, setRevisionCurrentNodeName] = useState('');
+  const [isRevisionLoading, setIsRevisionLoading] = useState(false);
+
   // 修改相关状态
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [showFullRevisionModal, setShowFullRevisionModal] = useState(false);
@@ -121,7 +137,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
   const [currentDbVersionId, setCurrentDbVersionId] = useState<string | null>(null);
   const [isLoadingVersions, setIsLoadingVersions] = useState(false);
   
-  const { runRevision, isRevising } = useDifyRevisePS();
+  const { runRevision, runRevisionStreaming, isRevising } = useDifyRevisePS();
   
   // 段落高亮状态
   const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState<number | null>(null);
@@ -142,9 +158,14 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
     return generationState.generatedContent || '';
   };
-  
-  // 使用计算属性获取显示内容
+
+  // 使用计算属性获取显示内容 - MUST be defined before wordCountInfo
   const displayContent = getCurrentDbVersion();
+
+  // Smart word count with useMemo optimization
+  const wordCountInfo = useMemo(() => {
+    return smartWordCount(displayContent, generationState.languagePreference);
+  }, [displayContent, generationState.languagePreference]);
   
   // 段落修改处理
   const handleParagraphRevise = async (index: number, newText: string) => {
@@ -331,6 +352,147 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
   }, [documentUuid, data, generationState.languagePreference, runWorkflow, updateGeneratedContent, setGenerationLoading, setGenerationError]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Streaming generation function
+  const handleGenerateStreaming = useCallback(async () => {
+    setGenerationLoading(true);
+    setGenerationError(null);
+    setFirstChunkReceived(false);
+    setIsStreamingText(false);
+    setCurrentNodeName('');
+
+    try {
+      // Prepare Dify inputs
+      const difyInputs = {
+        count: '800',
+        language: generationState.languagePreference || 'English',
+        username: 'User',
+        target: data.target || '',
+        education: data.education || '',
+        skill: data.skill || '',
+        research: data.research || '',
+        workExperience: data.workExperience || '',
+        reason: data.reason || ''
+      };
+
+      // Text accumulation - MUST use array pattern
+      const chunks: string[] = [];
+      let workflowRunId = '';
+
+      await runWorkflowStreamingWithCallbacks(
+        {
+          inputs: difyInputs,
+          response_mode: 'streaming',
+          user: 'personal-statement-user'
+        },
+        {
+          onWorkflowStarted: (data) => {
+            workflowRunId = data.workflow_run_id;
+            console.log('[PS Streaming] Workflow started:', workflowRunId);
+          },
+
+          onNodeStarted: (data) => {
+            const nodeName = data.data.title || data.data.node_type || 'Processing...';
+            setCurrentNodeName(nodeName);
+            console.log('[PS Streaming] Node started:', nodeName);
+          },
+
+          onTextChunk: (text: string, isFirst: boolean) => {
+            // First chunk closes loading immediately
+            if (isFirst && !firstChunkReceived) {
+              setFirstChunkReceived(true);
+              setGenerationLoading(false);
+              setIsStreamingText(true);
+              setIsInitialLoading(false);
+              console.log('[PS Streaming] First chunk received, closing loader');
+            }
+
+            // Accumulate chunks (official pattern)
+            chunks.push(text);
+            const fullText = chunks.join('');
+
+            // Update display (triggers re-render for typewriter effect)
+            updateGeneratedContent(fullText);
+          },
+
+          onNodeFinished: (data) => {
+            console.log('[PS Streaming] Node finished:', data.data.title || data.data.node_type);
+          },
+
+          onWorkflowFinished: (data) => {
+            setIsStreamingText(false);
+            setCurrentNodeName('');
+            console.log('[PS Streaming] Workflow finished');
+
+            // Get final content from outputs (fallback if no text_chunk events)
+            const finalContent = data.data.outputs?.text ||
+                                data.data.outputs?.output ||
+                                chunks.join('') ||
+                                '';
+
+            if (finalContent && !firstChunkReceived) {
+              updateGeneratedContent(finalContent);
+            }
+
+            // Save to database with smart word count
+            const saveContent = finalContent || chunks.join('');
+            const wordCount = smartWordCount(saveContent, generationState.languagePreference);
+
+            fetch('/api/documents', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uuid: documentUuid,
+                content: saveContent,
+                ai_workflow_id: workflowRunId,
+                word_count: wordCount.count.toString()
+              }),
+            })
+              .then(response => {
+                if (!response.ok) {
+                  console.error('[PS Streaming] Failed to save document');
+                }
+              })
+              .catch(error => {
+                console.error('[PS Streaming] Error saving document:', error);
+              });
+
+            toast.success("个人陈述已成功生成！");
+          },
+
+          onError: (msg: string, code?: string) => {
+            console.error('[PS Streaming] Error:', msg, code);
+            setGenerationError(msg || '生成失败，请重试');
+            setGenerationLoading(false);
+            setIsStreamingText(false);
+            setIsInitialLoading(false);
+            toast.error(`生成失败: ${msg}`);
+          }
+        },
+        'personal-statement'
+      );
+
+    } catch (error) {
+      console.error('[PS Streaming] Generation failed:', error);
+      const errorMessage = error instanceof Error ? error.message : '生成失败，请重试';
+      setGenerationError(errorMessage);
+      setGenerationLoading(false);
+      setIsStreamingText(false);
+      setIsInitialLoading(false);
+      toast.error(`生成失败: ${errorMessage}`);
+    }
+  }, [
+    documentUuid,
+    data,
+    generationState.languagePreference,
+    runWorkflowStreamingWithCallbacks,
+    updateGeneratedContent,
+    setGenerationLoading,
+    setGenerationError,
+    firstChunkReceived
+  ]);
+
   // 检查修改状态
   const checkRevisionStatus = async () => {
     try {
@@ -420,6 +582,13 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
   };
 
+  // Auto-scroll during streaming (generation or revision)
+  useEffect(() => {
+    if ((isStreamingText || isRevisionStreaming) && contentEndRef.current) {
+      contentEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [displayContent, isStreamingText, isRevisionStreaming]);
+
   // 页面加载时处理
   useEffect(() => {
     if (!documentUuid) {
@@ -494,9 +663,14 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     // 只在标记为true且未在生成中且有数据时触发一次
     if (hasGenerated && !generationState.isGenerating && data.target) {
       setHasGenerated(false); // 立即重置标记，避免重复调用
-      handleGenerate();
+      // Use streaming generation
+      if (useStreaming) {
+        handleGenerateStreaming();
+      } else {
+        handleGenerate();
+      }
     }
-  }, [hasGenerated, data.target, generationState.isGenerating, handleGenerate]); // 添加所有依赖
+  }, [hasGenerated, data.target, generationState.isGenerating, handleGenerate, handleGenerateStreaming, useStreaming]); // 添加所有依赖
 
 
   const handleCopy = async () => {
@@ -509,22 +683,58 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async (format: 'txt' | 'pdf' | 'docx') => {
     const contentToExport = displayContent;
-    const blob = new Blob([contentToExport], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `personal-statement-${data.target || 'document'}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("个人陈述已导出");
+    const baseFilename = `personal-statement-${data.target || 'document'}`;
+
+    try {
+      switch (format) {
+        case 'txt': {
+          const blob = new Blob([contentToExport], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${baseFilename}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success("TXT 文件已导出");
+          break;
+        }
+        case 'pdf': {
+          await exportMarkdownToPDF(contentToExport, {
+            filename: `${baseFilename}.pdf`,
+            title: 'Personal Statement',
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en',
+            quality: 0.95,
+            scale: 2,
+            margin: 20
+          });
+          break;
+        }
+        case 'docx': {
+          await exportTextToDOCX(contentToExport, {
+            filename: `${baseFilename}.docx`,
+            title: 'Personal Statement',
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en'
+          });
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('导出失败:', error);
+      toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
   };
 
   const handleRegenerate = () => {
-    handleGenerate();
+    // Use streaming generation
+    if (useStreaming) {
+      handleGenerateStreaming();
+    } else {
+      handleGenerate();
+    }
   };
 
   // 修改功能处理函数
@@ -549,10 +759,13 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
 
   const handleFullRevision = async (settings: RevisionSettings) => {
     setShowFullRevisionModal(false);
-    setGenerationLoading(true); // 设置loading状态
-    
+    setIsRevisionLoading(true);
+    setRevisionFirstChunkReceived(false);
+    setIsRevisionStreaming(false);
+    setRevisionCurrentNodeName('');
+
     // 准备 API 参数
-    const styleLabels = settings.styles.map(styleValue => {
+    const styleLabels = settings.styles.map((styleValue: string) => {
       const STYLE_OPTIONS = [
         { value: 'concise', label: '更精炼' },
         { value: 'formal', label: '更正式' },
@@ -571,64 +784,126 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     const params = {
       revise_type: settings.wordControl === 'keep' ? '0' : (settings.wordControl === 'expand' ? '1' : '2'),
       style: styleLabels.join(';'),
-      original_word_count: displayContent.length.toString(),
-      word_count: settings.targetWordCount?.toString() || displayContent.length.toString(),
+      original_word_count: wordCountInfo.count.toString(),
+      word_count: settings.targetWordCount?.toString() || wordCountInfo.count.toString(),
       detail: settings.direction,
       original_context: displayContent,
       whole: '0', // 整篇重写
       language: generationState.languagePreference || 'Chinese'
     };
 
-    try {
-      const revisedContent = await runRevision(params);
-      
-      if (revisedContent) {
-        // 创建修改版本
-        const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: revisedContent,
-            revision_settings: settings
-          }),
-        });
+    // Text accumulation - MUST use array pattern
+    const chunks: string[] = [];
 
-        if (response.ok) {
-          const result = await response.json();
-          
-          // 立即更新显示内容
-          updateGeneratedContent(revisedContent);
-          setCurrentVersion(result.data.version || 2);
-          
-          // 立即更新修改状态，禁用修改按钮
-          setServerRevisionStatus(true);
-          
-          // 重新加载版本历史，并强制选择新版本
-          if (result.data?.uuid) {
-            await loadDocumentVersions(result.data.uuid);
-          } else {
-            await loadDocumentVersions();
+    try {
+      await runRevisionStreaming(params, {
+        onWorkflowStarted: (data) => {
+          console.log('[PS Revision] Workflow started:', data.workflow_run_id);
+        },
+
+        onNodeStarted: (data) => {
+          const nodeName = data.data.title || data.data.node_type || 'Processing...';
+          setRevisionCurrentNodeName(nodeName);
+          console.log('[PS Revision] Node started:', nodeName);
+        },
+
+        onTextChunk: (text: string, isFirst: boolean) => {
+          // First chunk closes loading immediately
+          if (isFirst && !revisionFirstChunkReceived) {
+            setRevisionFirstChunkReceived(true);
+            setIsRevisionLoading(false);
+            setIsRevisionStreaming(true);
+            console.log('[PS Revision] First chunk received, closing loader');
           }
-          
-          await loadVersions();
-          await checkRevisionStatus();
-          toast.success("个人陈述修改成功！");
-        } else {
-          if (response.status === 403) {
-            toast.error("您已经使用过免费修改机会");
-            setServerRevisionStatus(true);
-          } else {
-            throw new Error('Failed to save revision');
+
+          // Accumulate chunks (official pattern)
+          chunks.push(text);
+          const fullText = chunks.join('');
+
+          // Update display (triggers re-render for typewriter effect)
+          updateGeneratedContent(fullText);
+        },
+
+        onNodeFinished: (data) => {
+          console.log('[PS Revision] Node finished:', data.data.title || data.data.node_type);
+        },
+
+        onWorkflowFinished: async (data) => {
+          setIsRevisionStreaming(false);
+          setRevisionCurrentNodeName('');
+          console.log('[PS Revision] Workflow finished');
+
+          // Get final content from outputs (fallback if no text_chunk events)
+          const finalContent = data.data.outputs?.text ||
+                              data.data.outputs?.output ||
+                              chunks.join('') ||
+                              '';
+
+          if (finalContent && !revisionFirstChunkReceived) {
+            updateGeneratedContent(finalContent);
           }
+
+          // Save to database with smart word count
+          const saveContent = finalContent || chunks.join('');
+
+          try {
+            const response = await fetch(`/api/documents/${documentUuid}/revisions`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                content: saveContent,
+                revision_settings: settings
+              }),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+
+              // 立即更新显示内容
+              updateGeneratedContent(saveContent);
+              setCurrentVersion(result.data.version || 2);
+
+              // 立即更新修改状态，禁用修改按钮
+              setServerRevisionStatus(true);
+
+              // 重新加载版本历史，并强制选择新版本
+              if (result.data?.uuid) {
+                await loadDocumentVersions(result.data.uuid);
+              } else {
+                await loadDocumentVersions();
+              }
+
+              await loadVersions();
+              await checkRevisionStatus();
+              toast.success("个人陈述修改成功！");
+            } else {
+              if (response.status === 403) {
+                toast.error("您已经使用过免费修改机会");
+                setServerRevisionStatus(true);
+              } else {
+                throw new Error('Failed to save revision');
+              }
+            }
+          } catch (saveError) {
+            console.error('[PS Revision] Save failed:', saveError);
+            toast.error("保存失败，请重试");
+          }
+        },
+
+        onError: (msg: string, code?: string) => {
+          console.error('[PS Revision] Error:', msg, code);
+          setIsRevisionLoading(false);
+          setIsRevisionStreaming(false);
+          toast.error(`修改失败: ${msg}`);
         }
-      }
+      });
     } catch (error) {
-      console.error('Revision failed:', error);
+      console.error('[PS Revision] Revision failed:', error);
       toast.error("修改失败，请重试");
-    } finally {
-      setGenerationLoading(false); // 无论成功还是失败都清除loading状态
+      setIsRevisionLoading(false);
+      setIsRevisionStreaming(false);
     }
   };
 
@@ -649,9 +924,11 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
     }
   };
 
-  // 如果正在生成，显示AI生成动画
-  if (generationState.isGenerating) {
-    return <AIGeneratingLoader />;
+  // 如果正在生成或修改，显示AI生成动画
+  // ONLY show loader if (generating AND no chunks received) OR (revising AND no revision chunks received)
+  if ((generationState.isGenerating && !firstChunkReceived) ||
+      (isRevisionLoading && !revisionFirstChunkReceived)) {
+    return <AIGeneratingLoader currentNodeName={currentNodeName || revisionCurrentNodeName} />;
   }
   
   // 如果是初始加载，显示简单的loading状态
@@ -688,7 +965,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
         <CardContent className="p-12 text-center">
           <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-lg font-medium mb-4">暂无内容</p>
-          <Button onClick={handleGenerate}>
+          <Button onClick={useStreaming ? handleGenerateStreaming : handleGenerate}>
             生成个人陈述
           </Button>
         </CardContent>
@@ -711,7 +988,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
             已生成
           </Badge>
           <Badge variant="outline">
-            {displayContent.length} 字
+            {wordCountInfo.count} {wordCountInfo.label}
           </Badge>
         </div>
       </div>
@@ -800,10 +1077,29 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           <Copy className="mr-2 h-4 w-4" />
           复制
         </Button>
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          导出
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              导出
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleExport('txt')}>
+              <FileText className="mr-2 h-4 w-4" />
+              导出为 TXT
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('pdf')}>
+              <FileText className="mr-2 h-4 w-4" />
+              导出为 PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('docx')}>
+              <FileText className="mr-2 h-4 w-4" />
+              导出为 DOCX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {/* <Button variant="outline" size="sm" onClick={handleSave}>
           <Save className="mr-2 h-4 w-4" />
           保存
@@ -827,6 +1123,32 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
           )}
         </Button>
       </div>
+
+      {/* Streaming indicator - Generation */}
+      {isStreamingText && (
+        <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">
+            {currentNodeName || 'AI 正在生成内容...'}
+          </span>
+          <Badge variant="secondary" className="ml-auto">
+            {wordCountInfo.count} {wordCountInfo.label}
+          </Badge>
+        </div>
+      )}
+
+      {/* Streaming indicator - Revision */}
+      {isRevisionStreaming && (
+        <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+          <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+          <span className="text-sm text-orange-900 dark:text-orange-100">
+            {revisionCurrentNodeName || 'AI 正在修改内容...'}
+          </span>
+          <Badge variant="secondary" className="ml-auto">
+            {wordCountInfo.count} {wordCountInfo.label}
+          </Badge>
+        </div>
+      )}
 
       {/* 内容显示区 */}
       <Card className="overflow-hidden">
@@ -857,7 +1179,10 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
                   ))}
                 </div>
               ) : (
-                <Markdown content={displayContent} />
+                <>
+                  <Markdown content={displayContent} />
+                  <div ref={contentEndRef} />
+                </>
               )}
             </div>
           )}
@@ -876,7 +1201,7 @@ function PSResultContent({ documentUuid }: { documentUuid: string }) {
         isOpen={showFullRevisionModal}
         onClose={() => setShowFullRevisionModal(false)}
         onConfirm={handleFullRevision}
-        currentWordCount={displayContent.length}
+        currentWordCount={wordCountInfo.count}
       />
       
       {/* 版本对比弹窗 */}

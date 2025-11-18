@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import { setRequestLocale } from "next-intl/server";
 import { locales } from "@/i18n/locale";
 import { cn } from "@/lib/utils";
+import NextTopLoader from "nextjs-toploader";
 
 export default async function RootLayout({
   children,
@@ -38,7 +39,20 @@ export default async function RootLayout({
           ))}
         <link rel="alternate" hrefLang="x-default" href={webUrl} />
       </head>
-      <body className={cn("min-h-screen overflow-x-hidden")}>{children}</body>
+      <body className={cn("min-h-screen overflow-x-hidden")}>
+        <NextTopLoader
+          color="#22c55e"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #22c55e,0 0 5px #22c55e"
+        />
+        {children}
+      </body>
     </html>
   );
 }

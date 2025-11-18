@@ -10,6 +10,13 @@ export function useUserCredits() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchCredits = async () => {
+    // DISABLED: Credits API call - commented out to prevent HTTP requests
+    setCredits(0);
+    setLoading(false);
+    setError(null);
+    return;
+
+    /* ORIGINAL CODE - DISABLED
     if (!session) {
       setCredits(0);
       return;
@@ -41,6 +48,7 @@ export function useUserCredits() {
     } finally {
       setLoading(false);
     }
+    */
   };
 
   useEffect(() => {

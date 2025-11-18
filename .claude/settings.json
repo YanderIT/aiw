@@ -21,17 +21,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/a1/Desktop/ring/play_random_ring3.sh"
-          }
-        ]
-      }
     ]
   }
 }
