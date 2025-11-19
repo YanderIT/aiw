@@ -11,9 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useTranslations } from "next-intl";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2, Trash2 } from "lucide-react";
 import { useRouter } from '@/i18n/navigation';
 import { GlobalLoading } from "@/components/ui/loading";
 import { toast } from "sonner";
@@ -127,8 +137,8 @@ function ConfirmationPage() {
       <GlobalLoading isVisible={generationState.isGenerating} />
       <div className="space-y-6">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold text-foreground mb-2">确认文书内容</h2>
-          <p className="text-muted-foreground">请确认您要包含在文书中的内容，点击复选框可以切换选择</p>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">确认简历内容</h2>
+          <p className="text-muted-foreground">请确认您要包含在简历中的内容，点击复选框可以切换选择</p>
         </div>
 
       {/* 开发调试按钮 - 仅在开发环境显示 */}
@@ -289,11 +299,11 @@ function ConfirmationPage() {
           {generationState.isGenerating ? (
             <>
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              正在生成文书...
+              正在生成简历...
             </>
           ) : (
             <>
-              生成文书 ({selectedItems.filter(item => item.hasContent).length} 项内容)
+              生成简历 ({selectedItems.filter(item => item.hasContent).length} 项内容)
               <ArrowRight className="w-4 h-4 ml-2" />
             </>
           )}
@@ -309,13 +319,15 @@ function ResumeGeneratorContent() {
   const [activeModule, setActiveModule] = useState("header");
   const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
   const [showDevMode, setShowDevMode] = useState(false);
-  const { 
-    isModuleSelected, 
-    isModuleRequired, 
-    toggleModuleSelection, 
-    getCompletedModulesCount, 
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const {
+    isModuleSelected,
+    isModuleRequired,
+    toggleModuleSelection,
+    getCompletedModulesCount,
     getConfirmationData,
     fillMockData,
+    clearAllData,
     saveToCache
   } = useResume();
   const isDevEnvironment = process.env.NODE_ENV === "development";
@@ -588,6 +600,19 @@ function ResumeGeneratorContent() {
                     <ArrowRight className="w-4 h-4 flex-shrink-0 opacity-60" />
                   </button>
                 </div>
+
+                {/* 清空内容按钮 */}
+                <div className="pt-4 mt-4">
+                  <Button
+                    onClick={() => setShowClearDialog(true)}
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    清空内容
+                  </Button>
+                </div>
               </div>
 
               {/* Progress Summary */}
@@ -672,6 +697,32 @@ function ResumeGeneratorContent() {
           </div>
         </div>
       </div>
+
+      {/* 清空内容确认对话框 */}
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认清空所有内容</AlertDialogTitle>
+            <AlertDialogDescription>
+              此操作将清空所有已填写的内容，无法恢复。确定要继续吗？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                clearAllData();
+                toast.success("已清空所有内容");
+                setActiveModule("header"); // 重置到第一个模块
+                setShowClearDialog(false); // 关闭对话框
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              确认清空
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

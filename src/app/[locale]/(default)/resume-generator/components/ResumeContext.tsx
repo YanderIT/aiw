@@ -104,7 +104,7 @@ const REQUIRED_MODULES = ["header", "education"] as const;
 
 export interface ResumeData {
   header: HeaderData;
-  education: EducationData;
+  education: EducationData[];
   workExperience: WorkExperienceData[];
   research: ResearchData[];
   activities: ActivitiesData[];
@@ -200,7 +200,9 @@ interface ResumeContextType {
   data: ResumeData;
   isEditMode?: boolean; // 新增：是否在编辑模式
   updateHeaderData: (data: Partial<HeaderData>) => void;
-  updateEducationData: (data: Partial<EducationData>) => void;
+  updateEducationData: (index: number, data: Partial<EducationData>) => void;
+  addEducation: () => void;
+  removeEducation: (index: number) => void;
   updateWorkExperienceData: (
     index: number,
     data: Partial<WorkExperienceData>
@@ -251,6 +253,8 @@ interface ResumeContextType {
   setLanguagePreference: (language: "English" | "Chinese") => void;
   // 新增：一键填充测试数据
   fillMockData: () => void;
+  // 新增：一键清除所有数据
+  clearAllData: () => void;
   // 新增：文档管理
   documentState: DocumentState;
   saveDocument: () => Promise<void>;
@@ -269,16 +273,7 @@ const defaultResumeData: ResumeData = {
     github: "",
     profilePicture: undefined,
   },
-  education: {
-    school_name: "",
-    edu_city: "",
-    edu_country: "",
-    degree: "",
-    edu_start_date: "",
-    edu_end_date: "",
-    gpa_or_rank: "",
-    relevant_courses: "",
-  },
+  education: [],
   workExperience: [],
   research: [],
   activities: [],
@@ -326,17 +321,19 @@ const mockResumeData: ResumeData = {
     github: "github.com/alexchen",
     profilePicture: undefined,
   },
-  education: {
-    school_name: "Massachusetts Institute of Technology",
-    edu_city: "Cambridge",
-    edu_country: "United States",
-    degree: "B.S. Computer Science and Engineering",
-    edu_start_date: "2019-09",
-    edu_end_date: "2023-06",
-    gpa_or_rank: "GPA: 3.8/4.0 (Dean's List)",
-    relevant_courses:
-      "Algorithms, Distributed Systems, Machine Learning, Computer Systems, Product Design",
-  },
+  education: [
+    {
+      school_name: "Massachusetts Institute of Technology",
+      edu_city: "Cambridge",
+      edu_country: "United States",
+      degree: "B.S. Computer Science and Engineering",
+      edu_start_date: "2019-09",
+      edu_end_date: "2023-06",
+      gpa_or_rank: "GPA: 3.8/4.0 (Dean's List)",
+      relevant_courses:
+        "Algorithms, Distributed Systems, Machine Learning, Computer Systems, Product Design",
+    },
+  ],
   workExperience: [
     {
       company: "Stripe",
@@ -476,6 +473,11 @@ export function ResumeProvider({
           if (!parsedData.layoutConfiguration) {
             parsedData.layoutConfiguration =
               defaultResumeData.layoutConfiguration;
+          }
+
+          // 处理 education 数据兼容性：如果是旧的单对象格式，转换为数组
+          if (parsedData.education && !Array.isArray(parsedData.education)) {
+            parsedData.education = [parsedData.education];
           }
 
           // 确保必选模块始终保持选中状态
@@ -647,10 +649,41 @@ export function ResumeProvider({
     }));
   };
 
-  const updateEducationData = (newData: Partial<EducationData>) => {
+  const updateEducationData = (
+    index: number,
+    newData: Partial<EducationData>
+  ) => {
     setData((prev) => ({
       ...prev,
-      education: { ...prev.education, ...newData },
+      education: prev.education.map((item, i) =>
+        i === index ? { ...item, ...newData } : item
+      ),
+    }));
+  };
+
+  const addEducation = () => {
+    const newEducation: EducationData = {
+      school_name: "",
+      edu_city: "",
+      edu_country: "",
+      degree: "",
+      edu_start_date: "",
+      edu_end_date: "",
+      gpa_or_rank: "",
+      relevant_courses: "",
+    };
+    setData((prev) => ({
+      ...prev,
+      education: [...prev.education, newEducation],
+    }));
+  };
+
+  const removeEducation = (index: number) => {
+    setData((prev) => ({
+      ...prev,
+      education: prev.education.filter(
+        (_: EducationData, i: number) => i !== index
+      ),
     }));
   };
 
@@ -808,7 +841,9 @@ export function ResumeProvider({
     setData({
       ...mockResumeData,
       header: { ...mockResumeData.header },
-      education: { ...mockResumeData.education },
+      education: mockResumeData.education.map((item) => ({
+        ...item,
+      })),
       workExperience: mockResumeData.workExperience.map((item) => ({
         ...item,
       })),
@@ -828,6 +863,37 @@ export function ResumeProvider({
         sidebarSections: [...mockResumeData.layoutConfiguration.sidebarSections],
       },
     });
+  };
+
+  const clearAllData = () => {
+    // 重置为默认空白状态
+    setData({
+      ...defaultResumeData,
+      header: { ...defaultResumeData.header },
+      education: [],
+      workExperience: [],
+      research: [],
+      activities: [],
+      awards: [],
+      skillsLanguage: { ...defaultResumeData.skillsLanguage },
+      moduleSelection: { ...defaultResumeData.moduleSelection },
+      selectedTemplate: defaultResumeData.selectedTemplate,
+      themeColor: defaultResumeData.themeColor,
+      layoutConfiguration: {
+        mainSections: [...defaultResumeData.layoutConfiguration.mainSections],
+        sidebarSections: [...defaultResumeData.layoutConfiguration.sidebarSections],
+      },
+    });
+    // 清除 localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem("resume_language_preference");
+    }
+    // 重置语言偏好
+    setGenerationState((prev) => ({
+      ...prev,
+      languagePreference: "English",
+    }));
   };
 
   // 新增：获取选中模块的数据
@@ -882,14 +948,20 @@ export function ResumeProvider({
         break;
 
       case "education":
-        Object.entries(requiredFields).forEach(
-          ([key, label]: [string, string]) => {
-            const value = data.education[key as keyof EducationData];
-            if (typeof value === "string" && !value.trim()) {
-              missing.push(label);
+        if (data.education.length === 0) {
+          missing.push("需要至少添加一个教育经历");
+        } else {
+          // 检查第一个教育经历的必填字段
+          const firstEdu = data.education[0];
+          Object.entries(requiredFields).forEach(
+            ([key, label]: [string, string]) => {
+              const value = firstEdu[key as keyof EducationData];
+              if (typeof value === "string" && !value.trim()) {
+                missing.push(label);
+              }
             }
-          }
-        );
+          );
+        }
         break;
 
       case "workExperience":
@@ -1216,9 +1288,16 @@ export function ResumeProvider({
         }
 
         // Extract the actual resume data fields
+        // 处理 education 数据兼容性：如果是旧的单对象格式，转换为数组
+        let educationData = resumeData.education || defaultResumeData.education;
+        if (educationData && !Array.isArray(educationData)) {
+          // 旧数据格式（单个对象），转换为数组
+          educationData = [educationData];
+        }
+
         const extractedData = {
           header: resumeData.header || defaultResumeData.header,
-          education: resumeData.education || defaultResumeData.education,
+          education: educationData,
           workExperience: resumeData.workExperience || defaultResumeData.workExperience,
           research: resumeData.research || defaultResumeData.research,
           activities: resumeData.activities || defaultResumeData.activities,
@@ -1263,6 +1342,8 @@ export function ResumeProvider({
     isEditMode,
     updateHeaderData,
     updateEducationData,
+    addEducation,
+    removeEducation,
     updateWorkExperienceData,
     addWorkExperience,
     removeWorkExperience,
@@ -1277,6 +1358,7 @@ export function ResumeProvider({
    removeAward,
    updateSkillsLanguageData,
     fillMockData,
+    clearAllData,
     toggleModuleSelection,
     isModuleSelected,
     isModuleRequired,

@@ -814,9 +814,12 @@ function ResumeResultContent() {
               {/* Left Column - Module Navigation Tabs */}
               <div className="w-full xl:w-64 2xl:w-72 flex-shrink-0">
                 <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-3 xl:p-4 2xl:p-6 shadow-sm h-full xl:h-full min-h-[300px]">
-                  <h3 className="font-semibold text-xs xl:text-sm text-muted-foreground uppercase tracking-wide mb-4 xl:mb-6">
+                  <h3 className="font-semibold text-xs xl:text-sm text-muted-foreground uppercase tracking-wide mb-2">
                     内容模块
                   </h3>
+                  <p className="text-xs text-muted-foreground mb-4 xl:mb-6">
+                    勾选需要在简历上呈现的部分
+                  </p>
                   <div className="flex xl:flex-col gap-2 xl:gap-3 overflow-x-auto xl:overflow-x-visible xl:overflow-y-auto">
                     {modules.slice(1).map((module) => {
                       // Skip template selector module
@@ -1167,6 +1170,10 @@ function ResumeResultContent() {
                         布局管理
                       </h3>
                     </div>
+
+                    <p className="text-xs text-muted-foreground mb-4 xl:mb-6">
+                      您可以拖动模块调整布局顺序,以自定义简历结构。
+                    </p>
 
                     <div className="space-y-4">
                       {/* Main Content Area */}

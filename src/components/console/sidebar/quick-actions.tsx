@@ -18,7 +18,7 @@ export default function QuickActions({ collapsed = false, className }: QuickActi
  
     {
       icon: Coins,
-      label: "充值积分",
+      label: "充值次数",
       onClick: () => router.push("/pricing"),
       color: "from-purple-500/20 to-purple-600/20",
     },
@@ -86,7 +86,7 @@ export default function QuickActions({ collapsed = false, className }: QuickActi
           
           {!collapsed && (
             <span className="relative z-10 text-base font-medium text-amber-700/80">
-              充值积分
+              充值次数
             </span>
           )}
           
@@ -110,7 +110,7 @@ export default function QuickActions({ collapsed = false, className }: QuickActi
           
           {collapsed && (
             <div className="absolute left-full ml-2 hidden rounded-md bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md group-hover:block whitespace-nowrap">
-              充值积分
+              充值次数
             </div>
           )}
         </Button>

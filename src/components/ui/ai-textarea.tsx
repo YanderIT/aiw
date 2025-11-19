@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Textarea } from "./textarea";
 import { Button } from "./button";
 import { Sparkles, Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AITextareaProps extends React.ComponentProps<"textarea"> {
   onAIGenerate?: () => void;
@@ -105,36 +106,48 @@ const AITextarea = React.forwardRef<HTMLTextAreaElement, AITextareaProps>(
               (isFocused || isHovered) ? "opacity-100" : "opacity-70"
             )}
           >
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleAIGenerate}
-              disabled={aiGenerating}
-              className={cn(
-                "h-7 px-2.5 text-xs font-medium",
-                "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30",
-                "border-orange-200 dark:border-orange-800",
-                "text-orange-700 dark:text-orange-300",
-                "hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-950/50 dark:hover:to-amber-950/50",
-                "hover:border-orange-300 dark:hover:border-orange-700",
-                "hover:text-orange-800 dark:hover:text-orange-200",
-                "transition-all duration-200",
-                aiGenerating && "cursor-wait opacity-80"
-              )}
-            >
-              {aiGenerating ? (
-                <>
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  生成中...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI 生成
-                </>
-              )}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAIGenerate}
+                    disabled={aiGenerating}
+                    className={cn(
+                      "h-7 px-2.5 text-xs font-medium",
+                      "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30",
+                      "border-orange-200 dark:border-orange-800",
+                      "text-orange-700 dark:text-orange-300",
+                      "hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-950/50 dark:hover:to-amber-950/50",
+                      "hover:border-orange-300 dark:hover:border-orange-700",
+                      "hover:text-orange-800 dark:hover:text-orange-200",
+                      "transition-all duration-200",
+                      aiGenerating && "cursor-wait opacity-80"
+                    )}
+                  >
+                    {aiGenerating ? (
+                      <>
+                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        生成中...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        AI 生成
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-sm">
+                  <p className="text-xs leading-relaxed">
+                    AI 将根据您填写的信息自动生成内容建议。<br />
+                    如不满意，可重新生成。
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
       </div>

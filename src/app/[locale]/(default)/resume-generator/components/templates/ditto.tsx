@@ -4,47 +4,6 @@ import { cn, isEmptyString } from "./shared/utils";
 import { Rating } from "./shared/components";
 import { getThemeColor, getThemeFromScale } from "./shared/theme-colors";
 
-// Page break component
-const PageBreak = ({
-  pageNumber,
-  themeColor,
-}: {
-  pageNumber: number;
-  themeColor: string;
-}) => {
-  return (
-    <div
-      className="page-break-indicator"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        margin: "10px 0",
-        color: themeColor,
-        fontSize: "12px",
-        fontWeight: "bold",
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          height: "2px",
-          backgroundColor: themeColor,
-          marginRight: "10px",
-        }}
-      ></div>
-      <span>Page {pageNumber}</span>
-      <div
-        style={{
-          flex: 1,
-          height: "2px",
-          backgroundColor: themeColor,
-          marginLeft: "10px",
-        }}
-      ></div>
-    </div>
-  );
-};
-
 const Header = ({
   resume,
   theme,
@@ -948,40 +907,6 @@ export const DittoTemplate = ({
     ? getThemeFromScale(themeColor)
     : getThemeColor(themeColor);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pageBreaks, setPageBreaks] = useState<number[]>([]);
-  const A4_HEIGHT_PX = 297 * 3.78; // Convert mm to pixels (1mm ≈ 3.78px at 96dpi)
-
-  useEffect(() => {
-    const calculatePageBreaks = () => {
-      if (!containerRef.current) return;
-
-      const containerHeight = containerRef.current.scrollHeight;
-      const pageCount = Math.ceil(containerHeight / A4_HEIGHT_PX);
-
-      if (pageCount > 1) {
-        const breaks = [];
-        for (let i = 1; i < pageCount; i++) {
-          breaks.push(i * A4_HEIGHT_PX);
-        }
-        setPageBreaks(breaks);
-      } else {
-        setPageBreaks([]);
-      }
-    };
-
-    // Calculate on mount
-    calculatePageBreaks();
-
-    // Use ResizeObserver to recalculate when content changes
-    const resizeObserver = new ResizeObserver(calculatePageBreaks);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [resume, themeColor]);
 
   return (
     <div
@@ -1010,20 +935,6 @@ export const DittoTemplate = ({
         />
       </div>
 
-      {/* Page break indicators */}
-      {pageBreaks.map((breakHeight, index) => (
-        <div
-          key={index}
-          className="absolute left-0 right-0 pointer-events-none"
-          style={{
-            top: `${breakHeight}px`,
-            zIndex: 10,
-          }}
-        >
-          <PageBreak pageNumber={index + 2} themeColor={theme.primary} />
-        </div>
-      ))}
-
       {/* CSS for page breaks and scrolling */}
       <style jsx global>{`
         @media print {
@@ -1032,9 +943,6 @@ export const DittoTemplate = ({
           }
           section {
             break-inside: avoid;
-          }
-          .page-break-indicator {
-            display: none;
           }
         }
 

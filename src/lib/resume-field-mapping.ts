@@ -402,20 +402,20 @@ export function mapToStandardFormat(data: ResumeData, selectedTemplate: string =
       education: {
         id: 'education',
         name: 'Education',
-        items: data.moduleSelection.education ? [{
-          id: 'edu-0',
-          institution: data.education.school_name || '',
-          area: data.education.degree || '',
+        items: data.education.map((edu, index) => ({
+          id: `edu-${index}`,
+          institution: edu.school_name || '',
+          area: edu.degree || '',
           studyType: '', // You don't distinguish study type
-          score: data.education.gpa_or_rank || '',
-          date: `${formatDateToMMYYYY(data.education.edu_start_date)} - ${formatDateToMMYYYY(data.education.edu_end_date)}`,
-          summary: data.education.relevant_courses || '',
-          location: `${data.education.edu_city}${data.education.edu_country ? `, ${data.education.edu_country}` : ''}`,
-          courses: data.education.relevant_courses || '',
+          score: edu.gpa_or_rank || '',
+          date: `${formatDateToMMYYYY(edu.edu_start_date)} - ${formatDateToMMYYYY(edu.edu_end_date)}`,
+          summary: edu.relevant_courses || '',
+          location: `${edu.edu_city}${edu.edu_country ? `, ${edu.edu_country}` : ''}`,
+          courses: edu.relevant_courses || '',
           url: { href: '', label: '' },
           visible: true
-        }] : [],
-        visible: data.moduleSelection.education,
+        })),
+        visible: data.moduleSelection.education && data.education.length > 0,
         columns: 1,
         separateLinks: true
       },
