@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 import { apiRequest } from '@/lib/api-client';
@@ -39,16 +41,17 @@ function ConfirmationPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale || 'zh';
-  const { 
-    getConfirmationData, 
-    getIncompleteSelections, 
-    canGenerate, 
+  const {
+    getConfirmationData,
+    getIncompleteSelections,
+    canGenerate,
     toggleModuleSelection,
     getSelectedData,
     generationState,
     setGenerationLoading,
     setGenerationError,
-    saveToCache
+    saveToCache,
+    setLanguagePreference
   } = useCoverLetter();
   
   const confirmationData = getConfirmationData();
@@ -90,7 +93,7 @@ function ConfirmationPage() {
           document_type: 'cover_letter',
           title: `${selectedData.full_name || '用户'} - 求职信`,
           form_data: selectedData,
-          language: 'zh'
+          language: selectedData.language === 'English' ? 'en' : 'zh'
         }),
       });
 
@@ -153,6 +156,31 @@ function ConfirmationPage() {
             );
           })}
         </ul>
+      </div>
+
+      {/* Language Selection */}
+      <div className="bg-muted/30 rounded-xl p-6">
+        <div className="flex items-center gap-4">
+          <Globe className="w-5 h-5 text-muted-foreground" />
+          <Label htmlFor="language-select" className="text-base font-medium">
+            求职信语言 / Cover Letter Language
+          </Label>
+          <Select
+            value={generationState.languagePreference}
+            onValueChange={(value: 'English' | 'Chinese') => setLanguagePreference(value)}
+          >
+            <SelectTrigger id="language-select" className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="English">English (英文)</SelectItem>
+              <SelectItem value="Chinese">中文 (Chinese)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 ml-9">
+          选择求职信的生成语言 / Select the language for the cover letter
+        </p>
       </div>
 
       {/* 选中内容的汇总 */}

@@ -174,7 +174,7 @@ export default function FullRevisionModal({
                         if (e.target.value) validateWordCount(e.target.value);
                       }}
                       onClick={() => setWordControl('expand')}
-                      className="w-24 h-8"
+                      className="w-24 h-8 bg-white dark:bg-white"
                       placeholder="字数"
                     />
                     <span className="text-sm">字</span>
@@ -195,7 +195,7 @@ export default function FullRevisionModal({
                         if (e.target.value) validateWordCount(e.target.value);
                       }}
                       onClick={() => setWordControl('reduce')}
-                      className="w-24 h-8"
+                      className="w-24 h-8 bg-white dark:bg-white"
                       placeholder="字数"
                     />
                     <span className="text-sm">字</span>
@@ -220,7 +220,7 @@ export default function FullRevisionModal({
               value={direction}
               onChange={(e) => setDirection(e.target.value.slice(0, 30))}
               placeholder="例如：把项目过程写清楚一点、结尾更有总结感、想多写一点课程收获"
-              className="min-h-[80px]"
+              className="min-h-[80px] bg-white dark:bg-white"
               maxLength={30}
             />
             <div className="flex justify-between items-center mt-2">

@@ -123,7 +123,7 @@ export default function VersionComparison({
                 value={leftVersionId}
                 onValueChange={(value) => setLeftVersionId(value)}
               >
-                <SelectTrigger className="flex-1">
+                <SelectTrigger className="flex-1 bg-white dark:bg-white">
                   <SelectValue placeholder="选择版本" />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,7 +143,7 @@ export default function VersionComparison({
                 value={rightVersionId}
                 onValueChange={(value) => setRightVersionId(value)}
               >
-                <SelectTrigger className="flex-1">
+                <SelectTrigger className="flex-1 bg-white dark:bg-white">
                   <SelectValue placeholder="选择版本" />
                 </SelectTrigger>
                 <SelectContent>

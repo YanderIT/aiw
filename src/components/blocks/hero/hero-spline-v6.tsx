@@ -65,32 +65,55 @@ export default function HeroSplineV6({ section }: { section: SectionType }) {
     // Check immediately
     if (checkSplineLoaded()) return;
 
-    // Load script only if not already loaded
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js';
-    script.onload = () => {
-      setIsSplineLoaded(true);
-    };
-    
-    // Check if script already exists
-    const existingScript = document.querySelector(`script[src="${script.src}"]`);
+    const scriptSrc = 'https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js';
+    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+
     if (!existingScript) {
+      // Load script only if not already loaded
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = scriptSrc;
+      script.onload = () => {
+        setIsSplineLoaded(true);
+      };
       document.head.appendChild(script);
     } else {
-      // Script exists, just wait for element to be defined
-      const interval = setInterval(() => {
-        if (checkSplineLoaded()) {
-          clearInterval(interval);
+      // Script exists, just wait for element to be defined with proper cleanup
+      let intervalId: NodeJS.Timeout | null = null;
+      let timeoutId: NodeJS.Timeout | null = null;
+
+      intervalId = setInterval(() => {
+        if (checkSplineLoaded() && intervalId) {
+          clearInterval(intervalId);
+          if (timeoutId) clearTimeout(timeoutId);
+          intervalId = null;
+          timeoutId = null;
         }
       }, 100);
 
-      return () => clearInterval(interval);
-    }
+      // Timeout fallback to prevent infinite polling (max 5 seconds)
+      timeoutId = setTimeout(() => {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        // If still not loaded after 5 seconds, mark as loaded anyway
+        if (!customElements.get('spline-viewer')) {
+          console.warn('Spline viewer failed to load within timeout');
+        }
+      }, 5000);
 
-    return () => {
-      // Cleanup if needed
-    };
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+      };
+    }
   }, []);
 
   if (section.disabled) {

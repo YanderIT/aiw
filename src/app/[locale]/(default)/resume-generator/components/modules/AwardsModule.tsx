@@ -83,7 +83,7 @@ export default function AwardsModule() {
                     placeholder="例如：国家奖学金、优秀学生干部"
                     value={award.award_name}
                     onChange={(e) => handleInputChange(index, "award_name", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
                 
@@ -112,7 +112,7 @@ export default function AwardsModule() {
                     placeholder="例如：教育部、清华大学"
                     value={award.award_issuer}
                     onChange={(e) => handleInputChange(index, "award_issuer", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
                 
@@ -126,7 +126,7 @@ export default function AwardsModule() {
                     placeholder="例如：Top 5%、前10名"
                     value={award.award_rank}
                     onChange={(e) => handleInputChange(index, "award_rank", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                   <p className="text-[10px] text-muted-foreground">如知道具体排名或比例，请填写</p>
                 </div>
@@ -149,7 +149,7 @@ export default function AwardsModule() {
                       placeholder="例如：英语四级证书、计算机二级证书"
                       value={award.certificate_name}
                       onChange={(e) => handleInputChange(index, "certificate_name", e.target.value)}
-                      className="h-10 text-xs"
+                      className="h-10 text-xs bg-white dark:bg-white"
                     />
                   </div>
                   
@@ -163,7 +163,7 @@ export default function AwardsModule() {
                       placeholder="例如：教育部考试中心、工信部"
                       value={award.certificate_issuer}
                       onChange={(e) => handleInputChange(index, "certificate_issuer", e.target.value)}
-                      className="h-10 text-xs"
+                      className="h-10 text-xs bg-white dark:bg-white"
                     />
                   </div>
                 </div>

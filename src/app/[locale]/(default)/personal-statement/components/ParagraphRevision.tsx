@@ -223,7 +223,7 @@ export default function ParagraphRevision({
                   value={direction}
                   onChange={(e) => setDirection(e.target.value.slice(0, 30))}
                   placeholder="例如：更详细说明成果"
-                  className="min-h-[60px] text-sm"
+                  className="min-h-[60px] text-sm bg-white dark:bg-white"
                   maxLength={30}
                 />
                 <span className="text-xs text-muted-foreground float-right mt-1">

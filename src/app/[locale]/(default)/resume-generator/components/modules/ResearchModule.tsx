@@ -89,7 +89,7 @@ export default function ResearchModule() {
                     placeholder="例如：基于机器学习的图像识别系统研究"
                     value={project.project_title}
                     onChange={(e) => handleInputChange(index, "project_title", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
                 
@@ -103,7 +103,7 @@ export default function ResearchModule() {
                     placeholder="例如：人工智能实验室"
                     value={project.lab_or_unit}
                     onChange={(e) => handleInputChange(index, "lab_or_unit", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
               </div>
@@ -147,7 +147,7 @@ export default function ResearchModule() {
                     placeholder="请描述研究项目的背景、目标和意义"
                     value={project.project_background}
                     onChange={(e) => handleInputChange(index, "project_background", e.target.value)}
-                    className="min-h-[80px] resize-none text-xs"
+                    className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                   />
                 ) : (
@@ -156,7 +156,7 @@ export default function ResearchModule() {
                     placeholder="请描述研究项目的背景、目标和意义"
                     value={project.project_background}
                     onChange={(e) => handleInputChange(index, "project_background", e.target.value)}
-                    className="min-h-[80px] resize-none text-xs"
+                    className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                     aiGenerating={isGenerating && generatingIndex === index && generatingField === 'background'}
                     onAIGenerate={async () => {
@@ -188,7 +188,7 @@ export default function ResearchModule() {
                     placeholder="请用英文描述您在项目中的具体贡献"
                     value={project.your_contributions}
                     onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs"
+                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                   />
                 ) : (
@@ -197,7 +197,7 @@ export default function ResearchModule() {
                     placeholder="请用英文描述您在项目中的具体贡献"
                     value={project.your_contributions}
                     onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs"
+                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index && generatingField === 'contributions'}
                     onAIGenerate={async () => {
@@ -230,7 +230,7 @@ export default function ResearchModule() {
                     placeholder="例如：Python, TensorFlow, OpenCV, MATLAB"
                     value={project.tools_used}
                     onChange={(e) => handleInputChange(index, "tools_used", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                   <p className="text-[10px] text-muted-foreground">请列出使用的编程语言、软件工具或研究方法</p>
                 </div>
@@ -245,7 +245,7 @@ export default function ResearchModule() {
                     placeholder="例如：发表论文1篇，申请专利1项"
                     value={project.outcomes}
                     onChange={(e) => handleInputChange(index, "outcomes", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                   <p className="text-[10px] text-muted-foreground">请列出研究成果，如论文、专利、报告等</p>
                 </div>

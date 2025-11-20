@@ -87,7 +87,7 @@ export default function EducationModule() {
                   placeholder="例如：Peking University"
                   value={education.school_name}
                   onChange={(e) => handleInputChange(index, "school_name", e.target.value)}
-                  className="h-10 text-xs"
+                  className="h-10 text-xs bg-white dark:bg-white"
                 />
                 <p className="text-[10px] text-muted-foreground">请填写学校的完整英文名称</p>
               </div>
@@ -104,7 +104,7 @@ export default function EducationModule() {
                     placeholder="例如：北京"
                     value={education.edu_city}
                     onChange={(e) => handleInputChange(index, "edu_city", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
 
@@ -118,7 +118,7 @@ export default function EducationModule() {
                     placeholder="例如：中国"
                     value={education.edu_country}
                     onChange={(e) => handleInputChange(index, "edu_country", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function EducationModule() {
                   placeholder="例如：Bachelor of Arts in Psychology"
                   value={education.degree}
                   onChange={(e) => handleInputChange(index, "degree", e.target.value)}
-                  className="h-10 text-xs"
+                  className="h-10 text-xs bg-white dark:bg-white"
                 />
                 <p className="text-[10px] text-muted-foreground">请用英文填写完整的学位名称</p>
               </div>
@@ -177,7 +177,7 @@ export default function EducationModule() {
                   placeholder="例如：3.8/4.0 或 Top 10%"
                   value={education.gpa_or_rank}
                   onChange={(e) => handleInputChange(index, "gpa_or_rank", e.target.value)}
-                  className="h-10 text-xs"
+                  className="h-10 text-xs bg-white dark:bg-white"
                 />
                 <p className="text-[10px] text-muted-foreground">请填写 GPA 分数或年级排名百分比</p>
               </div>
@@ -209,7 +209,7 @@ export default function EducationModule() {
                     placeholder="例如：Advanced Statistics, Research Methods, Cognitive Psychology"
                     value={education.relevant_courses}
                     onChange={(e) => handleInputChange(index, "relevant_courses", e.target.value)}
-                    className="min-h-[80px] resize-none text-xs"
+                    className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                   />
                 ) : (
@@ -218,7 +218,7 @@ export default function EducationModule() {
                     placeholder="例如：Advanced Statistics, Research Methods, Cognitive Psychology"
                     value={education.relevant_courses}
                     onChange={(e) => handleInputChange(index, "relevant_courses", e.target.value)}
-                    className="min-h-[80px] resize-none text-xs"
+                    className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                     aiGenerating={isGenerating && generatingIndex === index}
                     onAIGenerate={async () => {

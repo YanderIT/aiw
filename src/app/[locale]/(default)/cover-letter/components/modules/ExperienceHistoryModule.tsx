@@ -33,7 +33,7 @@ export default function ExperienceHistoryModule() {
               placeholder="请详细描述一段重要的实习或工作经历，包括：&#10;- 公司名称和职位&#10;- 主要工作任务和职责&#10;- 具体成果和收获&#10;&#10;例如：在JP Morgan Chase担任Summer Analyst，负责金融建模和行业研究，参与了3个IPO项目的财务分析，提升了Excel建模和数据分析能力..."
               value={formData.past_internship_1}
               onChange={(e) => updateExperienceHistoryData({ past_internship_1: e.target.value })}
-              className="min-h-32 text-lg"
+              className="min-h-32 text-lg bg-white dark:bg-white"
               rows={8}
             />
           </div>
@@ -49,7 +49,7 @@ export default function ExperienceHistoryModule() {
               placeholder="例如：金融建模、数据分析、客户沟通、团队协作等"
               value={formData.skills_from_internship}
               onChange={(e) => updateExperienceHistoryData({ skills_from_internship: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               列出您在该经历中学到或提升的关键技能，如专业技能、软技能等
@@ -67,7 +67,7 @@ export default function ExperienceHistoryModule() {
               placeholder="描述一个您参与的代表性项目及其成果，例如：&#10;- 参与某公司IPO项目的估值建模&#10;- 完成某行业的深度研究报告&#10;- 设计并实施某项业务流程优化方案&#10;&#10;请包含项目背景、您的具体贡献和最终结果..."
               value={formData.highlight_project}
               onChange={(e) => updateExperienceHistoryData({ highlight_project: e.target.value })}
-              className="min-h-24 text-lg"
+              className="min-h-24 text-lg bg-white dark:bg-white"
               rows={6}
             />
             <p className="text-sm text-muted-foreground">
@@ -86,7 +86,7 @@ export default function ExperienceHistoryModule() {
               placeholder="例如：担任项目负责人、组织团队活动、跨部门协作等"
               value={formData.leadership_or_teamwork}
               onChange={(e) => updateExperienceHistoryData({ leadership_or_teamwork: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               简要描述体现您领导能力或团队合作精神的经历

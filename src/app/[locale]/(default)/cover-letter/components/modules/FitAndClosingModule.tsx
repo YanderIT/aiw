@@ -33,7 +33,7 @@ export default function FitAndClosingModule() {
               placeholder="请结合您的背景、经历和能力，说明为什么您适合这个岗位：&#10;&#10;- 教育背景如何与岗位要求匹配&#10;- 实习经历如何体现您的相关能力&#10;- 个人技能如何满足岗位需求&#10;- 职业目标如何与公司发展方向一致&#10;&#10;例如：我的金融学背景和在投行的实习经历让我具备了扎实的财务分析能力，而我在项目中展现的团队合作精神和学习能力也符合贵公司对分析师的要求..."
               value={formData.fit_reason}
               onChange={(e) => updateFitAndClosingData({ fit_reason: e.target.value })}
-              className="min-h-32 text-lg"
+              className="min-h-32 text-lg bg-white dark:bg-white"
               rows={8}
             />
           </div>
@@ -49,7 +49,7 @@ export default function FitAndClosingModule() {
               placeholder="例如：公司近期的增长表现、市场地位、创新能力等"
               value={formData.impressed_by_company}
               onChange={(e) => updateFitAndClosingData({ impressed_by_company: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               表达您对这家公司的了解和认可，如近期成长、行业地位、业务创新等
@@ -67,7 +67,7 @@ export default function FitAndClosingModule() {
               placeholder="请表达您希望获得面试机会的愿望，并对招聘方表示感谢：&#10;&#10;例如：我非常希望能有机会进一步讨论我如何为贵公司贡献价值。感谢您抽出宝贵时间阅读我的求职信，期待您的回复。&#10;&#10;或者：我期待能够在面试中更详细地分享我的经历和想法。感谢您的考虑，希望能够尽快收到您的回复。"
               value={formData.final_expectation}
               onChange={(e) => updateFitAndClosingData({ final_expectation: e.target.value })}
-              className="min-h-24 text-lg"
+              className="min-h-24 text-lg bg-white dark:bg-white"
               rows={6}
             />
             <p className="text-sm text-muted-foreground">

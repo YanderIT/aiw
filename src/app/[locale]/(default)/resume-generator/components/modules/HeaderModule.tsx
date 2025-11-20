@@ -206,7 +206,7 @@ export default function HeaderModule() {
               placeholder="例如：Zhang San"
               value={formData.full_name}
               onChange={(e) => updateHeaderData({ full_name: e.target.value })}
-              className="h-10 text-xs"
+              className="h-10 text-xs bg-white dark:bg-white"
             />
           </div>
 
@@ -222,7 +222,7 @@ export default function HeaderModule() {
                 placeholder="例如：Beijing"
                 value={formData.city}
                 onChange={(e) => updateHeaderData({ city: e.target.value })}
-                className="h-10 text-xs"
+                className="h-10 text-xs bg-white dark:bg-white"
               />
             </div>
             <div className="space-y-2">
@@ -235,7 +235,7 @@ export default function HeaderModule() {
                 placeholder="例如：China"
                 value={formData.country}
                 onChange={(e) => updateHeaderData({ country: e.target.value })}
-                className="h-10 text-xs"
+                className="h-10 text-xs bg-white dark:bg-white"
               />
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function HeaderModule() {
                 placeholder="zhangsan@example.com"
                 value={formData.email}
                 onChange={(e) => updateHeaderData({ email: e.target.value })}
-                className="h-10 text-xs"
+                className="h-10 text-xs bg-white dark:bg-white"
               />
             </div>
             <div className="space-y-2">
@@ -266,7 +266,7 @@ export default function HeaderModule() {
                 placeholder="例如：+86 138 1234 5678"
                 value={formData.phone}
                 onChange={(e) => updateHeaderData({ phone: e.target.value })}
-                className="h-10 text-xs"
+                className="h-10 text-xs bg-white dark:bg-white"
               />
             </div>
           </div>
@@ -312,7 +312,7 @@ export default function HeaderModule() {
                   placeholder="username"
                   value={formData.linkedin ? formData.linkedin.replace('https://linkedin.com/in/', '') : ''}
                   onChange={(e) => updateHeaderData({ linkedin: e.target.value ? `https://linkedin.com/in/${e.target.value}` : '' })}
-                  className="h-10 text-xs pl-24"
+                  className="h-10 text-xs pl-24 bg-white dark:bg-white"
                 />
               </div>
             </div>
@@ -333,7 +333,7 @@ export default function HeaderModule() {
                   placeholder="username"
                   value={formData.github ? formData.github.replace('https://github.com/', '') : ''}
                   onChange={(e) => updateHeaderData({ github: e.target.value ? `https://github.com/${e.target.value}` : '' })}
-                  className="h-10 text-xs pl-20"
+                  className="h-10 text-xs pl-20 bg-white dark:bg-white"
                 />
               </div>
             </div>

@@ -32,7 +32,7 @@ export default function ApplicationBackgroundModule() {
               placeholder="例如：Master's candidate majoring in Finance at NYU"
               value={formData.current_program}
               onChange={(e) => updateApplicationBackgroundData({ current_program: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               请简要描述您的当前状态，如学生身份、专业、学校等
@@ -50,7 +50,7 @@ export default function ApplicationBackgroundModule() {
               placeholder="例如：Investment Banking Analyst"
               value={formData.target_position}
               onChange={(e) => updateApplicationBackgroundData({ target_position: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
           </div>
 
@@ -65,7 +65,7 @@ export default function ApplicationBackgroundModule() {
               placeholder="例如：Investment Banking Division"
               value={formData.department}
               onChange={(e) => updateApplicationBackgroundData({ department: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function ApplicationBackgroundModule() {
               placeholder="例如：通过官网/校招/内推等方式了解到该岗位"
               value={formData.application_channel}
               onChange={(e) => updateApplicationBackgroundData({ application_channel: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               说明您是如何了解到这个岗位的，如官网、校园招聘、内推等
@@ -98,7 +98,7 @@ export default function ApplicationBackgroundModule() {
               placeholder="例如：公司文化、培训体系、发展机会等"
               value={formData.why_this_company}
               onChange={(e) => updateApplicationBackgroundData({ why_this_company: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
             <p className="text-sm text-muted-foreground">
               描述吸引您申请这家公司的原因，如文化、培训、发展前景等

@@ -88,7 +88,7 @@ export default function WorkExperienceModule() {
                     placeholder="例如：腾讯科技有限公司"
                     value={experience.company}
                     onChange={(e) => handleInputChange(index, "company", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
                 
@@ -102,7 +102,7 @@ export default function WorkExperienceModule() {
                     placeholder="例如：软件工程师"
                     value={experience.job_title}
                     onChange={(e) => handleInputChange(index, "job_title", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
               </div>
@@ -119,7 +119,7 @@ export default function WorkExperienceModule() {
                     placeholder="例如：深圳"
                     value={experience.work_city}
                     onChange={(e) => handleInputChange(index, "work_city", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
                 
@@ -133,7 +133,7 @@ export default function WorkExperienceModule() {
                     placeholder="例如：中国"
                     value={experience.work_country}
                     onChange={(e) => handleInputChange(index, "work_country", e.target.value)}
-                    className="h-10 text-xs"
+                    className="h-10 text-xs bg-white dark:bg-white"
                   />
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default function WorkExperienceModule() {
                     placeholder="请用英文描述您的工作职责，每行一个要点"
                     value={experience.responsibilities}
                     onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs"
+                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                   />
                 ) : (
@@ -186,7 +186,7 @@ export default function WorkExperienceModule() {
                     placeholder="请用英文描述您的工作职责，每行一个要点"
                     value={experience.responsibilities}
                     onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs"
+                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index}
                     onAIGenerate={async () => {

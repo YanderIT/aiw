@@ -165,7 +165,7 @@ function PSForm() {
             value={data.target}
             onChange={(e) => updateField('target', e.target.value)}
             placeholder="例如：申请麻省理工学院数据科学硕士项目，专注于医疗健康领域的机器学习应用..."
-            className="min-h-[100px]"
+            className="min-h-[100px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>
@@ -186,7 +186,7 @@ function PSForm() {
             value={data.education}
             onChange={(e) => updateField('education', e.target.value)}
             placeholder="例如：北京大学计算机科学与技术本科，GPA 3.85/4.0，主修课程包括数据结构、算法、机器学习..."
-            className="min-h-[120px]"
+            className="min-h-[120px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>
@@ -207,7 +207,7 @@ function PSForm() {
             value={data.skill}
             onChange={(e) => updateField('skill', e.target.value)}
             placeholder="例如：编程语言：Python、R、SQL；数据科学工具：pandas、scikit-learn、TensorFlow..."
-            className="min-h-[100px]"
+            className="min-h-[100px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>
@@ -228,7 +228,7 @@ function PSForm() {
             value={data.research}
             onChange={(e) => updateField('research', e.target.value)}
             placeholder="例如：在PKU人工智能实验室担任研究助理，开发医学图像分析的机器学习模型..."
-            className="min-h-[120px]"
+            className="min-h-[120px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>
@@ -249,7 +249,7 @@ function PSForm() {
             value={data.workExperience}
             onChange={(e) => updateField('workExperience', e.target.value)}
             placeholder="例如：腾讯医疗健康部数据科学实习生，构建疾病进展分析的预测模型..."
-            className="min-h-[120px]"
+            className="min-h-[120px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>
@@ -270,7 +270,7 @@ function PSForm() {
             value={data.reason}
             onChange={(e) => updateField('reason', e.target.value)}
             placeholder="例如：我对利用AI解决医疗挑战充满热情，因为我亲眼目睹了技术差距如何影响农村地区的患者护理..."
-            className="min-h-[120px]"
+            className="min-h-[120px] bg-white dark:bg-white"
           />
         </CardContent>
       </Card>

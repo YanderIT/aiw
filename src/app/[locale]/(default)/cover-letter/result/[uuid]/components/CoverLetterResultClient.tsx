@@ -192,6 +192,9 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
   const [currentNodeName, setCurrentNodeName] = useState('');
   const contentEndRef = useRef<HTMLDivElement>(null);
 
+  // Flag-based generation triggering (prevents repeated API calls)
+  const [hasGenerated, setHasGenerated] = useState(false);
+
   // 修改相关状态
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [showFullRevisionModal, setShowFullRevisionModal] = useState(false);
@@ -217,8 +220,8 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
   const { runRevision, runRevisionStreaming, isRevising } = useDifyReviseCoverLetter();
 
   const {
-    data, 
-    isModuleSelected, 
+    data,
+    isModuleSelected,
     toggleModuleSelection,
     updateBasicInfoData,
     updateApplicationBackgroundData,
@@ -230,11 +233,10 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
     versions,
     currentVersionId,
     switchVersion,
-    hasUsedFreeRevision
+    hasUsedFreeRevision,
+    generationState,
+    setLanguagePreference
   } = useCoverLetter();
-
-  // Language preference - Cover letters are always English
-  const languagePreference = 'English';
 
   // Define displayContent before wordCountInfo to avoid initialization order errors
   const displayContent = (() => {
@@ -247,8 +249,8 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
 
   // Smart word count with useMemo optimization
   const wordCountInfo = useMemo(() => {
-    return smartWordCount(displayContent, languagePreference);
-  }, [displayContent, languagePreference]);
+    return smartWordCount(displayContent, generationState.languagePreference);
+  }, [displayContent, generationState.languagePreference]);
 
   const modules: CoverLetterModule[] = [
     {
@@ -278,6 +280,10 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
   ];
 
   const handleGenerate = useCallback(async () => {
+    console.log('[DEBUG] handleGenerate called');
+    console.log('[DEBUG] Current data state:', JSON.stringify(data, null, 2));
+    console.log('[DEBUG] Language preference:', generationState.languagePreference);
+
     setIsGenerating(true);
     setFirstChunkReceived(false);
     setIsStreamingText(false);
@@ -285,7 +291,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
 
     // 准备Dify API输入
     const difyInputs = {
-      language: 'English',
+      language: generationState.languagePreference,
       // Basic Info fields
       full_name: data.basicInfo.full_name || '',
       address: data.basicInfo.address || '',
@@ -374,7 +380,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
 
             // Save to database with smart word count
             const saveContent = finalContent || chunks.join('');
-            const wordCount = smartWordCount(saveContent, 'English');
+            const wordCount = smartWordCount(saveContent, generationState.languagePreference);
 
             try {
               const updateResponse = await fetch('/api/documents', {
@@ -424,47 +430,94 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
     }
   }, [data, runWorkflowStreamingWithCallbacks, documentUuid, firstChunkReceived]);
 
-  // 从数据库加载文档数据
+  // Effect 1: Load data from database ONLY (no generation triggering)
   useEffect(() => {
-    const loadDocumentData = async () => {
+    const initializeDocument = async () => {
       if (!documentUuid) return;
-      
+
       try {
         // 从数据库加载文档数据
+        console.log('[Cover Letter] Loading document from database:', documentUuid);
         const response = await fetch(`/api/documents/${documentUuid}`);
         if (response.ok) {
           const result = await response.json();
+          console.log('[Cover Letter] Document loaded from DB:', result.data);
+
           if (result.data?.form_data) {
-            // 更新Context中的数据
+            // form_data 是扁平结构，需要转换为嵌套结构
             const formData = result.data.form_data;
-            if (formData.basicInfo) {
-              updateBasicInfoData(formData.basicInfo);
+
+            // 转换扁平结构为嵌套结构
+            const basicInfo = {
+              full_name: formData.full_name || '',
+              address: formData.address || '',
+              email: formData.email || '',
+              phone: formData.phone || '',
+              date: formData.date || '',
+              recruiter_name: formData.recruiter_name || '',
+              recruiter_title: formData.recruiter_title || '',
+              company_name: formData.company_name || '',
+              company_address: formData.company_address || ''
+            };
+
+            const applicationBackground = {
+              current_program: formData.current_program || '',
+              target_position: formData.target_position || '',
+              department: formData.department || '',
+              application_channel: formData.application_channel || '',
+              why_this_company: formData.why_this_company || ''
+            };
+
+            const experienceHistory = {
+              past_internship_1: formData.past_internship_1 || '',
+              skills_from_internship: formData.skills_from_internship || '',
+              highlight_project: formData.highlight_project || '',
+              leadership_or_teamwork: formData.leadership_or_teamwork || ''
+            };
+
+            const fitAndClosing = {
+              fit_reason: formData.fit_reason || '',
+              impressed_by_company: formData.impressed_by_company || '',
+              final_expectation: formData.final_expectation || ''
+            };
+
+            // 更新Context中的数据 (atomic update)
+            updateBasicInfoData(basicInfo);
+            updateApplicationBackgroundData(applicationBackground);
+            updateExperienceHistoryData(experienceHistory);
+            updateFitAndClosingData(fitAndClosing);
+
+            // 更新语言偏好（如果数据库中有）
+            if (formData.language) {
+              setLanguagePreference(formData.language as 'English' | 'Chinese');
             }
-            if (formData.applicationBackground) {
-              updateApplicationBackgroundData(formData.applicationBackground);
-            }
-            if (formData.experienceHistory) {
-              updateExperienceHistoryData(formData.experienceHistory);
-            }
-            if (formData.fitAndClosing) {
-              updateFitAndClosingData(formData.fitAndClosing);
-            }
+
+            console.log('[Cover Letter] Context updated with form data');
           }
+
           // 如果有内容，加载到生成内容中
           if (result.data?.content) {
             setGeneratedContent(result.data.content);
             setEditingContent(result.data.content);
           }
+
+          // 检查是否需要自动生成
+          const urlParams = new URLSearchParams(window.location.search);
+          const shouldAutoGenerate = urlParams.get('autoGenerate') === 'true';
+
+          if (shouldAutoGenerate && result.data?.form_data) {
+            console.log('[Cover Letter] Setting hasGenerated flag for auto-generation');
+            // 清理URL参数
+            window.history.replaceState({}, '', window.location.pathname);
+            // Set flag to trigger generation (Effect 2 will handle it)
+            setHasGenerated(true);
+          }
         }
       } catch (error) {
-        console.error('Error loading document:', error);
+        console.error('[Cover Letter] Error loading document:', error);
       }
-    };
-    
-    // 检查文档的修改状态
-    const checkRevisionStatus = async () => {
-      if (!documentUuid) return;
-      
+
+      // 检查文档的修改状态
       try {
         const response = await fetch(`/api/documents/${documentUuid}/revisions`);
         if (response.ok) {
@@ -472,28 +525,57 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
           setServerRevisionStatus(data.has_used_free_revision);
         }
       } catch (error) {
-        console.error('Error checking revision status:', error);
+        console.error('[Cover Letter] Error checking revision status:', error);
+      }
+
+      // Load document versions inline (following SOP pattern)
+      setIsLoadingVersions(true);
+      try {
+        const response = await fetch(`/api/documents/${documentUuid}/versions`);
+        if (response.ok) {
+          const data = await response.json();
+          const versions = data.data?.versions || data.versions || [];
+          setDbVersions(versions);
+
+          if (versions && versions.length > 0) {
+            // Default to original version
+            const originalVersion = versions.find((v: any) => v.version_type === 'original');
+            const versionToSet = originalVersion || versions[0];
+            setCurrentDbVersionId(versionToSet.uuid);
+
+            // If version has content, update display
+            if (versionToSet.content) {
+              setGeneratedContent(versionToSet.content);
+              setEditingContent(versionToSet.content);
+            }
+          }
+
+          // Set revision status
+          if (data.has_used_revision !== undefined) {
+            setServerRevisionStatus(data.has_used_revision);
+          }
+        }
+      } catch (error) {
+        console.error('[Cover Letter] Failed to load document versions:', error);
+      } finally {
+        setIsLoadingVersions(false);
       }
     };
-    
-    // 加载文档数据
-    loadDocumentData();
-    checkRevisionStatus();
-  }, [documentUuid, updateBasicInfoData, updateApplicationBackgroundData, updateExperienceHistoryData, updateFitAndClosingData]);
 
-  // 初始加载时检查是否需要自动生成
+    initializeDocument();
+  }, [documentUuid]); // ONLY documentUuid dependency to prevent re-triggers
+
+  // Effect 2: Watch for data readiness and trigger generation ONCE
   useEffect(() => {
-    // 检查URL参数，如果有autoGenerate=true，自动开始生成
-    const urlParams = new URLSearchParams(window.location.search);
-    const shouldAutoGenerate = urlParams.get('autoGenerate') === 'true';
-    
-    if (shouldAutoGenerate && !isGenerating && !generatedContent) {
-      console.log('Auto-generating cover letter...');
+    // Only trigger if flag is set, data exists, and not already generating
+    if (hasGenerated && data.basicInfo.full_name && !isGenerating) {
+      console.log('[Cover Letter] Data ready, triggering generation');
+      // Reset flag immediately to prevent re-triggers
+      setHasGenerated(false);
+      // Call generate with fresh data
       handleGenerate();
-      // 清理URL参数
-      window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [isGenerating, generatedContent, handleGenerate]);
+  }, [hasGenerated, data.basicInfo.full_name, isGenerating, handleGenerate]); // Include handleGenerate for completeness
 
   // 监听版本切换
   useEffect(() => {
@@ -539,7 +621,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
           await exportMarkdownToPDF(contentToExport, {
             filename: `${baseFilename}.pdf`,
             title: 'Cover Letter',
-            language: languagePreference === 'Chinese' ? 'zh' : 'en',
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en',
             quality: 0.95,
             scale: 2,
             margin: 20
@@ -550,7 +632,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
           await exportTextToDOCX(contentToExport, {
             filename: `${baseFilename}.docx`,
             title: 'Cover Letter',
-            language: languagePreference === 'Chinese' ? 'zh' : 'en'
+            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en'
           });
           break;
         }
@@ -632,11 +714,11 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
     } finally {
       setIsLoadingVersions(false);
     }
-  }, [documentUuid, currentDbVersionId]);
+  }, [documentUuid]); // Removed currentDbVersionId to prevent recreation loop
 
-  useEffect(() => {
-    loadDocumentVersions();
-  }, [loadDocumentVersions]);
+  // Note: Removed the separate useEffect that called loadDocumentVersions()
+  // which caused an infinite loop. Version loading is now handled inline
+  // in the initialization effect above (following SOP pattern).
 
   // 获取当前数据库版本内容
   const getCurrentDbVersion = () => {
@@ -705,7 +787,7 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
       detail: settings.direction,
       original_context: displayContent,
       whole: '0', // 整篇修改
-      language: 'English' // 求职信默认英文 - API要求的格式
+      language: generationState.languagePreference // API要求的格式
     };
 
     // Text accumulation - MUST use array pattern
@@ -829,9 +911,9 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
       const selectedData = getSelectedData();
       const paramsWithLanguage = {
         ...params,
-        language: 'English' // 求职信默认英文 - API要求的格式
+        language: generationState.languagePreference // API要求的格式
       };
-      
+
       const revisedContent = await runRevision(paramsWithLanguage);
       return revisedContent;
     } catch (error) {

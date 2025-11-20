@@ -241,25 +241,29 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
         setData(parsedData);
       }
       
-      // 加载语言偏好
+      // 加载语言偏好（无论是否自动生成都要加载）
       const savedLanguage = localStorage.getItem('recommendationLetter_language_preference');
-      
+      if (savedLanguage) {
+        setGenerationState(prev => ({
+          ...prev,
+          languagePreference: (savedLanguage as 'English' | 'Chinese')
+        }));
+      }
+
       // 检查是否是自动生成请求
       const urlParams = new URLSearchParams(window.location.search);
       const shouldAutoGenerate = urlParams.get('autoGenerate') === 'true';
-      
-      // 如果是自动生成请求，不要加载之前的生成内容
+
+      // 如果不是自动生成请求，加载之前的生成内容
       if (!shouldAutoGenerate) {
-        // 加载生成的内容
         const cachedContent = localStorage.getItem('recommendationLetter_generated_content');
         const cachedTime = localStorage.getItem('recommendationLetter_generated_at');
-        
-        if (cachedContent || savedLanguage) {
+
+        if (cachedContent) {
           setGenerationState(prev => ({
             ...prev,
-            generatedContent: cachedContent || prev.generatedContent,
-            lastGeneratedAt: cachedTime ? parseInt(cachedTime) : null,
-            languagePreference: (savedLanguage as 'English' | 'Chinese') || prev.languagePreference
+            generatedContent: cachedContent,
+            lastGeneratedAt: cachedTime ? parseInt(cachedTime) : null
           }));
         }
       }

@@ -199,7 +199,7 @@ export default function FullRevisionModal({
                     }
                   }}
                   placeholder="请输入目标字数"
-                  className={`mt-2 ${errors.wordCount ? 'border-red-500' : ''}`}
+                  className={`mt-2 bg-white dark:bg-white ${errors.wordCount ? 'border-red-500' : ''}`}
                   min="200"
                   max="6000"
                 />
@@ -220,7 +220,7 @@ export default function FullRevisionModal({
               value={direction}
               onChange={(e) => setDirection(e.target.value.slice(0, 30))}
               placeholder="例如：强调技术能力，突出团队合作经验"
-              className="min-h-[80px]"
+              className="min-h-[80px] bg-white dark:bg-white"
               maxLength={30}
             />
             <span className="text-xs text-muted-foreground float-right mt-1">

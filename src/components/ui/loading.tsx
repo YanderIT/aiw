@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import Script from 'next/script';
 
 // Declare the custom element type for Spline viewer
 declare global {
@@ -84,54 +83,122 @@ export function Loading({ className, size = "md", text }: LoadingProps) {
 
 export function GlobalLoading({ isVisible }: { isVisible: boolean }) {
   const t = useTranslations("loading");
-  
+  const [isSplineLoaded, setIsSplineLoaded] = useState(false);
+
+  // Load Spline script only when component becomes visible
+  useEffect(() => {
+    if (!isVisible) return;
+
+    // Check if spline-viewer custom element is already defined
+    const checkSplineLoaded = () => {
+      if (customElements.get('spline-viewer')) {
+        setIsSplineLoaded(true);
+        return true;
+      }
+      return false;
+    };
+
+    // Check immediately
+    if (checkSplineLoaded()) return;
+
+    const scriptSrc = 'https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js';
+    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+
+    if (!existingScript) {
+      // Load script only if not already loaded
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = scriptSrc;
+      script.onload = () => {
+        setIsSplineLoaded(true);
+      };
+      script.onerror = () => {
+        console.warn('Failed to load Spline viewer script');
+        // Still show loading UI even if Spline fails
+        setIsSplineLoaded(true);
+      };
+      document.head.appendChild(script);
+    } else {
+      // Script exists, wait for element to be defined
+      let intervalId: NodeJS.Timeout | null = null;
+      let timeoutId: NodeJS.Timeout | null = null;
+
+      intervalId = setInterval(() => {
+        if (checkSplineLoaded() && intervalId) {
+          clearInterval(intervalId);
+          if (timeoutId) clearTimeout(timeoutId);
+          intervalId = null;
+          timeoutId = null;
+        }
+      }, 100);
+
+      // Timeout fallback (max 5 seconds)
+      timeoutId = setTimeout(() => {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        if (!customElements.get('spline-viewer')) {
+          console.warn('Spline viewer failed to load within timeout');
+        }
+        setIsSplineLoaded(true);
+      }, 5000);
+
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+      };
+    }
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (
-    <>
-      <Script
-        type="module"
-        src="https://unpkg.com/@splinetool/viewer@1.10.35/build/spline-viewer.js"
-        strategy="lazyOnload"
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-300">
-        {/* Spline 3D 背景 */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-300">
+      {/* Spline 3D 背景 */}
+      {isSplineLoaded && (
         <div className="absolute inset-0 w-full h-full">
-          <spline-viewer 
+          <spline-viewer
             url="https://prod.spline.design/JdZgoBYW5zhBLimi/scene.splinecode"
             className="w-full h-full"
             style={{ width: '70%', height: '100%' }}
           />
         </div>
-        
-        {/* 渐变背景遮罩 - 确保内容可见 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/70 to-background/80 backdrop-blur-sm" />
-      
-      {/* Loading卡片 */}
-      <div className="relative z-10 animate-in zoom-in-95 duration-500 delay-100">
-        <div className="relative p-20">
-          {/* Loading内容 */}
-          <div className="relative z-10 flex flex-col items-center space-y-4">
-            <Loading size="lg" text={t("page_loading")} />
-            
-            {/* 额外的进度提示 */}
-            <div className="mt-8 w-64 h-2 bg-muted/20 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full loading-shimmer" />
-            </div>
+      )}
+
+      {/* 渐变背景遮罩 - 确保内容可见 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/70 to-background/80 backdrop-blur-sm" />
+
+    {/* Loading卡片 */}
+    <div className="relative z-10 animate-in zoom-in-95 duration-500 delay-100">
+      <div className="relative p-20">
+        {/* Loading内容 */}
+        <div className="relative z-10 flex flex-col items-center space-y-4">
+          <Loading size="lg" text={t("page_loading")} />
+
+          {/* 额外的进度提示 */}
+          <div className="mt-8 w-64 h-2 bg-muted/20 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full loading-shimmer" />
           </div>
         </div>
       </div>
-      
-      {/* 浮动装饰点 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/40 rounded-full animate-bounce delay-0" style={{animationDuration: "3s"}} />
-        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-primary/30 rounded-full animate-bounce delay-1000" style={{animationDuration: "3.5s"}} />
-        <div className="absolute bottom-1/4 left-1/3 w-2.5 h-2.5 bg-primary/20 rounded-full animate-bounce delay-2000" style={{animationDuration: "4s"}} />
-        <div className="absolute bottom-1/3 right-1/4 w-1 h-1 bg-primary/25 rounded-full animate-bounce delay-500" style={{animationDuration: "2.5s"}} />
-        <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-primary/35 rounded-full animate-bounce delay-1500" style={{animationDuration: "3.2s"}} />
-        <div className="absolute top-2/3 right-1/6 w-2 h-2 bg-primary/25 rounded-full animate-bounce delay-800" style={{animationDuration: "3.8s"}} />
-      </div>
     </div>
-    </>
+
+    {/* 浮动装饰点 */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/40 rounded-full animate-bounce delay-0" style={{animationDuration: "3s"}} />
+      <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-primary/30 rounded-full animate-bounce delay-1000" style={{animationDuration: "3.5s"}} />
+      <div className="absolute bottom-1/4 left-1/3 w-2.5 h-2.5 bg-primary/20 rounded-full animate-bounce delay-2000" style={{animationDuration: "4s"}} />
+      <div className="absolute bottom-1/3 right-1/4 w-1 h-1 bg-primary/25 rounded-full animate-bounce delay-500" style={{animationDuration: "2.5s"}} />
+      <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-primary/35 rounded-full animate-bounce delay-1500" style={{animationDuration: "3.2s"}} />
+      <div className="absolute top-2/3 right-1/6 w-2 h-2 bg-primary/25 rounded-full animate-bounce delay-800" style={{animationDuration: "3.8s"}} />
+    </div>
+  </div>
   );
 } 

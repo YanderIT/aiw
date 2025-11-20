@@ -72,6 +72,7 @@ export interface GenerationState {
   workflowRunId: string | null;
   taskId: string | null;
   workflowStatus: 'running' | 'succeeded' | 'failed' | 'stopped' | null;
+  languagePreference: 'English' | 'Chinese';
 }
 
 // 版本管理
@@ -134,6 +135,7 @@ interface CoverLetterContextType {
   startWorkflowStatusPolling: () => void;
   stopWorkflowStatusPolling: () => void;
   fillMockData: () => void; // 填充模拟数据
+  setLanguagePreference: (lang: 'English' | 'Chinese') => void;
   // 版本管理
   versions: DocumentVersion[];
   currentVersionId: string | null;
@@ -237,7 +239,8 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     error: null,
     workflowRunId: null,
     taskId: null,
-    workflowStatus: null
+    workflowStatus: null,
+    languagePreference: 'English'
   });
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   
@@ -256,12 +259,21 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
       // 加载生成的内容
       const cachedContent = localStorage.getItem('coverLetter_generated_content');
       const cachedTime = localStorage.getItem('coverLetter_generated_at');
-      
+
       if (cachedContent) {
         setGenerationState(prev => ({
           ...prev,
           generatedContent: cachedContent,
           lastGeneratedAt: cachedTime ? parseInt(cachedTime) : null
+        }));
+      }
+
+      // 加载语言偏好
+      const savedLanguage = localStorage.getItem('coverLetter_language_preference');
+      if (savedLanguage) {
+        setGenerationState(prev => ({
+          ...prev,
+          languagePreference: (savedLanguage as 'English' | 'Chinese')
         }));
       }
     } catch (error) {
@@ -443,7 +455,7 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
 
   const getSelectedData = () => {
     const selectedData: any = {
-      language: language  // 添加语言字段
+      language: generationState.languagePreference  // 使用用户选择的语言
     };
     
     if (data.moduleSelection.basicInfo) {
@@ -540,6 +552,19 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     saveToCache();
   };
 
+  const setLanguagePreference = (lang: 'English' | 'Chinese') => {
+    setGenerationState(prev => ({
+      ...prev,
+      languagePreference: lang
+    }));
+    // Save to localStorage
+    try {
+      localStorage.setItem('coverLetter_language_preference', lang);
+    } catch (error) {
+      console.error('Error saving language preference to cache:', error);
+    }
+  };
+
   // 版本管理方法
   const addVersion = (content: string, type: 'original' | 'revised') => {
     const newVersion: DocumentVersion = {
@@ -621,6 +646,7 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     startWorkflowStatusPolling,
     stopWorkflowStatusPolling,
     fillMockData,
+    setLanguagePreference,
     // 版本管理
     versions,
     currentVersionId,

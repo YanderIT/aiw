@@ -41,6 +41,15 @@ export async function POST(req: NextRequest) {
 
       const baseUrl = process.env.DIFY_BASE_URL || 'https://api.dify.ai/v1';
 
+      // Log request for debugging
+      console.log('[Dify API Request]', {
+        functionType,
+        apiKeyExists: !!apiKey,
+        baseUrl,
+        inputFields: Object.keys(inputs),
+        user
+      });
+
       const difyResponse = await fetch(`${baseUrl}/workflows/run`, {
         method: 'POST',
         headers: {
@@ -55,7 +64,27 @@ export async function POST(req: NextRequest) {
       });
 
       if (!difyResponse.ok) {
-        return respErr(`Dify API 错误: ${difyResponse.status}`);
+        // Capture the actual error response from Dify
+        const errorText = await difyResponse.text();
+        let errorBody;
+        try {
+          errorBody = JSON.parse(errorText);
+        } catch (e) {
+          errorBody = errorText;
+        }
+
+        console.error('[Dify API Error]', {
+          status: difyResponse.status,
+          statusText: difyResponse.statusText,
+          body: errorBody
+        });
+
+        // Return detailed error message
+        const errorMessage = typeof errorBody === 'object' && errorBody.message
+          ? errorBody.message
+          : errorText || difyResponse.statusText;
+
+        return respErr(`Dify API 错误 (${difyResponse.status}): ${errorMessage}`);
       }
 
       // 直接转发Dify的流式响应

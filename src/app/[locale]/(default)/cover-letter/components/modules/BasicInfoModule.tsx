@@ -33,7 +33,7 @@ export default function BasicInfoModule() {
               placeholder="例如：John Smith"
               value={formData.full_name}
               onChange={(e) => updateBasicInfoData({ full_name: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
           </div>
 
@@ -48,7 +48,7 @@ export default function BasicInfoModule() {
               placeholder="例如：123 Main Street, Apt 4B, New York, NY 10001"
               value={formData.address}
               onChange={(e) => updateBasicInfoData({ address: e.target.value })}
-              className="min-h-20 text-lg"
+              className="min-h-20 text-lg bg-white dark:bg-white"
               rows={3}
             />
           </div>
@@ -66,7 +66,7 @@ export default function BasicInfoModule() {
                 placeholder="john.smith@example.com"
                 value={formData.email}
                 onChange={(e) => updateBasicInfoData({ email: e.target.value })}
-                className="h-14 text-lg"
+                className="h-14 text-lg bg-white dark:bg-white"
               />
             </div>
             <div className="space-y-3">
@@ -79,7 +79,7 @@ export default function BasicInfoModule() {
                 placeholder="例如：+1 (555) 123-4567"
                 value={formData.phone}
                 onChange={(e) => updateBasicInfoData({ phone: e.target.value })}
-                className="h-14 text-lg"
+                className="h-14 text-lg bg-white dark:bg-white"
               />
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function BasicInfoModule() {
               type="date"
               value={formData.date}
               onChange={(e) => updateBasicInfoData({ date: e.target.value })}
-              className="h-14 text-lg"
+              className="h-14 text-lg bg-white dark:bg-white"
             />
           </div>
 
@@ -116,7 +116,7 @@ export default function BasicInfoModule() {
                   placeholder="例如：Sarah Johnson"
                   value={formData.recruiter_name}
                   onChange={(e) => updateBasicInfoData({ recruiter_name: e.target.value })}
-                  className="h-14 text-lg"
+                  className="h-14 text-lg bg-white dark:bg-white"
                 />
               </div>
               <div className="space-y-3">
@@ -129,7 +129,7 @@ export default function BasicInfoModule() {
                   placeholder="例如：HR Manager"
                   value={formData.recruiter_title}
                   onChange={(e) => updateBasicInfoData({ recruiter_title: e.target.value })}
-                  className="h-14 text-lg"
+                  className="h-14 text-lg bg-white dark:bg-white"
                 />
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function BasicInfoModule() {
                 placeholder="例如：Goldman Sachs"
                 value={formData.company_name}
                 onChange={(e) => updateBasicInfoData({ company_name: e.target.value })}
-                className="h-14 text-lg"
+                className="h-14 text-lg bg-white dark:bg-white"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function BasicInfoModule() {
                 placeholder="例如：200 West Street, New York, NY 10282"
                 value={formData.company_address}
                 onChange={(e) => updateBasicInfoData({ company_address: e.target.value })}
-                className="min-h-20 text-lg"
+                className="min-h-20 text-lg bg-white dark:bg-white"
                 rows={3}
               />
             </div>
