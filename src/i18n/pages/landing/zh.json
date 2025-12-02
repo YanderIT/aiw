@@ -27,6 +27,11 @@
           "title": "常见问题",
           "url": "/#faq",
           "icon": "RiQuestionAnswerLine"
+        },
+        {
+          "title": "帮助中心",
+          "url": "/help",
+          "icon": "RiBookOpenLine"
         }
       ]
     },
