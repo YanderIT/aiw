@@ -183,10 +183,11 @@ export default function WorkExperienceModule() {
                 ) : (
                   <AITextarea
                     id={`responsibilities-${index}`}
-                    placeholder="请用英文描述您的工作职责，每行一个要点"
+                    placeholder="请描述您的工作职责，每行一个要点"
                     value={experience.responsibilities}
                     onChange={(e) => handleInputChange(index, "responsibilities", e.target.value)}
                     className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
+                    showLanguageHint
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index}
                     onAIGenerate={async () => {

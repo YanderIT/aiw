@@ -50,6 +50,7 @@ export default function SkillsLanguageModule() {
               className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
               rows={3}
               aiGenerating={isGenerating}
+              showLanguageHint
               onAIGenerate={async () => {
                 // Type 1: Skills Language - Skills
                 // Pass entire resume JSON for better context

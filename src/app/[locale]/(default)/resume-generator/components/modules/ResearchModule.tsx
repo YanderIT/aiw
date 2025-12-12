@@ -159,6 +159,7 @@ export default function ResearchModule() {
                     className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                     aiGenerating={isGenerating && generatingIndex === index && generatingField === 'background'}
+                    showLanguageHint
                     onAIGenerate={async () => {
                       // Type 4: Research - Project Background
                       setGeneratingIndex(index);
@@ -194,12 +195,13 @@ export default function ResearchModule() {
                 ) : (
                   <AITextarea
                     id={`your_contributions-${index}`}
-                    placeholder="请用英文描述您在项目中的具体贡献"
+                    placeholder="请描述您在项目中的具体贡献"
                     value={project.your_contributions}
                     onChange={(e) => handleInputChange(index, "your_contributions", e.target.value)}
                     className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index && generatingField === 'contributions'}
+                    showLanguageHint
                     onAIGenerate={async () => {
                       // Type 5: Research - Your Contributions
                       setGeneratingIndex(index);

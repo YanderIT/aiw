@@ -221,6 +221,7 @@ export default function EducationModule() {
                     className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
                     rows={3}
                     aiGenerating={isGenerating && generatingIndex === index}
+                    showLanguageHint
                     onAIGenerate={async () => {
                       setGeneratingIndex(index);
                       // Type 0: Education - Relevant Courses

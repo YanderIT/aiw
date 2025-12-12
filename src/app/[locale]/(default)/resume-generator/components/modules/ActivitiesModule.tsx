@@ -183,12 +183,13 @@ export default function ActivitiesModule() {
                 ) : (
                   <AITextarea
                     id={`description-${index}`}
-                    placeholder="请用英文描述您在活动中的具体工作和贡献"
+                    placeholder="请描述您在活动中的具体工作和贡献"
                     value={activity.description}
                     onChange={(e) => handleInputChange(index, "description", e.target.value)}
                     className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index}
+                    showLanguageHint
                     onAIGenerate={async () => {
                       // Type 3: Activities - Description
                       setGeneratingIndex(index);

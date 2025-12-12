@@ -4,13 +4,14 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "./textarea";
 import { Button } from "./button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Languages } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AITextareaProps extends React.ComponentProps<"textarea"> {
   onAIGenerate?: () => void;
   aiGenerating?: boolean;
   showAIButton?: boolean;
+  showLanguageHint?: boolean;
   contextHint?: string;
   autoResize?: boolean;
   maxHeight?: number;
@@ -23,6 +24,7 @@ const AITextarea = React.forwardRef<HTMLTextAreaElement, AITextareaProps>(
       onAIGenerate,
       aiGenerating = false,
       showAIButton = true,
+      showLanguageHint = false,
       contextHint,
       disabled,
       value,
@@ -79,12 +81,26 @@ const AITextarea = React.forwardRef<HTMLTextAreaElement, AITextareaProps>(
     };
 
     return (
-      <div
-        className="relative w-full"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <Textarea
+      <div className="w-full space-y-1.5">
+        {showLanguageHint && (
+          <div className="flex items-center gap-1.5 px-0.5">
+            <Languages className="w-3 h-3 text-orange-500/70 flex-shrink-0" />
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              中文或英文填写均可，填写后建议点击
+              <span className="inline-flex items-center mx-0.5 px-1 py-0.5 rounded bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-medium">
+                <Sparkles className="w-2.5 h-2.5 mr-0.5" />
+                AI 生成
+              </span>
+              进行优化，优化结果将自动为英文
+            </p>
+          </div>
+        )}
+        <div
+          className="relative w-full"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <Textarea
           ref={textareaRef}
           className={cn(
             "resize-none pr-24 transition-height duration-200",
@@ -150,6 +166,7 @@ const AITextarea = React.forwardRef<HTMLTextAreaElement, AITextareaProps>(
             </TooltipProvider>
           </div>
         )}
+        </div>
       </div>
     );
   }
