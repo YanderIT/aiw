@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
 import { newStorage } from '@/lib/storage';
 import { nanoid } from 'nanoid';
 import { rateLimiter } from '@/lib/security/simple-rate-limiter';
@@ -12,7 +12,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export async function POST(request: NextRequest) {
   try {
     // 验证用户登录状态
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // 验证用户登录状态
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

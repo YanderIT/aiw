@@ -22,7 +22,7 @@ import {
 import Icon from "@/components/icon";
 
 import { Button } from "@/components/ui/button";
-import { signOut } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { useAppContext } from "@/contexts/app";
 import { useTranslations } from "next-intl";
 import { Account } from "@/types/blocks/base";
@@ -117,7 +117,7 @@ export default function SidebarUser({ account }: { account?: Account }) {
                   ))}
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => signOut()}
+                    onClick={() => authClient.signOut()}
                   >
                     <LogOut />
                     {t("user.sign_out")}

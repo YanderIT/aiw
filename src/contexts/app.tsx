@@ -14,7 +14,7 @@ import { ContextValue } from "@/types/context";
 import { User } from "@/types/user";
 import moment from "moment";
 import useOneTapLogin from "@/hooks/useOneTapLogin";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 
 const AppContext = createContext({} as ContextValue);
 

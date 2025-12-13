@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     console.log("[Revise SOP API] Starting request");
     
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     console.log("[Revise SOP API] Session user:", session?.user?.email);
     
     if (!session?.user?.email) {

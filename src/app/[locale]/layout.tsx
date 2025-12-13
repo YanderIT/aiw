@@ -5,7 +5,6 @@ import {
 } from "next-intl/server";
 import { AppContextProvider } from "@/contexts/app";
 import { Metadata } from "next";
-import { NextAuthSessionProvider } from "@/auth/session";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "@/providers/theme";
 import SignModal from "@/components/sign/modal";
@@ -45,15 +44,13 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <NextAuthSessionProvider>
-        <AppContextProvider>
-          <ThemeProvider attribute="class" disableTransitionOnChange>
-            {children}
-            <SignModal />
-            <NewcomerManager />
-          </ThemeProvider>
-        </AppContextProvider>
-      </NextAuthSessionProvider>
+      <AppContextProvider>
+        <ThemeProvider attribute="class" disableTransitionOnChange>
+          {children}
+          <SignModal />
+          <NewcomerManager />
+        </ThemeProvider>
+      </AppContextProvider>
     </NextIntlClientProvider>
   );
 }

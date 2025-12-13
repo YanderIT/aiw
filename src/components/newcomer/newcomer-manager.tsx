@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useAppContext } from "@/contexts/app";
 import NewcomerPopup from "./newcomer-popup";
 import NewcomerBanner from "./newcomer-banner";

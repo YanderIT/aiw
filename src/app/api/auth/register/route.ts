@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserByEmail, findUserByNickname } from "@/models/user";
-import { hashPassword, validatePasswordStrength } from "@/lib/password";
-import { getUuid } from "@/lib/hash";
-import { getIsoTimestr } from "@/lib/time";
-import { getClientIp } from "@/lib/ip";
-import { saveUser } from "@/services/user";
-import { User } from "@/types/user";
+import { auth } from "@/lib/auth";
+import { findUserByNickname } from "@/models/user";
+import { validatePasswordStrength } from "@/lib/password";
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,49 +71,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查邮箱是否已被注册
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
+    // 使用 Better Auth 的 signUpEmail API 创建用户
+    const result = await auth.api.signUpEmail({
+      body: {
+        name: finalNickname,
+        email: email,
+        password: password,
+      },
+    });
+
+    if (!result || !result.user) {
+      return NextResponse.json(
+        { success: false, message: "注册失败，请重试" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "注册成功",
+      user: {
+        uuid: result.user.id,
+        email: result.user.email,
+        nickname: result.user.name,
+      }
+    });
+
+  } catch (error: unknown) {
+    console.error("Registration error:", error);
+
+    // Check if it's a duplicate email error
+    if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
         { success: false, message: "该邮箱已被注册" },
         { status: 409 }
       );
     }
 
-    // 哈希密码
-    const hashedPassword = await hashPassword(password);
-
-    // 创建新用户
-    const newUser: User = {
-      uuid: getUuid(),
-      email: email,
-      nickname: finalNickname,
-      avatar_url: "",
-      signin_type: "email",
-      signin_provider: "credentials",
-      signin_openid: hashedPassword, // 将密码哈希存储在 signin_openid 字段
-      created_at: getIsoTimestr(),
-      signin_ip: await getClientIp(),
-    };
-
-    // 保存用户
-    await saveUser(newUser);
-
-    return NextResponse.json({
-      success: true,
-      message: "注册成功",
-      user: {
-        uuid: newUser.uuid,
-        email: newUser.email,
-        nickname: newUser.nickname,
-      }
-    });
-
-  } catch (error: any) {
-    console.error("Registration error:", error);
     return NextResponse.json(
       { success: false, message: "注册失败，请重试" },
       { status: 500 }
     );
   }
-} 
+}

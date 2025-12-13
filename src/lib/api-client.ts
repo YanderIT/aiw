@@ -1,13 +1,13 @@
-import { signOut } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success?: boolean;
   data?: T;
   error?: string;
   code?: string;
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest<T = unknown>(
   url: string,
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
@@ -18,7 +18,13 @@ export async function apiRequest<T = any>(
     // 如果是 401 错误且错误代码是 SESSION_EXPIRED，自动退出登录
     if (response.status === 401 && data.code === "SESSION_EXPIRED") {
       console.log("Session expired, signing out...");
-      await signOut({ callbackUrl: "/auth/signin" });
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/auth/signin";
+          },
+        },
+      });
       throw new Error("Session expired");
     }
 

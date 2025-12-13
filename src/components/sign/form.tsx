@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { signIn } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
@@ -119,22 +119,21 @@ export default function SignForm({
     }
 
     setIsLoading(true);
-    
+
     try {
-      const result = await signIn("email-password", {
+      const { data, error } = await authClient.signIn.email({
         email,
         password,
-        redirect: false,
       });
 
-      if (result?.error) {
+      if (error) {
         toast.error("邮箱或密码错误");
-      } else if (result?.ok) {
+      } else if (data) {
         toast.success("登录成功");
         // 登录成功后刷新页面或跳转
         window.location.reload();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Credentials signin error:", error);
       toast.error("登录失败，请重试");
     } finally {
@@ -224,7 +223,7 @@ export default function SignForm({
               variant="outline"
               className="w-full h-12 flex items-center gap-2"
               onClick={() => {
-                signIn("github");
+                authClient.signIn.social({ provider: "github" });
               }}
             >
               <SiGithub className="w-4 h-4" />
@@ -237,7 +236,7 @@ export default function SignForm({
               variant="outline"
               className="w-full h-12 flex items-center gap-2"
               onClick={() => {
-                signIn("google");
+                authClient.signIn.social({ provider: "google" });
               }}
             >
               <SiGoogle className="w-4 h-4" />

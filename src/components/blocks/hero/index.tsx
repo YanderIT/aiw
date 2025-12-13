@@ -7,7 +7,7 @@ import HeroBg from "./bg";
 import { Hero as HeroType } from "@/types/blocks/hero";
 import Icon from "@/components/icon";
 import { Link } from "@/i18n/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
 

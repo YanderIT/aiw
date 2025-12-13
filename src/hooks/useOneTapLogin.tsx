@@ -1,52 +1,42 @@
 "use client";
 
-import googleOneTap from "google-one-tap";
-import { signIn } from "next-auth/react";
+import { authClient, useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
 
-export default function () {
-  const { data: session, status } = useSession();
-
-  const oneTapLogin = async function () {
-    const options = {
-      client_id: process.env.NEXT_PUBLIC_AUTH_GOOGLE_ID,
-      auto_select: false,
-      cancel_on_tap_outside: false,
-      context: "signin",
-    };
-
-    // console.log("onetap login trigger", options);
-
-    googleOneTap(options, (response: any) => {
-      console.log("onetap login ok", response);
-      handleLogin(response.credential);
-    });
-  };
-
-  const handleLogin = async function (credentials: string) {
-    const res = await signIn("google-one-tap", {
-      credential: credentials,
-      redirect: false,
-    });
-    console.log("signIn ok", res);
-  };
+export default function useOneTapLogin() {
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
-    // console.log("one tap login status", status, session);
+    // Only trigger One Tap if not loading and not authenticated
+    if (isPending) return;
+    if (session) return;
 
-    if (status === "unauthenticated") {
-      oneTapLogin();
-
-      const intervalId = setInterval(() => {
-        oneTapLogin();
-      }, 3000);
-
-      return () => {
-        clearInterval(intervalId);
-      };
+    // Check if One Tap is enabled and client ID is available
+    if (
+      process.env.NEXT_PUBLIC_AUTH_GOOGLE_ONE_TAP_ENABLED !== "true" ||
+      !process.env.NEXT_PUBLIC_AUTH_GOOGLE_ID
+    ) {
+      return;
     }
-  }, [status]);
 
-  return <></>;
+    // Use Better Auth's One Tap client plugin
+    const triggerOneTap = async () => {
+      try {
+        await authClient.oneTap({
+          fetchOptions: {
+            onSuccess: () => {
+              // Reload to update session state
+              window.location.reload();
+            },
+          },
+        });
+      } catch (error) {
+        console.error("One Tap login error:", error);
+      }
+    };
+
+    triggerOneTap();
+  }, [session, isPending]);
+
+  return null;
 }

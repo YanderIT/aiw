@@ -31,7 +31,7 @@ import { Menu } from "lucide-react";
 import SignToggle from "@/components/sign/toggle";
 import ThemeToggle from "@/components/theme/toggle";
 import { cn } from "@/lib/utils";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
 import { GlobalLoading } from "@/components/ui/loading";

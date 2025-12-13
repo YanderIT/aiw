@@ -14,7 +14,7 @@ import {
 
 import { Link } from "@/i18n/navigation";
 import { User } from "@/types/user";
-import { signOut } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";
 import { NavItem } from "@/types/blocks/base";
 import { useUserCredits } from "@/hooks/useUserCredits";
@@ -39,7 +39,7 @@ export default function SignUser({ user }: { user: User }) {
     // },
     {
       title: t("user.sign_out"),
-      onClick: () => signOut(),
+      onClick: () => authClient.signOut(),
     },
   ];
 

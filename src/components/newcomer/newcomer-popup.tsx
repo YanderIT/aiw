@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Gift, Shield, Star } from "lucide-react";
 import { useAppContext } from "@/contexts/app";
-import { useSession } from "next-auth/react";
 
 interface NewcomerPopupProps {
   isOpen: boolean;
