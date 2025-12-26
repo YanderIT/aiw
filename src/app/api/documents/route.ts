@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { headers } from "next/headers";
+import { customAuth } from "@/lib/auth";
 import { insertDocument, updateDocument, findDocumentByUuid, DocumentType } from "@/models/document";
 import { findUserByEmail, findUserByUuid } from "@/models/user";
 import { getUserDocuments } from "@/services/document";
@@ -7,13 +8,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    
+    const session = await customAuth.api.getSession({ headers: await headers() });
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await findUserByEmail(session.user.email);
+    const user = await findUserByUuid(session.user.uuid!);
     
     if (!user) {
       // 如果找不到用户，返回 401 状态码，触发前端重新登录
@@ -57,16 +58,14 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await findUserByEmail(session.user.email);
+    const user = await findUserByUuid(session.user.uuid!);
     if (!user) {
-      // 如果找不到用户，返回 401 状态码，触发前端重新登录
-      console.error("User not found for email:", session.user.email, "- forcing re-authentication");
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Session expired, please sign in again",
         code: "SESSION_EXPIRED"
       }, { status: 401 });
@@ -104,16 +103,14 @@ export async function PUT(request: Request) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await findUserByEmail(session.user.email);
+    const user = await findUserByUuid(session.user.uuid!);
     if (!user) {
-      // 如果找不到用户，返回 401 状态码，触发前端重新登录
-      console.error("User not found for email:", session.user.email, "- forcing re-authentication");
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Session expired, please sign in again",
         code: "SESSION_EXPIRED"
       }, { status: 401 });

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { headers } from "next/headers";
+import { customAuth } from "@/lib/auth";
 import { DifyService } from "@/services/dify";
 
 export async function POST(request: Request) {
   try {
     console.log("[Revise SOP API] Starting request");
-    
-    const session = await auth.api.getSession({ headers: await headers() });
+
+    const session = await customAuth.api.getSession({ headers: await headers() });
     console.log("[Revise SOP API] Session user:", session?.user?.email);
     
     if (!session?.user?.email) {

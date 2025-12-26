@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { findUserByNickname } from "@/models/user";
-import { validatePasswordStrength } from "@/lib/password";
+import { findUserByNickname, findUserByEmail, insertUser } from "@/models/user";
+import { validatePasswordStrength, hashPassword } from "@/lib/password";
+import { v4 as uuidv4 } from "uuid";
+import { getIsoTimestr } from "@/lib/time";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +30,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, message: "邮箱格式无效" },
         { status: 400 }
+      );
+    }
+
+    // 检查邮箱是否已被注册
+    const existingUserByEmail = await findUserByEmail(email);
+    if (existingUserByEmail) {
+      return NextResponse.json(
+        { success: false, message: "该邮箱已被注册" },
+        { status: 409 }
       );
     }
 
@@ -71,42 +81,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 使用 Better Auth 的 signUpEmail API 创建用户
-    const result = await auth.api.signUpEmail({
-      body: {
-        name: finalNickname,
-        email: email,
-        password: password,
-      },
-    });
+    // 获取客户端 IP
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const clientIp = forwardedFor ? forwardedFor.split(",")[0].trim() : "::1";
 
-    if (!result || !result.user) {
-      return NextResponse.json(
-        { success: false, message: "注册失败，请重试" },
-        { status: 500 }
-      );
-    }
+    // 哈希密码
+    const hashedPassword = await hashPassword(password);
+
+    // 生成 UUID
+    const userUuid = uuidv4();
+    const now = getIsoTimestr();
+
+    // 创建用户
+    await insertUser({
+      uuid: userUuid,
+      email: email,
+      nickname: finalNickname,
+      avatar_url: "",
+      signin_type: "email",
+      signin_ip: clientIp,
+      signin_provider: "credentials",
+      signin_openid: hashedPassword,
+      created_at: now,
+    });
 
     return NextResponse.json({
       success: true,
       message: "注册成功",
       user: {
-        uuid: result.user.id,
-        email: result.user.email,
-        nickname: result.user.name,
+        uuid: userUuid,
+        email: email,
+        nickname: finalNickname,
       }
     });
 
   } catch (error: unknown) {
     console.error("Registration error:", error);
-
-    // Check if it's a duplicate email error
-    if (error instanceof Error && error.message.includes("already exists")) {
-      return NextResponse.json(
-        { success: false, message: "该邮箱已被注册" },
-        { status: 409 }
-      );
-    }
 
     return NextResponse.json(
       { success: false, message: "注册失败，请重试" },

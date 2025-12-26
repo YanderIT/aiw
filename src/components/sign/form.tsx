@@ -121,17 +121,22 @@ export default function SignForm({
     setIsLoading(true);
 
     try {
-      const { data, error } = await authClient.signIn.email({
-        email,
-        password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        toast.error("邮箱或密码错误");
-      } else if (data) {
+      const result = await response.json();
+
+      if (result.success) {
         toast.success("登录成功");
-        // 登录成功后刷新页面或跳转
+        // 登录成功后刷新页面
         window.location.reload();
+      } else {
+        toast.error(result.message || "邮箱或密码错误");
       }
     } catch (error: unknown) {
       console.error("Credentials signin error:", error);

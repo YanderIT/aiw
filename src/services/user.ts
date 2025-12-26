@@ -2,7 +2,7 @@ import { CreditsAmount, CreditsTransType } from "./credit";
 import { findUserByEmail, findUserByUuid, insertUser } from "@/models/user";
 
 import { User } from "@/types/user";
-import { auth } from "@/lib/auth";
+import { customAuth } from "@/lib/auth";
 import { getOneYearLaterTimestr } from "@/lib/time";
 import { getUserUuidByApiKey } from "@/models/apikey";
 import { headers } from "next/headers";
@@ -48,15 +48,13 @@ export async function getUserUuid() {
     }
   }
 
-  // Get session using Better Auth
-  const session = await auth.api.getSession({
+  // Get session using custom auth
+  const session = await customAuth.api.getSession({
     headers: await headers(),
   });
 
-  if (session && session.user && session.user.id) {
-    // In Better Auth, the user ID is stored in session.user.id
-    // which maps to our users.uuid field
-    user_uuid = session.user.id;
+  if (session && session.user && session.user.uuid) {
+    user_uuid = session.user.uuid;
   }
 
   return user_uuid;
@@ -75,7 +73,7 @@ export async function getBearerToken() {
 export async function getUserEmail() {
   let user_email = "";
 
-  const session = await auth.api.getSession({
+  const session = await customAuth.api.getSession({
     headers: await headers(),
   });
 

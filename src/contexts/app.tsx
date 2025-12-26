@@ -14,7 +14,7 @@ import { ContextValue } from "@/types/context";
 import { User } from "@/types/user";
 import moment from "moment";
 import useOneTapLogin from "@/hooks/useOneTapLogin";
-import { useSession } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 
 const AppContext = createContext({} as ContextValue);
 
@@ -28,7 +28,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     useOneTapLogin();
   }
 
-  const { data: session } = useSession();
+  const { data: session } = useCustomSession();
 
   const [theme, setTheme] = useState<string>(() => {
     return process.env.NEXT_PUBLIC_DEFAULT_THEME || "";

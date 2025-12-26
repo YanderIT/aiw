@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { customAuth } from '@/lib/auth';
 import { newStorage } from '@/lib/storage';
 import { nanoid } from 'nanoid';
 import { rateLimiter } from '@/lib/security/simple-rate-limiter';
@@ -12,13 +13,13 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export async function POST(request: NextRequest) {
   try {
     // 验证用户登录状态
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 获取用户标识和客户端IP
-    const userIdentifier = (session.user as any).uuid || (session.user as any).id || session.user.email;
+    const userIdentifier = session.user.uuid || session.user.email;
     const clientIp = getClientIp(request);
     
     // 检查速率限制
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // 验证用户登录状态
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -115,7 +116,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 获取用户信息
-    const userIdentifier = (session.user as any).uuid || (session.user as any).id || session.user.email;
+    const userIdentifier = session.user.uuid || session.user.email;
     
     // 验证 key 是否属于当前用户
     if (!key.includes(`avatars/${userIdentifier}/`)) {

@@ -14,6 +14,8 @@ export interface User {
   invite_code?: string;
   invited_by?: string;
   is_affiliate?: boolean;
+  email_verified?: boolean;
+  updated_at?: string;
 }
 
 export interface UserCredits {

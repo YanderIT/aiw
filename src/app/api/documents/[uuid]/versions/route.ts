@@ -1,22 +1,22 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { headers } from "next/headers";
+import { customAuth } from "@/lib/auth";
 import { findDocumentByUuid, findDocumentVersions } from "@/models/document";
-import { findUserByEmail } from "@/models/user";
+import { findUserByUuid } from "@/models/user";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ uuid: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await findUserByEmail(session.user.email);
+    const user = await findUserByUuid(session.user.uuid!);
     if (!user) {
-      console.error("User not found for email:", session.user.email, "- forcing re-authentication");
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Session expired, please sign in again",
         code: "SESSION_EXPIRED"
       }, { status: 401 });

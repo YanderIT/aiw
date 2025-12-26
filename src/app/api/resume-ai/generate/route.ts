@@ -1,12 +1,13 @@
 import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { customAuth } from '@/lib/auth';
 import { resumeAIService, ResumeFieldType, ResumeAIService } from '@/services/resume-ai';
 import { respJson, respErr } from '@/lib/resp';
 
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await customAuth.api.getSession({ headers: await headers() });
     if (!session?.user) {
       return respErr('Unauthorized', 401);
     }
