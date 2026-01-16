@@ -38,7 +38,7 @@ export default function SkillsLanguageModule() {
               placeholder="请列出您的专业技能，用逗号分隔"
               value={formData.skills}
               onChange={(e) => handleInputChange("skills", e.target.value)}
-              className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
+              className="min-h-[80px] resize-none text-xs"
               rows={3}
             />
           ) : (
@@ -47,7 +47,7 @@ export default function SkillsLanguageModule() {
               placeholder="请列出您的专业技能，用逗号分隔"
               value={formData.skills}
               onChange={(e) => handleInputChange("skills", e.target.value)}
-              className="min-h-[80px] resize-none text-xs bg-white dark:bg-white"
+              className="min-h-[80px] resize-none text-xs"
               rows={3}
               aiGenerating={isGenerating}
               showLanguageHint
@@ -82,7 +82,7 @@ export default function SkillsLanguageModule() {
                 placeholder="例如：IELTS 6.5、TOEFL 95、CET-6"
                 value={formData.english_level}
                 onChange={(e) => handleInputChange("english_level", e.target.value)}
-                className="h-10 text-xs bg-white dark:bg-white"
+                className="h-10 text-xs"
               />
               <p className="text-[10px] text-muted-foreground">请填写考试成绩或水平描述</p>
             </div>
@@ -97,7 +97,7 @@ export default function SkillsLanguageModule() {
                 placeholder="例如：中文、English"
                 value={formData.native_language}
                 onChange={(e) => handleInputChange("native_language", e.target.value)}
-                className="h-10 text-xs bg-white dark:bg-white"
+                className="h-10 text-xs"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function SkillsLanguageModule() {
               placeholder="例如：Japanese – Basic, French – Intermediate"
               value={formData.other_languages}
               onChange={(e) => handleInputChange("other_languages", e.target.value)}
-              className="h-10 text-xs bg-white dark:bg-white"
+              className="h-10 text-xs"
             />
             <p className="text-[10px] text-muted-foreground">请标注语言名称和熟练程度，用逗号分隔多种语言</p>
           </div>

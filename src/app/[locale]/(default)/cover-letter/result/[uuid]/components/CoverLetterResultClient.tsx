@@ -29,8 +29,11 @@ import {
 import { toast } from "sonner";
 import { useDify } from '@/hooks/useDify';
 import { useDifyReviseCoverLetter } from '@/hooks/useDifyReviseCoverLetter';
-import { exportMarkdownToPDF } from '@/lib/markdown-pdf-export';
-import { exportTextToDOCX } from '@/lib/text-document-export';
+import {
+  exportCoverLetterToTXT,
+  exportCoverLetterToPDF,
+  exportCoverLetterToDOCX
+} from '@/lib/cover-letter-document-export';
 import { smartWordCount } from '@/lib/word-count';
 import Markdown from "@/components/markdown";
 import MarkdownEditor from "@/components/blocks/mdeditor";
@@ -601,39 +604,39 @@ function CoverLetterResultContent({ documentUuid }: CoverLetterResultContentProp
   const handleExport = async (format: 'txt' | 'pdf' | 'docx') => {
     const contentToExport = isEditMode ? editingContent : generatedContent;
     const baseFilename = `cover-letter-${data.basicInfo.full_name || 'applicant'}`;
+    const language = generationState.languagePreference === 'Chinese' ? 'zh' : 'en';
+
+    // 准备导出选项
+    const exportOptions = {
+      filename: `${baseFilename}.${format}`,
+      language: language as 'en' | 'zh',
+      senderInfo: {
+        full_name: data.basicInfo.full_name || '',
+        address: data.basicInfo.address || undefined,
+        email: data.basicInfo.email || '',
+        phone: data.basicInfo.phone || ''
+      },
+      recipientInfo: {
+        recruiter_name: data.basicInfo.recruiter_name || undefined,
+        recruiter_title: data.basicInfo.recruiter_title || undefined,
+        company_name: data.basicInfo.company_name || '',
+        company_address: data.basicInfo.company_address || undefined
+      },
+      date: data.basicInfo.date || ''
+    };
 
     try {
       switch (format) {
         case 'txt': {
-          const blob = new Blob([contentToExport], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${baseFilename}.txt`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast.success("TXT 文件已导出");
+          await exportCoverLetterToTXT(contentToExport, exportOptions);
           break;
         }
         case 'pdf': {
-          await exportMarkdownToPDF(contentToExport, {
-            filename: `${baseFilename}.pdf`,
-            title: 'Cover Letter',
-            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en',
-            quality: 0.95,
-            scale: 2,
-            margin: 20
-          });
+          await exportCoverLetterToPDF(contentToExport, exportOptions);
           break;
         }
         case 'docx': {
-          await exportTextToDOCX(contentToExport, {
-            filename: `${baseFilename}.docx`,
-            title: 'Cover Letter',
-            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en'
-          });
+          await exportCoverLetterToDOCX(contentToExport, exportOptions);
           break;
         }
       }

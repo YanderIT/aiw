@@ -8,17 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { 
-  ArrowRight, 
-  FileText, 
-  GraduationCap, 
-  Briefcase, 
-  Target, 
+import Link from "next/link";
+import {
+  ArrowRight,
+  FileText,
+  GraduationCap,
+  Briefcase,
+  Target,
   Lightbulb,
   ChartBar,
   Loader2,
   Globe,
-  Wand2
+  Wand2,
+  BookOpen
 } from "lucide-react";
 import { toast } from 'sonner';
 import { SOPProvider, useSOP } from "./SOPContext";
@@ -130,7 +132,15 @@ function SOPForm() {
         <p className="text-muted-foreground text-lg">
           专业的Statement of Purpose撰写服务，清晰表达您的学术目标和研究兴趣
         </p>
-        
+        <div className="mt-4">
+          <Link href={`/${locale}/help`}>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <BookOpen className="w-4 h-4" />
+              {locale === 'zh' ? '查看教程' : 'View Tutorial'}
+            </Button>
+          </Link>
+        </div>
+
         {/* 开发模式下显示填充按钮 */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-4">

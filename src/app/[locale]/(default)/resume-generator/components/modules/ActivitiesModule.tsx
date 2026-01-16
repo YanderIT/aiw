@@ -88,7 +88,7 @@ export default function ActivitiesModule() {
                     placeholder="例如：学生会主席团、环保志愿者协会"
                     value={activity.activity_name}
                     onChange={(e) => handleInputChange(index, "activity_name", e.target.value)}
-                    className="h-10 text-xs bg-white dark:bg-white"
+                    className="h-10 text-xs"
                   />
                 </div>
                 
@@ -102,7 +102,7 @@ export default function ActivitiesModule() {
                     placeholder="例如：负责人、志愿者、团队成员"
                     value={activity.role}
                     onChange={(e) => handleInputChange(index, "role", e.target.value)}
-                    className="h-10 text-xs bg-white dark:bg-white"
+                    className="h-10 text-xs"
                   />
                 </div>
               </div>
@@ -119,7 +119,7 @@ export default function ActivitiesModule() {
                     placeholder="例如：上海"
                     value={activity.act_city}
                     onChange={(e) => handleInputChange(index, "act_city", e.target.value)}
-                    className="h-10 text-xs bg-white dark:bg-white"
+                    className="h-10 text-xs"
                   />
                 </div>
                 
@@ -133,7 +133,7 @@ export default function ActivitiesModule() {
                     placeholder="例如：中国"
                     value={activity.act_country}
                     onChange={(e) => handleInputChange(index, "act_country", e.target.value)}
-                    className="h-10 text-xs bg-white dark:bg-white"
+                    className="h-10 text-xs"
                   />
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default function ActivitiesModule() {
                     placeholder="请用英文描述您在活动中的具体工作和贡献"
                     value={activity.description}
                     onChange={(e) => handleInputChange(index, "description", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
+                    className="min-h-[100px] resize-none text-xs"
                     rows={4}
                   />
                 ) : (
@@ -186,7 +186,7 @@ export default function ActivitiesModule() {
                     placeholder="请描述您在活动中的具体工作和贡献"
                     value={activity.description}
                     onChange={(e) => handleInputChange(index, "description", e.target.value)}
-                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-white"
+                    className="min-h-[100px] resize-none text-xs"
                     rows={4}
                     aiGenerating={isGenerating && generatingIndex === index}
                     showLanguageHint

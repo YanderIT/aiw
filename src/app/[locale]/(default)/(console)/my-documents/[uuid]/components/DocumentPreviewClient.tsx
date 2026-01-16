@@ -7,17 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { 
-  ArrowLeft, 
-  Copy, 
-  Download, 
+import {
+  ArrowLeft,
+  Copy,
+  Download,
   Calendar,
   FileText,
   Loader2,
   AlertCircle,
   GitCompare,
   History,
-  RotateCcw
+  RotateCcw,
+  ChevronDown
 } from "lucide-react";
 import { Document, DocumentType, VersionType } from "@/models/document";
 import { getDocumentTypeDisplayName, formatDocumentDate } from "@/services/document";
@@ -34,6 +35,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportSOPToTXT, exportSOPToPDF, exportSOPToDOCX } from "@/lib/sop-document-export";
+import { exportCoverLetterToTXT, exportCoverLetterToPDF, exportCoverLetterToDOCX } from "@/lib/cover-letter-document-export";
 import { 
   RecommendationLetterIcon, 
   CoverLetterIcon, 
@@ -142,7 +151,7 @@ export default function DocumentPreviewClient({ documentUuid }: DocumentPreviewC
 
   const handleDownload = () => {
     if (!document) return;
-    
+
     const element = window.document.createElement("a");
     const file = new Blob([document.content], { type: "text/markdown" });
     element.href = URL.createObjectURL(file);
@@ -151,6 +160,129 @@ export default function DocumentPreviewClient({ documentUuid }: DocumentPreviewC
     element.click();
     window.document.body.removeChild(element);
     toast.success("下载成功");
+  };
+
+  const handleSOPExport = async (format: 'txt' | 'pdf' | 'docx') => {
+    if (!document) return;
+
+    // 从 form_data 中获取 target 信息
+    let target = '';
+    if (document.form_data) {
+      try {
+        const formData = typeof document.form_data === 'string'
+          ? JSON.parse(document.form_data)
+          : document.form_data;
+        target = formData.target || '';
+      } catch (e) {
+        console.error('Failed to parse form_data:', e);
+      }
+    }
+
+    // 检测语言（从内容或标题判断）
+    const content = document.content || '';
+    const hasChineseChars = /[\u4e00-\u9fa5]/.test(content);
+    const language = hasChineseChars ? 'zh' : 'en';
+
+    const baseFilename = `sop-${target || document.title || 'document'}`;
+    const exportOptions = {
+      filename: `${baseFilename}.${format}`,
+      title: language === 'zh' ? '个人陈述' : 'Statement of Purpose',
+      target: target,
+      language: language as 'en' | 'zh',
+      includeDate: true
+    };
+
+    try {
+      switch (format) {
+        case 'txt':
+          await exportSOPToTXT(content, exportOptions);
+          break;
+        case 'pdf':
+          await exportSOPToPDF(content, exportOptions);
+          break;
+        case 'docx':
+          await exportSOPToDOCX(content, exportOptions);
+          break;
+      }
+    } catch (error) {
+      console.error('导出失败:', error);
+      toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  };
+
+  const handleCoverLetterExport = async (format: 'txt' | 'pdf' | 'docx') => {
+    if (!document) return;
+
+    // 从 form_data 中获取发件人和收件人信息
+    let senderInfo = {
+      full_name: '',
+      address: undefined as string | undefined,
+      email: '',
+      phone: ''
+    };
+    let recipientInfo = {
+      recruiter_name: undefined as string | undefined,
+      recruiter_title: undefined as string | undefined,
+      company_name: '',
+      company_address: undefined as string | undefined
+    };
+    let date = '';
+
+    if (document.form_data) {
+      try {
+        const formData = typeof document.form_data === 'string'
+          ? JSON.parse(document.form_data)
+          : document.form_data;
+
+        // 发件人信息
+        senderInfo.full_name = formData.full_name || '';
+        senderInfo.address = formData.address || undefined;
+        senderInfo.email = formData.email || '';
+        senderInfo.phone = formData.phone || '';
+
+        // 收件人信息
+        recipientInfo.recruiter_name = formData.recruiter_name || undefined;
+        recipientInfo.recruiter_title = formData.recruiter_title || undefined;
+        recipientInfo.company_name = formData.company_name || '';
+        recipientInfo.company_address = formData.company_address || undefined;
+
+        // 日期
+        date = formData.date || '';
+      } catch (e) {
+        console.error('Failed to parse form_data:', e);
+      }
+    }
+
+    // 检测语言（从内容或标题判断）
+    const content = document.content || '';
+    const hasChineseChars = /[\u4e00-\u9fa5]/.test(content);
+    const language = hasChineseChars ? 'zh' : 'en';
+
+    const baseFilename = `cover-letter-${senderInfo.full_name || document.title || 'document'}`;
+    const exportOptions = {
+      filename: `${baseFilename}.${format}`,
+      language: language as 'en' | 'zh',
+      senderInfo,
+      recipientInfo,
+      date
+    };
+
+    try {
+      switch (format) {
+        case 'txt':
+          await exportCoverLetterToTXT(content, exportOptions);
+          break;
+        case 'pdf':
+          await exportCoverLetterToPDF(content, exportOptions);
+          break;
+        case 'docx':
+          await exportCoverLetterToDOCX(content, exportOptions);
+          break;
+      }
+    } catch (error) {
+      console.error('导出失败:', error);
+      toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
   };
 
   const handleVersionChange = (versionId: string) => {
@@ -540,10 +672,60 @@ export default function DocumentPreviewClient({ documentUuid }: DocumentPreviewC
               <Copy className="w-4 h-4 mr-2" />
               复制
             </Button>
-            <Button variant="outline" onClick={handleDownload}>
-              <Download className="w-4 h-4 mr-2" />
-              下载
-            </Button>
+            {document.document_type === DocumentType.SOP ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    下载
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleSOPExport('txt')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 TXT
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSOPExport('pdf')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSOPExport('docx')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 DOCX
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : document.document_type === DocumentType.CoverLetter ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    下载
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleCoverLetterExport('txt')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 TXT
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleCoverLetterExport('pdf')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleCoverLetterExport('docx')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    导出为 DOCX
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" onClick={handleDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                下载
+              </Button>
+            )}
           </div>
         </div>
 

@@ -213,18 +213,18 @@ export default function FullRevisionModal({
           {/* 补充方向 */}
           <div>
             <Label htmlFor="direction" className="text-base mb-2 block">
-              补充修改方向（选填，30字内）
+              补充修改方向（选填，150字内）
             </Label>
             <Textarea
               id="direction"
               value={direction}
-              onChange={(e) => setDirection(e.target.value.slice(0, 30))}
+              onChange={(e) => setDirection(e.target.value.slice(0, 150))}
               placeholder="例如：强调技术能力，突出团队合作经验"
               className="min-h-[80px] bg-white dark:bg-white"
-              maxLength={30}
+              maxLength={150}
             />
             <span className="text-xs text-muted-foreground float-right mt-1">
-              {direction.length}/30
+              {direction.length}/150
             </span>
           </div>
 

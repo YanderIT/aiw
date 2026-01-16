@@ -7,21 +7,37 @@ import { splitText } from "motion-plus";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAppContext } from "@/contexts/app";
 import Link from "next/link";
 import HeroBg from "./bg";
 
 export default function HeroSplineV7({ section }: { section: SectionType }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useAppContext();
 
+  // Handle hydration
   useEffect(() => {
-    // Preload the background image
-    const img = new Image();
-    img.onload = () => {
-      setImageLoaded(true);
-    };
-    img.src = '/imgs/cover.png';
+    setMounted(true);
   }, []);
+
+  // Preload the background image based on theme
+  useEffect(() => {
+    if (!mounted) return;
+
+    // Reset state BEFORE setting image source to avoid race condition
+    // (cached images trigger onload synchronously/quickly)
+    setImageLoaded(false);
+
+    const isDark = theme === 'dark';
+    const imageSrc = isDark ? '/imgs/coverdark.png' : '/imgs/cover.png';
+
+    const img = new Image();
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageLoaded(true); // Allow rendering even if image fails to load
+    img.src = imageSrc;
+  }, [theme, mounted]);
 
   useEffect(() => {
     document.fonts.ready.then(() => {
@@ -32,8 +48,14 @@ export default function HeroSplineV7({ section }: { section: SectionType }) {
 
       const { words } = splitText(titleRef.current);
 
+      // Set color based on theme
+      const textColor = theme === 'dark' ? '#ffffff' : '#000000';
+
       // Animate the words with initial delay
       words.forEach((word, index) => {
+        // Set color on each word span
+        (word as HTMLElement).style.color = textColor;
+
         animate(
           word,
           { opacity: [0, 1], y: [20, 0], filter: ["blur(10px)", "blur(0px)"] },
@@ -46,7 +68,7 @@ export default function HeroSplineV7({ section }: { section: SectionType }) {
         );
       });
     });
-  }, []);
+  }, [theme]);
 
   if (section.disabled) {
     return null;
@@ -61,7 +83,7 @@ export default function HeroSplineV7({ section }: { section: SectionType }) {
         
         {/* Loading indicator for image */}
         {!imageLoaded && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
             <div className="text-muted-foreground animate-pulse">
               Loading background...
             </div>
@@ -75,7 +97,7 @@ export default function HeroSplineV7({ section }: { section: SectionType }) {
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0 z-10"
           style={{
-            backgroundImage: imageLoaded ? "url('/imgs/cover.png')" : "none",
+            backgroundImage: imageLoaded ? `url('${mounted && theme === 'dark' ? '/imgs/coverdark.png' : '/imgs/cover.png'}')` : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat"
@@ -94,7 +116,7 @@ export default function HeroSplineV7({ section }: { section: SectionType }) {
             <div className="space-y-6">
               <h1 
                 ref={titleRef}
-                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold leading-tight text-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+                className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
                 style={{ visibility: "hidden" }}
               >
                 <span className="block">为留学申请打造的 </span>

@@ -21,9 +21,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2, Trash2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2, Trash2, BookOpen } from "lucide-react";
 import { useRouter } from '@/i18n/navigation';
 import { GlobalLoading } from "@/components/ui/loading";
 import { toast } from "sonner";
@@ -316,6 +317,7 @@ function ConfirmationPage() {
 
 function ResumeGeneratorContent() {
   const t = useTranslations();
+  const locale = useLocale();
   const [activeModule, setActiveModule] = useState("header");
   const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
   const [showDevMode, setShowDevMode] = useState(false);
@@ -649,6 +651,12 @@ function ResumeGeneratorContent() {
                       }`} />
                     </div>
                     <h2 className="text-2xl font-semibold text-foreground">{activeModuleData.title}</h2>
+                    <Link href={`/${locale}/help`} className="ml-auto">
+                      <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-primary">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="text-sm">{locale === 'zh' ? '查看教程' : 'View Tutorial'}</span>
+                      </Button>
+                    </Link>
                   </>
                 )}
               </div>

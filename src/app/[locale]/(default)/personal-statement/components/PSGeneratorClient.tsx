@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { 
   ArrowRight, 
   FileText, 
@@ -132,7 +133,15 @@ function PSForm() {
         <p className="text-muted-foreground text-lg">
           专业的Personal Statement撰写服务，展现您的独特背景和学术热情
         </p>
-        
+        <div className="mt-4">
+          <Link href={`/${locale}/help`}>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <BookOpen className="w-4 h-4" />
+              {locale === 'zh' ? '查看教程' : 'View Tutorial'}
+            </Button>
+          </Link>
+        </div>
+
         {/* 开发模式下显示填充按钮 */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-4">

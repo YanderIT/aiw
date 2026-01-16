@@ -214,21 +214,21 @@ export default function FullRevisionModal({
           {/* 补充修改方向 */}
           <div>
             <Label className="text-base font-medium mb-3 block">
-              3. 补充修改方向（限30字）
+              3. 补充修改方向（限150字）
             </Label>
             <Textarea
               value={direction}
-              onChange={(e) => setDirection(e.target.value.slice(0, 30))}
+              onChange={(e) => setDirection(e.target.value.slice(0, 150))}
               placeholder="例如：把项目过程写清楚一点、结尾更有总结感、想多写一点课程收获"
               className="min-h-[80px]"
-              maxLength={30}
+              maxLength={150}
             />
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-muted-foreground">
                 只允许表达方式调整，不能修改具体经历或内容
               </p>
               <span className="text-xs text-muted-foreground">
-                {direction.length}/30
+                {direction.length}/150
               </span>
             </div>
           </div>

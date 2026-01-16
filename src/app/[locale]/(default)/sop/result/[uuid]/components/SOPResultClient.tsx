@@ -4,13 +4,11 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Copy, 
-  Download, 
-  Save, 
-  RefreshCw, 
-  Edit3,
-  Eye,
+import {
+  Copy,
+  Download,
+  Save,
+  RefreshCw,
   Loader2,
   CheckCircle,
   FileText,
@@ -24,14 +22,12 @@ import {
   GitCompare
 } from "lucide-react";
 import Markdown from "@/components/markdown";
-import MarkdownEditor from "@/components/blocks/mdeditor";
 import { toast } from "sonner";
 import { SOPProvider, useSOP } from "../../../components/SOPContext";
 import { useDify } from '@/hooks/useDify';
 import { useDifyReviseSOP } from '@/hooks/useDifyReviseSOP';
 import { smartWordCount } from '@/lib/word-count';
-import { exportMarkdownToPDF } from '@/lib/markdown-pdf-export';
-import { exportTextToDOCX } from '@/lib/text-document-export';
+import { exportSOPToTXT, exportSOPToPDF, exportSOPToDOCX } from '@/lib/sop-document-export';
 import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RevisionModal from "../../../components/RevisionModal";
@@ -120,10 +116,8 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
 
   const { runWorkflow, runWorkflowStreamingWithCallbacks } = useDify({ functionType: 'sop' });
 
-  const [isEditMode, setIsEditMode] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [editingContent, setEditingContent] = useState(''); // 仅用于编辑模式
 
   // 流式输出相关状态
   const [useStreaming, setUseStreaming] = useState(true); // 默认使用流式输出
@@ -559,13 +553,6 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
     }
   }, [hasGenerated, data.target, generationState.isGenerating, useStreaming, handleGenerate, handleGenerateStreaming]); // 添加所有依赖
 
-  // 编辑模式时同步内容
-  useEffect(() => {
-    if (isEditMode && generationState.generatedContent) {
-      setEditingContent(generationState.generatedContent);
-    }
-  }, [isEditMode, generationState.generatedContent]);
-
   // 自动滚动到底部（流式生成时或修改时）
   useEffect(() => {
     if ((isStreamingText || isRevisionStreaming) && contentEndRef.current) {
@@ -574,9 +561,8 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
   }, [displayContent, isStreamingText, isRevisionStreaming]);
 
   const handleCopy = async () => {
-    const contentToCopy = isEditMode ? editingContent : displayContent;
     try {
-      await navigator.clipboard.writeText(contentToCopy);
+      await navigator.clipboard.writeText(displayContent);
       toast.success("内容已复制到剪贴板");
     } catch (error) {
       toast.error("复制失败");
@@ -584,43 +570,28 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
   };
 
   const handleExport = async (format: 'txt' | 'pdf' | 'docx') => {
-    const contentToExport = isEditMode ? editingContent : displayContent;
     const baseFilename = `sop-${data.target || 'document'}`;
+    const language = generationState.languagePreference === 'Chinese' ? 'zh' : 'en';
+
+    const exportOptions = {
+      filename: `${baseFilename}.${format === 'docx' ? 'docx' : format}`,
+      title: language === 'zh' ? '个人陈述' : 'Statement of Purpose',
+      target: data.target,
+      language: language as 'en' | 'zh',
+      includeDate: true
+    };
 
     try {
       switch (format) {
-        case 'txt': {
-          const blob = new Blob([contentToExport], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${baseFilename}.txt`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast.success("TXT 文件已导出");
+        case 'txt':
+          await exportSOPToTXT(displayContent, exportOptions);
           break;
-        }
-        case 'pdf': {
-          await exportMarkdownToPDF(contentToExport, {
-            filename: `${baseFilename}.pdf`,
-            title: 'Statement of Purpose',
-            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en',
-            quality: 0.95,
-            scale: 2,
-            margin: 20
-          });
+        case 'pdf':
+          await exportSOPToPDF(displayContent, exportOptions);
           break;
-        }
-        case 'docx': {
-          await exportTextToDOCX(contentToExport, {
-            filename: `${baseFilename}.docx`,
-            title: 'Statement of Purpose',
-            language: generationState.languagePreference === 'Chinese' ? 'zh' : 'en'
-          });
+        case 'docx':
+          await exportSOPToDOCX(displayContent, exportOptions);
           break;
-        }
       }
     } catch (error) {
       console.error('导出失败:', error);
@@ -629,9 +600,8 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
   };
 
   const handleSave = async () => {
-    const contentToSave = isEditMode ? editingContent : displayContent;
     try {
-      const wordCount = smartWordCount(contentToSave, generationState.languagePreference);
+      const wordCount = smartWordCount(displayContent, generationState.languagePreference);
       const updateResponse = await fetch('/api/documents', {
         method: 'PUT',
         headers: {
@@ -639,7 +609,7 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
         },
         body: JSON.stringify({
           uuid: documentUuid,
-          content: contentToSave,
+          content: displayContent,
           word_count: wordCount.count.toString()
         }),
       });
@@ -653,11 +623,6 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
       console.error('Error saving document:', error);
       toast.error("保存失败，请重试");
     }
-  };
-
-  const handleMarkdownChange = (value: string) => {
-    setEditingContent(value);
-    updateGeneratedContent(value);
   };
 
   const handleRegenerate = () => {
@@ -1084,23 +1049,6 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
             版本对比
           </Button>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditMode(!isEditMode)}
-        >
-          {isEditMode ? (
-            <>
-              <Eye className="mr-2 h-4 w-4" />
-              预览
-            </>
-          ) : (
-            <>
-              <Edit3 className="mr-2 h-4 w-4" />
-              编辑
-            </>
-          )}
-        </Button>
         <Button variant="outline" size="sm" onClick={handleCopy}>
           <Copy className="mr-2 h-4 w-4" />
           复制
@@ -1186,13 +1134,6 @@ function SOPResultContent({ documentUuid }: { documentUuid: string }) {
             <div className="flex items-center justify-center min-h-[400px]">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               <span className="ml-3 text-lg text-muted-foreground">正在保存修改...</span>
-            </div>
-          ) : isEditMode ? (
-            <div className="min-h-[600px]">
-              <MarkdownEditor
-                value={editingContent}
-                onChange={handleMarkdownChange}
-              />
             </div>
           ) : (
             <div className="p-8 prose prose-slate dark:prose-invert max-w-none">

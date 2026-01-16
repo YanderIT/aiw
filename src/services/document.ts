@@ -55,7 +55,7 @@ export function getDocumentTypeDisplayName(type: DocumentType): string {
     [DocumentType.RecommendationLetter]: "推荐信",
     [DocumentType.Resume]: "简历",
     [DocumentType.CoverLetter]: "求职信",
-    [DocumentType.SOP]: "学习计划书",
+    [DocumentType.SOP]: "SOP",
     [DocumentType.PersonalStatement]: "个人陈述",
     [DocumentType.StudyAbroadConsultation]: "留学咨询"
   };

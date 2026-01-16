@@ -9,6 +9,7 @@ import {
   FlaskConical,
   Trophy,
   CheckSquare,
+  Square,
   Eye,
   Layout,
   LayoutGrid,
@@ -24,9 +25,12 @@ import {
   Menu,
   X,
   Home,
+  Plus,
+  GripVertical,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import zhMessages from "@/i18n/pages/help/zh.json";
@@ -87,6 +91,148 @@ const categories = {
       sections: ["module_selection", "preview_edit", "template_selection", "layout_management", "theme_color", "export"],
     },
   },
+};
+
+// 展示用按钮组件（无点击逻辑）
+const MockCreationCenterButton = ({ locale }: { locale: string }) => (
+  <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-background/60 backdrop-blur-md border border-border/40 shadow-sm font-semibold text-foreground text-sm">
+    {locale === "zh" ? "创作中心" : "Creation Center"}
+    <Plus className="size-4" />
+  </span>
+);
+
+const MockAddButton = ({ text }: { text: string }) => (
+  <span className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium bg-primary text-primary-foreground rounded-md shadow-xs">
+    <Plus className="w-3 h-3" />
+    {text}
+  </span>
+);
+
+const MockAIButton = ({ locale }: { locale: string }) => (
+  <span className="inline-flex items-center gap-1 h-7 px-2.5 text-xs font-medium bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 rounded-md">
+    <Sparkles className="w-3 h-3" />
+    {locale === "zh" ? "AI 生成" : "AI Generate"}
+  </span>
+);
+
+// 模块勾选列表（复用 ResumeGeneratorClient.tsx L184-234 的真实样式）
+const MockModuleList = ({ locale }: { locale: string }) => {
+  const modules = locale === "zh"
+    ? [
+      { name: "个人背景", checked: true, filled: true },
+      { name: "教育经历", checked: true, filled: true },
+      { name: "实习/工作", checked: true, filled: false },
+      { name: "科研/项目", checked: false, filled: false },
+      { name: "活动经历", checked: true, filled: false },
+    ]
+    : [
+      { name: "Personal Info", checked: true, filled: true },
+      { name: "Education", checked: true, filled: true },
+      { name: "Work Experience", checked: true, filled: false },
+      { name: "Research/Projects", checked: false, filled: false },
+      { name: "Activities", checked: true, filled: false },
+    ];
+
+  return (
+    <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm w-fit">
+      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-4">
+        {locale === "zh" ? "简历模块" : "Resume Modules"}
+      </h3>
+      <ul className="space-y-3">
+        {modules.map((m, i) => (
+          <li key={i} className="flex items-center gap-3">
+            <span className={m.checked ? "text-primary" : "text-muted-foreground"}>
+              {m.checked ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+            </span>
+            <span className={`text-foreground flex-1 ${m.checked ? 'font-medium' : ''}`}>
+              {m.name}
+            </span>
+            {m.checked && m.filled && (
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                {locale === "zh" ? "已填写" : "Filled"}
+              </Badge>
+            )}
+            {m.checked && !m.filled && (
+              <Badge variant="outline" className="border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-400">
+                {locale === "zh" ? "未填写" : "Empty"}
+              </Badge>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+// 布局管理组件（复用 ResumeResultClient.tsx L1163-1238 的真实样式）
+const MockLayoutManager = ({ locale }: { locale: string }) => {
+  const mainModules = locale === "zh"
+    ? ["教育经历", "工作经历", "项目经历"]
+    : ["Education", "Work Experience", "Projects"];
+
+  const sidebarModules = locale === "zh"
+    ? ["技能", "语言"]
+    : ["Skills", "Languages"];
+
+  return (
+    <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-4 shadow-sm w-fit">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center">
+          <LayoutGrid className="w-3 h-3 text-primary" />
+        </div>
+        <h3 className="text-sm font-semibold text-foreground">
+          {locale === "zh" ? "布局管理" : "Layout Management"}
+        </h3>
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-4">
+        {locale === "zh" ? "拖动模块调整布局顺序" : "Drag modules to adjust layout"}
+      </p>
+
+      <div className="space-y-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2.5 h-2.5 rounded bg-blue-500"></div>
+            <span className="text-xs font-medium text-foreground">{locale === "zh" ? "主要内容" : "Main Content"}</span>
+          </div>
+          <div className="space-y-1.5">
+            {mainModules.map((name, i) => (
+              <div key={i} className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                <GripVertical className="w-3 h-3 text-gray-400" />
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2.5 h-2.5 rounded bg-green-500"></div>
+            <span className="text-xs font-medium text-foreground">{locale === "zh" ? "侧边栏" : "Sidebar"}</span>
+          </div>
+          <div className="space-y-1.5">
+            {sidebarModules.map((name, i) => (
+              <div key={i} className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                <GripVertical className="w-3 h-3 text-gray-400" />
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 图片路径到按钮组件的映射
+const imageToButtonMap: Record<string, string> = {
+  "/imgs/help/chuangzuozhongxin.png": "creation_center",
+  "/imgs/help/tianjiajiaoyu.png": "add_education",
+  "/imgs/help/tianjiagongzuo.png": "add_work",
+  "/imgs/help/addActivity.png": "add_activity",
+  "/imgs/help/aibutton.png": "ai_button",
+  "/imgs/help/mokuai.png": "module_list",
+  "/imgs/help/buju.png": "layout_manager",
 };
 
 export default function HelpClient({ locale }: HelpClientProps) {
@@ -240,7 +386,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
         className="scroll-mt-24 pb-8 border-b border-border/50 last:border-b-0"
       >
         {/* Section Title */}
-        <h2 className="text-xl font-semibold mb-4">
+        <h2 className="text-2xl font-semibold mb-4">
           {sectionData.title}
         </h2>
 
@@ -254,7 +400,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
           <div className="mb-4">
             <ul className="space-y-2">
               {sectionData.tips.map((tip: string, index: number) => (
-                <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                   <span className="text-muted-foreground/50 mt-1">•</span>
                   <span>{tip}</span>
                 </li>
@@ -275,7 +421,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
           <div className="mb-4">
             <ul className="space-y-2">
               {sectionData.extra_tips.map((tip: string, index: number) => (
-                <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                   <span className="text-muted-foreground/50 mt-1">•</span>
                   <span>{tip}</span>
                 </li>
@@ -284,17 +430,33 @@ export default function HelpClient({ locale }: HelpClientProps) {
           </div>
         )}
 
-        {/* Image */}
+        {/* Image or Mock Button */}
         {sectionData.image && (
           <div className="mb-4">
-            <Image
-              src={sectionData.image}
-              alt={sectionData.image_alt || ""}
-              width={400}
-              height={200}
-              className="max-w-full h-auto"
-              unoptimized
-            />
+            {imageToButtonMap[sectionData.image] === "creation_center" ? (
+              <MockCreationCenterButton locale={locale} />
+            ) : imageToButtonMap[sectionData.image] === "add_education" ? (
+              <MockAddButton text={locale === "zh" ? "添加教育经历" : "Add Education"} />
+            ) : imageToButtonMap[sectionData.image] === "add_work" ? (
+              <MockAddButton text={locale === "zh" ? "添加工作经历" : "Add Work Experience"} />
+            ) : imageToButtonMap[sectionData.image] === "add_activity" ? (
+              <MockAddButton text={locale === "zh" ? "添加活动" : "Add Activity"} />
+            ) : imageToButtonMap[sectionData.image] === "ai_button" ? (
+              <MockAIButton locale={locale} />
+            ) : imageToButtonMap[sectionData.image] === "module_list" ? (
+              <MockModuleList locale={locale} />
+            ) : imageToButtonMap[sectionData.image] === "layout_manager" ? (
+              <MockLayoutManager locale={locale} />
+            ) : (
+              <Image
+                src={sectionData.image}
+                alt={sectionData.image_alt || ""}
+                width={400}
+                height={200}
+                className="max-w-full h-auto"
+                unoptimized
+              />
+            )}
           </div>
         )}
 
@@ -310,7 +472,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
           <div className="mb-4">
             <ul className="space-y-2">
               {sectionData.extra_tips2.map((tip: string, index: number) => (
-                <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                   <span className="text-muted-foreground/50 mt-1">•</span>
                   <span>{tip}</span>
                 </li>
@@ -326,17 +488,29 @@ export default function HelpClient({ locale }: HelpClientProps) {
           </p>
         )}
 
-        {/* Image 2 */}
+        {/* Image 2 or Mock Button */}
         {sectionData.image2 && (
           <div className="mb-4">
-            <Image
-              src={sectionData.image2}
-              alt={sectionData.image2_alt || ""}
-              width={400}
-              height={200}
-              className="max-w-full h-auto"
-              unoptimized
-            />
+            {imageToButtonMap[sectionData.image2] === "creation_center" ? (
+              <MockCreationCenterButton locale={locale} />
+            ) : imageToButtonMap[sectionData.image2] === "add_education" ? (
+              <MockAddButton text={locale === "zh" ? "添加教育经历" : "Add Education"} />
+            ) : imageToButtonMap[sectionData.image2] === "add_work" ? (
+              <MockAddButton text={locale === "zh" ? "添加工作经历" : "Add Work Experience"} />
+            ) : imageToButtonMap[sectionData.image2] === "add_activity" ? (
+              <MockAddButton text={locale === "zh" ? "添加活动" : "Add Activity"} />
+            ) : imageToButtonMap[sectionData.image2] === "ai_button" ? (
+              <MockAIButton locale={locale} />
+            ) : (
+              <Image
+                src={sectionData.image2}
+                alt={sectionData.image2_alt || ""}
+                width={400}
+                height={200}
+                className="max-w-full h-auto"
+                unoptimized
+              />
+            )}
           </div>
         )}
 
@@ -350,7 +524,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
         {/* Warning */}
         {sectionData.warning && (
           <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
-            <p className="text-sm text-amber-700 dark:text-amber-300">
+            <p className="text-base text-amber-700 dark:text-amber-300">
               <span className="font-medium">{locale === "zh" ? "注意：" : "Note: "}</span>
               {sectionData.warning}
             </p>
@@ -362,8 +536,8 @@ export default function HelpClient({ locale }: HelpClientProps) {
           <div className="mb-6 space-y-4">
             {sectionData.features.order && (
               <div>
-                <h4 className="font-medium text-sm mb-2">{sectionData.features.order.title}</h4>
-                <p className="text-sm text-muted-foreground mb-2">{sectionData.features.order.description}</p>
+                <h4 className="font-medium text-base mb-2">{sectionData.features.order.title}</h4>
+                <p className="text-base text-muted-foreground mb-2">{sectionData.features.order.description}</p>
                 {sectionData.features.order.examples && (
                   <div className="flex flex-wrap gap-2">
                     {sectionData.features.order.examples.map((example: string, i: number) => (
@@ -377,8 +551,8 @@ export default function HelpClient({ locale }: HelpClientProps) {
             )}
             {sectionData.features.layout && (
               <div>
-                <h4 className="font-medium text-sm mb-2">{sectionData.features.layout.title}</h4>
-                <p className="text-sm text-muted-foreground">{sectionData.features.layout.description}</p>
+                <h4 className="font-medium text-base mb-2">{sectionData.features.layout.title}</h4>
+                <p className="text-base text-muted-foreground">{sectionData.features.layout.description}</p>
               </div>
             )}
           </div>
@@ -412,10 +586,10 @@ export default function HelpClient({ locale }: HelpClientProps) {
           <div className="mb-6 grid gap-4 sm:grid-cols-2">
             {sectionData.formats.pdf && (
               <div className="p-4 bg-muted/30 rounded-lg">
-                <div className="font-medium text-sm mb-2">{sectionData.formats.pdf.title}</div>
+                <div className="font-medium text-base mb-2">{sectionData.formats.pdf.title}</div>
                 <ul className="space-y-1">
                   {sectionData.formats.pdf.suitable_for.map((item: string, i: number) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                    <li key={i} className="text-base text-muted-foreground flex items-center gap-2">
                       <span className="text-muted-foreground/50">•</span>
                       {item}
                     </li>
@@ -425,10 +599,10 @@ export default function HelpClient({ locale }: HelpClientProps) {
             )}
             {sectionData.formats.word && (
               <div className="p-4 bg-muted/30 rounded-lg">
-                <div className="font-medium text-sm mb-2">{sectionData.formats.word.title}</div>
+                <div className="font-medium text-base mb-2">{sectionData.formats.word.title}</div>
                 <ul className="space-y-1">
                   {sectionData.formats.word.suitable_for.map((item: string, i: number) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                    <li key={i} className="text-base text-muted-foreground flex items-center gap-2">
                       <span className="text-muted-foreground/50">•</span>
                       {item}
                     </li>
@@ -441,7 +615,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
 
         {/* Extra tip */}
         {sectionData.tip && (
-          <p className="text-sm text-green-600 dark:text-green-400">
+          <p className="text-base text-green-600 dark:text-green-400">
             {sectionData.tip}
           </p>
         )}
@@ -538,7 +712,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
         <main className="flex-1 lg:ml-64">
           {/* Breadcrumb */}
           <div className="border-b border-border bg-muted/30">
-            <div className="max-w-4xl mx-auto px-6 py-3">
+            <div className="max-w-5xl mx-auto px-6 py-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Home className="w-4 h-4" />
                 <ChevronRight className="w-3 h-3" />
@@ -548,7 +722,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
           </div>
 
           {/* Content */}
-          <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="max-w-5xl mx-auto px-6 py-8">
             {/* Page Title */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold mb-3">{messages.title}</h1>
@@ -560,7 +734,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
               <div className="font-medium mb-3">{messages.quick_tips.title}</div>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {messages.quick_tips.items.map((item: string, index: number) => (
-                  <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <li key={index} className="flex items-start gap-2 text-base text-muted-foreground">
                     <span className="text-primary font-medium">{index + 1}.</span>
                     <span>{item}</span>
                   </li>
@@ -578,7 +752,7 @@ export default function HelpClient({ locale }: HelpClientProps) {
                   <div key={categoryKey}>
                     {/* Category Header */}
                     <div className="mb-6 pb-2 border-b border-border">
-                      <h2 className="text-lg font-semibold">{category.title}</h2>
+                      <h2 className="text-xl font-semibold">{category.title}</h2>
                     </div>
                     {/* Sections */}
                     <div className="space-y-8">

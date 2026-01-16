@@ -47,7 +47,9 @@ export default function SignModal() {
       <Dialog open={showSignModal} onOpenChange={setShowSignModal}>
         <DialogContent className="sm:max-w-lg lg:max-w-xl bg-gradient-to-br from-background via-primary/5 to-background border-primary/20 backdrop-blur-sm shadow-2xl shadow-primary/10">
           <DialogHeaderContent />
-          <SignForm />
+          <div className="px-4">
+            <SignForm />
+          </div>
         </DialogContent>
       </Dialog>
     );

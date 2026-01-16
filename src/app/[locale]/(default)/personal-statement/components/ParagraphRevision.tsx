@@ -218,16 +218,16 @@ export default function ParagraphRevision({
 
               {/* 补充方向 */}
               <div>
-                <Label className="text-sm mb-2 block">补充修改方向（30字内）</Label>
+                <Label className="text-sm mb-2 block">补充修改方向（150字内）</Label>
                 <Textarea
                   value={direction}
-                  onChange={(e) => setDirection(e.target.value.slice(0, 30))}
+                  onChange={(e) => setDirection(e.target.value.slice(0, 150))}
                   placeholder="例如：更详细说明成果"
                   className="min-h-[60px] text-sm bg-white dark:bg-white"
-                  maxLength={30}
+                  maxLength={150}
                 />
                 <span className="text-xs text-muted-foreground float-right mt-1">
-                  {direction.length}/30
+                  {direction.length}/150
                 </span>
               </div>
 
