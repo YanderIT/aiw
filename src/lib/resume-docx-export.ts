@@ -134,7 +134,7 @@ const createSectionHeading = (
         color: themeColor
       })
     ],
-    spacing: { before: sectionIndex === 0 ? 200 : 360, after: 100 },
+    spacing: { before: sectionIndex === 0 ? 120 : 240, after: 40 },
     border: {
       bottom: {
         color: themeColor,

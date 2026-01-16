@@ -118,13 +118,13 @@ const Section = ({
 
   return (
     <section id={section.id} className="grid" style={{ breakInside: 'avoid' }}>
-      <h4 className="mb-3 text-left font-bold text-lg h-10" style={{
+      <h4 className="mb-0 text-left font-bold text-lg pb-0.5" style={{
         color: theme.primary,
         borderBottom: `1px solid ${theme.primary}`
       }}>
         {title || section?.name}
       </h4>
-      <div className="space-y-4">
+      <div className="space-y-2">
         {children}
       </div>
     </section>
