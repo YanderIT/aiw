@@ -262,7 +262,7 @@ export default function SignForm({
           </div>
         )}
       </CardHeader>
-      <CardContent className="grid gap-4 p-0">
+      <CardContent className="grid gap-4">
         {isCredentialsEnabled && (
           <>
             <div className="grid gap-2">

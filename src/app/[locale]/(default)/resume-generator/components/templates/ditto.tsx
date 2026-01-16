@@ -4,6 +4,44 @@ import { cn, isEmptyString } from "./shared/utils";
 import { Rating } from "./shared/components";
 import { getThemeColor, getThemeFromScale } from "./shared/theme-colors";
 
+// Helper function to transform bullet points from "-" to "•" with proper indentation
+const formatBulletPoints = (text: string): React.ReactNode => {
+  if (!text) return null;
+  const lines = text.split('\n');
+
+  return (
+    <>
+      {lines.map((line: string, index: number) => {
+        const isBullet = line.trim().startsWith('-') || line.trim().startsWith('•');
+
+        if (isBullet) {
+          // Remove the bullet/dash and leading space from the text
+          const textContent = line.trim().replace(/^[-•]\s*/, '');
+          return (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+              }}
+            >
+              <span style={{ flexShrink: 0, width: '16px' }}>•</span>
+              <span>{textContent}</span>
+            </div>
+          );
+        }
+
+        // Non-bullet line
+        return (
+          <div key={index}>
+            {line}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 const Header = ({
   resume,
   theme,
@@ -601,9 +639,8 @@ const MainContent = ({
                   color: "#333333",
                   lineHeight: "1.6",
                 }}
-                className="whitespace-pre-line"
               >
-                {item.summary}
+                {formatBulletPoints(item.summary || '')}
               </div>
             )}
           </div>
@@ -683,9 +720,8 @@ const MainContent = ({
                       color: "#333333",
                       lineHeight: "1.6",
                     }}
-                    className="whitespace-pre-line"
                   >
-                    {item.summary}
+                    {formatBulletPoints(item.summary || '')}
                   </div>
                 )}
               </div>
@@ -859,9 +895,8 @@ const MainContent = ({
                       color: "#333333",
                       lineHeight: "1.6",
                     }}
-                    className="whitespace-pre-line"
                   >
-                    {item.summary}
+                    {formatBulletPoints(item.summary || '')}
                   </div>
                 )}
               </div>

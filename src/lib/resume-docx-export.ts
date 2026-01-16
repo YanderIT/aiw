@@ -279,7 +279,10 @@ const createBulletParagraphs = (
         : {
             level: 0
           },
-      indent: options.asHyphen ? undefined : undefined
+      indent: {
+        left: 240,     // Text starts 240 twips from left (approx 1/6 inch)
+        hanging: 240   // First line hangs back by 240 twips (bullet/hyphen appears at margin)
+      }
     });
   });
 };
@@ -712,7 +715,7 @@ const buildDittoDocument = (
           spacingBeforeFirst: 15,
           spacingBetween: 15,
           fontSize: BASE_FONT_SIZE,
-          asHyphen: true
+          asHyphen: false
         })
       );
       const wrapped = wrapWithAccent({ header, body, accentColor });
@@ -831,7 +834,7 @@ const buildDittoDocument = (
           spacingBeforeFirst: 15,
           spacingBetween: 15,
           fontSize: BASE_FONT_SIZE,
-          asHyphen: true
+          asHyphen: false
         })
       );
 
@@ -866,7 +869,7 @@ const buildDittoDocument = (
           spacingBeforeFirst: 15,
           spacingBetween: 15,
           fontSize: BASE_FONT_SIZE,
-          asHyphen: true
+          asHyphen: false
         })
       );
 
@@ -905,7 +908,7 @@ const buildDittoDocument = (
           spacingBeforeFirst: 10,
           spacingBetween: 15,
           fontSize: BASE_FONT_SIZE,
-          asHyphen: true
+          asHyphen: false
         })
       );
 
