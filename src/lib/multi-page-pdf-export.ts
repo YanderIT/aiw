@@ -1,7 +1,6 @@
 import html2canvas from 'yd-html2canvas';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
-import { log } from 'console';
 
 interface ExportOptions {
   filename?: string;
@@ -82,7 +81,7 @@ export class MultiPagePDFExporter {
         Math.max(rect.width, element.scrollWidth, element.offsetWidth)
       );
       const computedHeight = Math.ceil(
-        Math.max(rect.height, element.scrollHeight, element.offsetHeight) + 20
+        Math.max(rect.height, element.scrollHeight, element.offsetHeight)
       );
 
       // 生成完整内容的canvas
@@ -180,7 +179,7 @@ export class MultiPagePDFExporter {
       // 计算当前页的内容区域
       const startY = pageIndex * pageContentHeightPx;
       const endY = Math.min(startY + pageContentHeightPx, canvasHeight);
-      const currentPageHeight = endY - startY + 20;
+      const currentPageHeight = endY - startY;
 
       // 创建当前页的canvas
       const pageCanvas = document.createElement('canvas');
@@ -199,7 +198,6 @@ export class MultiPagePDFExporter {
 
       // 转换为图片并添加到PDF
       const imgData = pageCanvas.toDataURL('image/jpeg', quality);
-      console.log('ida',imgData)
       const imgHeight = (currentPageHeight / this.MM_TO_PX_RATIO) * scale;
       
       // 居中放置

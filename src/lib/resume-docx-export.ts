@@ -135,11 +135,11 @@ const createSectionHeading = (
         color: themeColor
       })
     ],
-    spacing: { before: sectionIndex === 0 ? 120 : 240, after: 60 },
+    spacing: { before: sectionIndex === 0 ? 120 : 240, after: 0 },
     border: {
       bottom: {
         color: themeColor,
-        space: 4,
+        space: 1,
         size: 12,
         style: BorderStyle.SINGLE
       }
@@ -281,8 +281,8 @@ const createBulletParagraphs = (
             level: 0
           },
       indent: {
-        left: 240,     // Text starts 240 twips from left (approx 1/6 inch)
-        hanging: 240   // First line hangs back by 240 twips (bullet/hyphen appears at margin)
+        left: 480,     // Text starts 480 twips from left (approx 1/3 inch)
+        hanging: 240   // First line hangs back by 240 twips (bullet at 240 twips from margin)
       }
     });
   });
@@ -1456,7 +1456,7 @@ export const exportResumeDocx = async (
     summary: () => {
       pushSection('summary', resume.sections.summary.name, resume.sections.summary.visible, [
         createPlainParagraph(resume.sections.summary.content, {
-          spacingBefore: 140,
+          spacingBefore: 40,
           spacingAfter: 80
         })
       ]);
@@ -1472,7 +1472,7 @@ export const exportResumeDocx = async (
             right: item.location,
             leftBold: true,
             rightBold: true,
-            spacingBefore: idx === 0 ? 160 : 240,
+            spacingBefore: idx === 0 ? 40 : 240,
             spacingAfter: 20
           })
         );
@@ -1502,7 +1502,7 @@ export const exportResumeDocx = async (
             right: item.location,
             leftBold: true,
             rightBold: true,
-            spacingBefore: idx === 0 ? 160 : 240,
+            spacingBefore: idx === 0 ? 40 : 240,
             spacingAfter: 20
           })
         );
@@ -1561,7 +1561,7 @@ export const exportResumeDocx = async (
             left: item.name,
             right: item.date,
             leftBold: true,
-            spacingBefore: idx === 0 ? 160 : 220,
+            spacingBefore: idx === 0 ? 40 : 220,
             spacingAfter: 20
           })
         );
@@ -1609,7 +1609,7 @@ export const exportResumeDocx = async (
                 ]
               : [])
           ],
-          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+          spacing: { before: idx === 0 ? 40 : 120, after: 40 }
         })
       );
       pushSection('skills', resume.sections.skills.name, resume.sections.skills.visible, skillParagraphs);
@@ -1624,7 +1624,7 @@ export const exportResumeDocx = async (
             left: item.title,
             right: item.date,
             leftBold: true,
-            spacingBefore: idx === 0 ? 160 : 220,
+            spacingBefore: idx === 0 ? 40 : 220,
             spacingAfter: 20
           })
         );
@@ -1654,7 +1654,7 @@ export const exportResumeDocx = async (
             right: item.location,
             leftBold: true,
             rightBold: true,
-            spacingBefore: idx === 0 ? 160 : 220,
+            spacingBefore: idx === 0 ? 40 : 220,
             spacingAfter: 20
           })
         );
@@ -1694,7 +1694,7 @@ export const exportResumeDocx = async (
                 ]
               : [])
           ],
-          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+          spacing: { before: idx === 0 ? 40 : 120, after: 40 }
         })
       );
       pushSection('languages', resume.sections.languages.name, resume.sections.languages.visible, languageParagraphs);
@@ -1709,7 +1709,7 @@ export const exportResumeDocx = async (
             left: item.name,
             right: item.date,
             leftBold: true,
-            spacingBefore: idx === 0 ? 160 : 220,
+            spacingBefore: idx === 0 ? 40 : 220,
             spacingAfter: 20
           })
         );
@@ -1756,7 +1756,7 @@ export const exportResumeDocx = async (
                 ]
               : [])
           ],
-          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+          spacing: { before: idx === 0 ? 40 : 120, after: 40 }
         })
       );
       pushSection('references', resume.sections.references.name, resume.sections.references.visible, referenceParagraphs);

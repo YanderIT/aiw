@@ -216,7 +216,7 @@ export async function exportSOPToPDF(
       Math.max(rect.width, container.scrollWidth, container.offsetWidth)
     );
     const computedHeight = Math.ceil(
-      Math.max(rect.height, container.scrollHeight, container.offsetHeight) + 20
+      Math.max(rect.height, container.scrollHeight, container.offsetHeight)
     );
 
     // 生成高分辨率 canvas
