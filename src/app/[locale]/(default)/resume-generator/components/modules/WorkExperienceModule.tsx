@@ -203,7 +203,7 @@ export default function WorkExperienceModule() {
                     contextHint={`${experience.company} ${experience.job_title}`}
                   />
                 )}
-                <p className="text-[10px] text-muted-foreground">tips: 请用英文填写 3-4 条工作职责，每条以动词开头，用 • 符号开头，结束回车换行</p>
+                <p className="text-[10px] text-muted-foreground">tips: 请用英文填写 3-4 条工作职责，每条以动词开头，结束回车换行</p>
               </div>
             </div>
           </div>

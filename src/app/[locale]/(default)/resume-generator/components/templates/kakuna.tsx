@@ -34,12 +34,21 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
     const lowerUrl = url.toLowerCase();
 
     if (lowerName.includes('linkedin') || lowerUrl.includes('linkedin')) {
-      const username = url.split('/').pop() || name;
-      return `${username}`;
+      // Extract username (handle full URL or plain username input)
+      let username = url;
+      if (url.includes('linkedin.com')) {
+        // Extract username part from URL - protocol is optional: (https?:\/\/)?
+        username = url.replace(/(https?:\/\/)?(www\.)?linkedin\.com\/in\/?/i, '').replace(/\/$/, '');
+      }
+      return `linkedin.com/in/${username}`;
     }
     if (lowerName.includes('github') || lowerUrl.includes('github')) {
-      const username = url.split('/').pop() || name;
-      return `${username}`;
+      let username = url;
+      if (url.includes('github.com')) {
+        // Protocol is optional: (https?:\/\/)?
+        username = url.replace(/(https?:\/\/)?(www\.)?github\.com\/?/i, '').replace(/\/$/, '');
+      }
+      return `github.com/${username}`;
     }
     return name;
   };
@@ -67,38 +76,57 @@ const Header = ({ resume, theme }: { resume: StandardResumeData; theme: any }) =
         {basics.headline && <div className="text-lg text-gray-600">{basics.headline}</div>}
       </div>
 
+      {/* 第一行：基本联系信息 */}
       <div className="flex flex-wrap justify-center text-base">
-        {[
-          basics.location,
-          basics.phone && <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">{basics.phone}</a>,
-          basics.email && <a href={`mailto:${basics.email}`} target="_blank" rel="noreferrer">{basics.email}</a>
-        ].filter(Boolean).map((item, index, arr) => (
-          <span key={index}>
-            {item}
-            {index < arr.length - 1 && <span className="mx-2">|</span>}
-          </span>
-        ))}
-        {basics.url?.href && (
-          <div className="flex items-center gap-x-1.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill={theme.primary} className="inline-block">
-              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
-            </svg>
-            <a href={basics.url.href} target="_blank" rel="noreferrer">
-              {basics.url.label || basics.url.href}
-            </a>
-          </div>
-        )}
-        {basics.customFields?.map((item) => (
-          <div key={item.id} className="flex items-center ml-2">
-            {getSocialIcon(item.value, item.name)}
-            <p className="ml-2">
-              {/* <a href={item.value} target="_blank" rel="noreferrer noopener nofollow"> */}
-              {getSocialDisplayName(item.value, item.name)}
-              {/* </a> */}
-            </p>
-          </div>
-        ))}
+        {(() => {
+          const basicItems: React.ReactNode[] = [];
+
+          if (basics.location) {
+            basicItems.push(<span key="location">{basics.location}</span>);
+          }
+          if (basics.phone) {
+            basicItems.push(
+              <a key="phone" href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">{basics.phone}</a>
+            );
+          }
+          if (basics.email) {
+            basicItems.push(
+              <a key="email" href={`mailto:${basics.email}`} target="_blank" rel="noreferrer">{basics.email}</a>
+            );
+          }
+          if (basics.url?.href) {
+            basicItems.push(
+              <span key="url" className="inline-flex items-center gap-x-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={theme.primary} className="inline-block">
+                  <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                </svg>
+                <a href={basics.url.href} target="_blank" rel="noreferrer">
+                  {basics.url.label || basics.url.href}
+                </a>
+              </span>
+            );
+          }
+
+          return basicItems.map((item: React.ReactNode, index: number, arr: React.ReactNode[]) => (
+            <span key={index} className="inline-flex items-center whitespace-nowrap">
+              {item}
+              {index < arr.length - 1 && <span className="mx-2">|</span>}
+            </span>
+          ));
+        })()}
       </div>
+
+      {/* 第二行：社交链接（居中） */}
+      {basics.customFields && basics.customFields.length > 0 && (
+        <div className="flex flex-wrap justify-center text-base">
+          {basics.customFields.map((item, index: number, arr) => (
+            <span key={item.id} className="inline-flex items-center whitespace-nowrap">
+              {getSocialDisplayName(item.value, item.name)}
+              {index < arr.length - 1 && <span className="mx-2">|</span>}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -146,9 +174,9 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
           <Section section={sections.experience} title="INTERNSHIP EXPERIENCE" theme={theme}>
             {sections.experience?.items?.map((item) => (
               <div key={item.id} className="mb-4">
-                <div className="mb-2">
+                <div className="-mb-1.5">
                   {/* 第一行：公司名称（左） + 地址（右） */}
-                  <div className="flex justify-between items-start mb-1">
+                  <div className="flex justify-between items-start -mb-1.5">
                     <div className="font-bold text-xl">{item.company}</div>
                     {item.location && <div className="font-bold text-base text-black">{item.location}</div>}
                   </div>
@@ -163,8 +191,13 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
                   </div>
                 </div>
                 {item.summary && !isEmptyString(item.summary) && (
-                  <div className="text-base whitespace-pre-line text-black">
-                    {item.summary}
+                  <div className="ml-4 text-base text-black leading-snug">
+                    {item.summary.split('\n').filter((line: string) => line.trim()).map((line: string, index: number) => (
+                      <div key={index} className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{line.trim().replace(/^[-•]\s*/, '')}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -178,7 +211,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
               <div key={item.id} className="mb-4">
                 <div className="mb-1">
                   {/* 第一行：大学名称（左） + 地址（右） */}
-                  <div className="flex justify-between items-start mb-1">
+                  <div className="flex justify-between items-start -mb-1.5">
                     <div className="font-bold text-xl">{item.institution}</div>
                     {item.location && <div className="font-bold text-base text-black">{item.location}</div>}
                   </div>
@@ -196,7 +229,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
                   </div>
                 </div>
                 {item.courses && !isEmptyString(item.courses) && (
-                  <div className="mb-1 text-base text-black ml-4">
+                  <div className="mb-1 text-base text-black ml-4 leading-snug -mt-1.5">
                     <span className="text-[1.2rem] font-medium italic">Relevant coursework:</span> <span className="text-[1.2rem]">{item.courses.split(',').map(course => course.trim()).join(', ')}</span>
                   </div>
                 )}
@@ -217,7 +250,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
               <div key={item.id} className="mb-4">
                 <div className="mb-2">
                   {/* 第一行：项目名称（左） + 时间（右） */}
-                  <div className="flex justify-between items-start mb-1">
+                  <div className="flex justify-between items-start -mb-1.5">
                     <div className="font-bold text-xl">{item.name}</div>
                     <div className="whitespace-nowrap text-right">
                       <div className="text-base text-black">
@@ -231,13 +264,18 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
                   )}
                 </div>
                 {item.keywords && item.keywords.length > 0 && (
-                  <div className="mb-2 text-base text-black">
+                  <div className="mb-2 text-base text-black leading-snug -mt-1.5">
                     <strong>Tools:</strong> {item.keywords.map(keyword => keyword.trim()).join(' • ')}
                   </div>
                 )}
                 {item.summary && !isEmptyString(item.summary) && (
-                  <div className="text-base whitespace-pre-line text-black">
-                    {item.summary}
+                  <div className="ml-4 text-base text-black leading-snug -mt-1.5">
+                    {item.summary.split('\n').filter((line: string) => line.trim()).map((line: string, index: number) => (
+                      <div key={index} className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{line.trim().replace(/^[-•]\s*/, '')}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -251,12 +289,12 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
               <div key={item.id} className="mb-4">
                 <div className="mb-2">
                   {/* 第一行：活动名称（左） + 地址（右） */}
-                  <div className="flex justify-between items-start mb-1">
+                  <div className="flex justify-between items-start -mb-1.5">
                     <div className="font-bold text-xl">{item.name}</div>
                     {item.location && <div className="font-bold text-base text-black">{item.location}</div>}
                   </div>
                   {/* 第二行：角色（左） + 时间（右） */}
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start ">
                     <div className="font-bold text-lg text-black">{item.role}</div>
                     <div className="whitespace-nowrap text-right">
                       <div className="text-base text-black">
@@ -266,8 +304,13 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
                   </div>
                 </div>
                 {item.summary && !isEmptyString(item.summary) && (
-                  <div className="text-base whitespace-pre-line text-black">
-                    {item.summary}
+                  <div className="ml-4 text-base text-black leading-snug -mt-1.5">
+                    {item.summary.split('\n').filter((line: string) => line.trim()).map((line: string, index: number) => (
+                      <div key={index} className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{line.trim().replace(/^[-•]\s*/, '')}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -277,12 +320,12 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
       case 'skills':
         return sections.skills?.visible && sections.skills?.items?.length > 0 && (
           <Section section={sections.skills} title="SKILLS AND COMPETENCIES" theme={theme}>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 ">
               {sections.skills?.items?.flatMap((skill) => {
                 // 如果有 keywords，展开每个 keyword 为独立项
                 if (skill.keywords && skill.keywords.length > 0) {
                   return skill.keywords.map((keyword, index) => (
-                    <div key={`${skill.id}-${index}`} className="flex items-start text-base">
+                    <div key={`${skill.id}-${index}`} className="flex items-start text-base -mb-1.5">
                       <span className="mr-2">•</span>
                       <span>{keyword}</span>
                     </div>
@@ -291,7 +334,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
                 // 如果只有 description，返回单个项
                 if (skill.description) {
                   return (
-                    <div key={skill.id} className="flex items-start text-base">
+                    <div key={skill.id} className="flex items-start text-base ">
                       <span className="mr-2">•</span>
                       <span>{skill.description}</span>
                     </div>
@@ -330,7 +373,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
 
               return (
                 <div key={item.id} className="mb-2">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start -mb-2.5">
                     <div className="text-base">
                       {displayTitle}
                       {/* 如果有发证单位/颁奖机构，显示在标题后 */}
@@ -347,7 +390,7 @@ const MainContent = ({ resume, theme, layoutConfiguration }: {
         );
       case 'languages':
         return sections.languages?.visible && sections.languages?.items?.length > 0 && (
-          <Section section={sections.languages} title="Languages" theme={theme}>
+          <Section section={sections.languages} title="LANGUAGE SKILLS" theme={theme}>
             <div className="space-y-2">
               {sections.languages?.items?.map((item) => (
                 <div
@@ -404,7 +447,7 @@ export const KakunaTemplate = ({ resume, themeColor = 'sky-500', layoutConfigura
         padding: '32px',
         paddingBottom: '48px',
         fontSize: '16px',
-        lineHeight: '1.6',
+        lineHeight: '1.25',
         color: '#333333',
         fontFamily: 'Times New Roman, serif',
       }}

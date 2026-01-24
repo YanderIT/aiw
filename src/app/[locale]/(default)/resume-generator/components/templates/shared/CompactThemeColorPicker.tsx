@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { THEME_COLORS, getThemeColorName } from './theme-colors';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { THEME_COLORS } from './theme-colors';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface CompactThemeColorPickerProps {
   currentTheme: string;
@@ -101,116 +107,155 @@ const COLOR_SCALES = {
   }
 };
 
+type ColorScaleKey = keyof typeof COLOR_SCALES;
+type ShadeKey = keyof typeof COLOR_SCALES.blue;
+
+// 颜色家族按钮组件
+interface ColorFamilyButtonProps {
+  themeColor: typeof THEME_COLORS[number];
+  colorScale: typeof COLOR_SCALES.blue;
+  isCurrentFamily: boolean;
+  currentTheme: string;
+  onThemeChange: (colorValue: string) => void;
+}
+
+const ColorFamilyButton: React.FC<ColorFamilyButtonProps> = ({
+  themeColor,
+  colorScale,
+  isCurrentFamily,
+  currentTheme,
+  onThemeChange,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "w-8 h-8 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400",
+            isCurrentFamily
+              ? "border-blue-500 ring-2 ring-blue-200"
+              : "border-white shadow-sm hover:border-gray-300"
+          )}
+          style={{ backgroundColor: colorScale[500] }}
+          title={themeColor.displayName}
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        side="left"
+        align="start"
+        sideOffset={8}
+        className="w-auto p-3"
+      >
+        {/* 颜色家族名称 */}
+        <div className="flex items-center gap-2 mb-3 pb-2 border-b">
+          <div
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: colorScale[500] }}
+          />
+          <span className="text-sm font-medium text-gray-900">
+            {themeColor.displayName}
+          </span>
+        </div>
+
+        {/* 色阶网格 */}
+        <div className="grid grid-cols-6 gap-1.5">
+          {Object.entries(colorScale).map(([scale, color]: [string, string]) => {
+            const colorKey = `${themeColor.name}-${scale}`;
+            const isSelected = currentTheme === colorKey;
+
+            return (
+              <button
+                key={scale}
+                className={cn(
+                  "relative w-8 h-8 rounded transition-all hover:scale-110",
+                  isSelected
+                    ? "ring-2 ring-blue-400 ring-offset-1"
+                    : "hover:ring-1 hover:ring-gray-300"
+                )}
+                style={{ backgroundColor: color }}
+                title={`${scale}: ${color}`}
+                onClick={() => {
+                  onThemeChange(colorKey);
+                  setOpen(false);
+                }}
+              >
+                {isSelected && (
+                  <Check
+                    className={cn(
+                      "absolute inset-0 m-auto w-4 h-4 drop-shadow-lg",
+                      parseInt(scale) < 500 ? "text-gray-800" : "text-white"
+                    )}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 色阶标签 */}
+        <div className="grid grid-cols-6 gap-1.5 mt-1">
+          {[50, 100, 200, 300, 400, 500].map((scale: number) => (
+            <span key={scale} className="text-[10px] text-center text-gray-500">
+              {scale}
+            </span>
+          ))}
+        </div>
+        <div className="grid grid-cols-6 gap-1.5 mt-0.5">
+          {[600, 700, 800, 900, 950, ''].map((scale: number | string, idx: number) => (
+            <span key={idx} className="text-[10px] text-center text-gray-500">
+              {scale}
+            </span>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 export const CompactThemeColorPicker: React.FC<CompactThemeColorPickerProps> = ({
   currentTheme,
   onThemeChange
 }) => {
-  const [expandedFamily, setExpandedFamily] = useState<string | null>(null);
-
   // 解析当前主题颜色
   const [currentColorFamily, currentColorScale] = currentTheme.split('-');
-  const currentFamilyData = THEME_COLORS.find(c => c.name === currentColorFamily);
+  const currentFamilyData = THEME_COLORS.find((c: typeof THEME_COLORS[number]) => c.name === currentColorFamily);
+  const currentHex = COLOR_SCALES[currentColorFamily as ColorScaleKey]?.[currentColorScale as unknown as ShadeKey];
 
   return (
     <div className="space-y-3">
       {/* 当前选中的颜色信息 */}
-      <div className="p-4 bg-gray-50 rounded-lg border">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            {/* 当前选中的颜色 */}
-            <div 
-              className="w-8 h-8 rounded-full border-2 border-white shadow-md ring-2 ring-blue-200"
-              style={{ backgroundColor: COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as unknown as keyof typeof COLOR_SCALES['blue']] }}
-            />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-900">
-                {currentFamilyData?.displayName} {currentColorScale}
-              </span>
-              <span className="text-xs text-gray-600">
-                {COLOR_SCALES[currentColorFamily as keyof typeof COLOR_SCALES]?.[currentColorScale as unknown as keyof typeof COLOR_SCALES['blue']]?.toUpperCase()}
-              </span>
-            </div>
-          </div>
+      <div className="p-3 bg-gray-50 rounded-lg border flex items-center gap-3">
+        <div
+          className="w-8 h-8 rounded-full border-2 border-white shadow-md ring-2 ring-blue-200 flex-shrink-0"
+          style={{ backgroundColor: currentHex }}
+        />
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-medium text-gray-900 truncate">
+            {currentFamilyData?.displayName} {currentColorScale}
+          </span>
+          <span className="text-xs text-gray-500 font-mono">
+            {currentHex?.toUpperCase()}
+          </span>
         </div>
       </div>
 
-      {/* 颜色家族列表 */}
-      <div className="space-y-2">
-        {THEME_COLORS.map((themeColor) => {
-          const colorScale = COLOR_SCALES[themeColor.name as keyof typeof COLOR_SCALES];
+      {/* 颜色调色盘网格 */}
+      <div className="grid grid-cols-6 xl:grid-cols-7 gap-2">
+        {THEME_COLORS.map((themeColor: typeof THEME_COLORS[number]) => {
+          const colorScale = COLOR_SCALES[themeColor.name as ColorScaleKey];
           const isCurrentFamily = currentColorFamily === themeColor.name;
-          const isExpanded = expandedFamily === themeColor.name;
-          
-          return (
-            <div key={themeColor.name} className="border rounded-lg overflow-hidden">
-              {/* 颜色家族标题 */}
-              <button
-                className={`w-full p-3 flex items-center justify-between transition-all duration-200 ${
-                  isCurrentFamily 
-                    ? 'bg-blue-50 text-blue-900 border-blue-200' 
-                    : 'bg-white hover:bg-gray-50 text-gray-700'
-                }`}
-                onClick={() => setExpandedFamily(isExpanded ? null : themeColor.name)}
-              >
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-5 h-5 rounded-full border border-gray-300"
-                    style={{ backgroundColor: themeColor.primary }}
-                  />
-                  <span className="text-sm font-medium">
-                    {themeColor.displayName}
-                  </span>
-                  {isCurrentFamily && (
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md">
-                      当前
-                    </span>
-                  )}
-                </div>
-                {isExpanded ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </button>
 
-              {/* 颜色色阶 */}
-              {isExpanded && (
-                <div className="bg-gray-50 p-3">
-                  <div className="grid grid-cols-6 gap-1.5">
-                    {Object.entries(colorScale).map(([scale, color]) => {
-                      const colorKey = `${themeColor.name}-${scale}`;
-                      const isSelected = currentTheme === colorKey;
-                      
-                      return (
-                        <button
-                          key={scale}
-                          className={`group relative w-full h-10 rounded transition-all hover:scale-105 ${
-                            isSelected ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:ring-1 hover:ring-gray-300'
-                          }`}
-                          style={{ backgroundColor: color }}
-                          title={`${themeColor.name}-${scale}: ${color}`}
-                          onClick={() => onThemeChange(colorKey)}
-                        >
-                          {/* 选中指示器 */}
-                          {isSelected && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="white" className="drop-shadow-lg">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                              </svg>
-                            </div>
-                          )}
-                          
-                          {/* Hover 显示色值 */}
-                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
-                            {scale}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
+          return (
+            <ColorFamilyButton
+              key={themeColor.name}
+              themeColor={themeColor}
+              colorScale={colorScale}
+              isCurrentFamily={isCurrentFamily}
+              currentTheme={currentTheme}
+              onThemeChange={onThemeChange}
+            />
           );
         })}
       </div>

@@ -21,6 +21,7 @@ interface DocxExportOptions {
   filename?: string;
   themePrimary?: string;
   sectionTitles?: Partial<Record<SectionKey, string>>;
+  layoutOrder?: string[];  // 模块顺序数组，支持动态排序
 }
 
 const FONT_FAMILY = 'Times New Roman';
@@ -134,13 +135,13 @@ const createSectionHeading = (
         color: themeColor
       })
     ],
-    spacing: { before: sectionIndex === 0 ? 120 : 240, after: 40 },
+    spacing: { before: sectionIndex === 0 ? 120 : 240, after: 60 },
     border: {
       bottom: {
         color: themeColor,
-        space: 1,
-        size: 6,
-        value: BorderStyle.SINGLE
+        space: 4,
+        size: 12,
+        style: BorderStyle.SINGLE
       }
     }
   });
@@ -1450,304 +1451,346 @@ export const exportResumeDocx = async (
     sectionIndex += 1;
   };
 
-  // Summary
-  pushSection('summary', resume.sections.summary.name, resume.sections.summary.visible, [
-    createPlainParagraph(resume.sections.summary.content, {
-      spacingBefore: 140,
-      spacingAfter: 80
-    })
-  ]);
+  // 模块内容生成器
+  const sectionGenerators: Record<string, () => void> = {
+    summary: () => {
+      pushSection('summary', resume.sections.summary.name, resume.sections.summary.visible, [
+        createPlainParagraph(resume.sections.summary.content, {
+          spacingBefore: 140,
+          spacingAfter: 80
+        })
+      ]);
+    },
 
-  // Work Experience
-  const experienceParagraphs: Array<Paragraph | null> = resume.sections.experience.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.company,
-        right: item.location,
-        leftBold: true,
-        rightBold: true,
-        spacingBefore: idx === 0 ? 160 : 240,
-        spacingAfter: 20
-      })
-    );
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.position,
-        right: item.date,
-        leftItalic: true,
-        spacingBefore: 0,
-        spacingAfter: 30
-      })
-    );
-    paragraphs.push(...createBulletParagraphs(item.summary));
-    return paragraphs;
-  });
-  pushSection('experience', resume.sections.experience.name, resume.sections.experience.visible, experienceParagraphs);
+    experience: () => {
+      const experienceParagraphs: Array<Paragraph | null> = resume.sections.experience.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.company,
+            right: item.location,
+            leftBold: true,
+            rightBold: true,
+            spacingBefore: idx === 0 ? 160 : 240,
+            spacingAfter: 20
+          })
+        );
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.position,
+            right: item.date,
+            leftItalic: true,
+            spacingBefore: 0,
+            spacingAfter: 30
+          })
+        );
+        paragraphs.push(...createBulletParagraphs(item.summary));
+        return paragraphs;
+      });
+      pushSection('experience', resume.sections.experience.name, resume.sections.experience.visible, experienceParagraphs);
+    },
 
-  // Education
-  const educationParagraphs: Array<Paragraph | null> = resume.sections.education.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.institution,
-        right: item.location,
-        leftBold: true,
-        rightBold: true,
-        spacingBefore: idx === 0 ? 160 : 240,
-        spacingAfter: 20
-      })
-    );
+    education: () => {
+      const educationParagraphs: Array<Paragraph | null> = resume.sections.education.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.institution,
+            right: item.location,
+            leftBold: true,
+            rightBold: true,
+            spacingBefore: idx === 0 ? 160 : 240,
+            spacingAfter: 20
+          })
+        );
 
-    const degreeParts = [
-      item.studyType,
-      item.area,
-      item.score ? `GPA: ${item.score}` : ''
-    ]
-      .map(toPlainText)
-      .filter(Boolean)
-      .join(', ');
+        const degreeParts = [
+          item.studyType,
+          item.area,
+          item.score ? `GPA: ${item.score}` : ''
+        ]
+          .map(toPlainText)
+          .filter(Boolean)
+          .join(', ');
 
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: degreeParts,
-        right: item.date,
-        leftItalic: true,
-        spacingBefore: 0,
-        spacingAfter: 20
-      })
-    );
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: degreeParts,
+            right: item.date,
+            leftItalic: true,
+            spacingBefore: 0,
+            spacingAfter: 20
+          })
+        );
 
-    appendIfTruthy(
-      paragraphs,
-      createPlainParagraph(item.summary, {
-        spacingBefore: 40,
-        spacingAfter: 40
-      })
-    );
+        appendIfTruthy(
+          paragraphs,
+          createPlainParagraph(item.summary, {
+            spacingBefore: 40,
+            spacingAfter: 40
+          })
+        );
 
-    appendIfTruthy(
-      paragraphs,
-      createPlainParagraph(
-        item.courses ? `Relevant coursework: ${item.courses}` : '',
-        {
-          spacingBefore: 0,
-          spacingAfter: 40,
-          italics: true
-        }
-      )
-    );
+        appendIfTruthy(
+          paragraphs,
+          createPlainParagraph(
+            item.courses ? `Relevant coursework: ${item.courses}` : '',
+            {
+              spacingBefore: 0,
+              spacingAfter: 40,
+              italics: true
+            }
+          )
+        );
 
-    return paragraphs;
-  });
-  pushSection('education', resume.sections.education.name, resume.sections.education.visible, educationParagraphs);
+        return paragraphs;
+      });
+      pushSection('education', resume.sections.education.name, resume.sections.education.visible, educationParagraphs);
+    },
 
-  // Projects
-  const projectParagraphs: Array<Paragraph | null> = resume.sections.projects.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.name,
-        right: item.date,
-        leftBold: true,
-        spacingBefore: idx === 0 ? 160 : 220,
-        spacingAfter: 20
-      })
-    );
+    projects: () => {
+      const projectParagraphs: Array<Paragraph | null> = resume.sections.projects.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.name,
+            right: item.date,
+            leftBold: true,
+            spacingBefore: idx === 0 ? 160 : 220,
+            spacingAfter: 20
+          })
+        );
 
-    appendIfTruthy(
-      paragraphs,
-      createPlainParagraph(
-        [item.url?.href, item.keywords?.join(', ')].filter(Boolean).join(' • '),
-        { spacingBefore: 0, spacingAfter: 30, italics: true }
-      )
-    );
+        appendIfTruthy(
+          paragraphs,
+          createPlainParagraph(
+            [item.url?.href, item.keywords?.join(', ')].filter(Boolean).join(' • '),
+            { spacingBefore: 0, spacingAfter: 30, italics: true }
+          )
+        );
 
-    paragraphs.push(...createBulletParagraphs(item.summary || item.description));
-    return paragraphs;
-  });
-  pushSection('projects', resume.sections.projects.name, resume.sections.projects.visible, projectParagraphs);
+        paragraphs.push(...createBulletParagraphs(item.summary || item.description));
+        return paragraphs;
+      });
+      pushSection('projects', resume.sections.projects.name, resume.sections.projects.visible, projectParagraphs);
+    },
 
-  // Skills
-  const skillParagraphs: Array<Paragraph | null> = resume.sections.skills.items.map((item, idx) =>
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: toPlainText(item.name),
-          font: FONT_FAMILY,
-          bold: true,
-          size: BASE_FONT_SIZE
-        }),
-        ...(item.description
-          ? [
-              new TextRun({
-                text: ` – ${toPlainText(item.description)}`,
-                font: FONT_FAMILY,
-                size: BASE_FONT_SIZE
-              })
-            ]
-          : []),
-        ...(item.keywords?.length
-          ? [
-              new TextRun({
-                text: ` (${item.keywords.map(toPlainText).join(', ')})`,
-                font: FONT_FAMILY,
-                size: BASE_FONT_SIZE
-              })
-            ]
-          : [])
-      ],
-      spacing: { before: idx === 0 ? 160 : 120, after: 40 }
-    })
-  );
-  pushSection('skills', resume.sections.skills.name, resume.sections.skills.visible, skillParagraphs);
+    skills: () => {
+      const skillParagraphs: Array<Paragraph | null> = resume.sections.skills.items.map((item, idx) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: toPlainText(item.name),
+              font: FONT_FAMILY,
+              bold: true,
+              size: BASE_FONT_SIZE
+            }),
+            ...(item.description
+              ? [
+                  new TextRun({
+                    text: ` – ${toPlainText(item.description)}`,
+                    font: FONT_FAMILY,
+                    size: BASE_FONT_SIZE
+                  })
+                ]
+              : []),
+            ...(item.keywords?.length
+              ? [
+                  new TextRun({
+                    text: ` (${item.keywords.map(toPlainText).join(', ')})`,
+                    font: FONT_FAMILY,
+                    size: BASE_FONT_SIZE
+                  })
+                ]
+              : [])
+          ],
+          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+        })
+      );
+      pushSection('skills', resume.sections.skills.name, resume.sections.skills.visible, skillParagraphs);
+    },
 
-  // Awards
-  const awardParagraphs: Array<Paragraph | null> = resume.sections.awards.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.title,
-        right: item.date,
-        leftBold: true,
-        spacingBefore: idx === 0 ? 160 : 220,
-        spacingAfter: 20
-      })
-    );
+    awards: () => {
+      const awardParagraphs: Array<Paragraph | null> = resume.sections.awards.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.title,
+            right: item.date,
+            leftBold: true,
+            spacingBefore: idx === 0 ? 160 : 220,
+            spacingAfter: 20
+          })
+        );
 
-    appendIfTruthy(
-      paragraphs,
-      createPlainParagraph(item.awarder, {
-        spacingBefore: 0,
-        spacingAfter: 30,
-        italics: true
-      })
-    );
+        appendIfTruthy(
+          paragraphs,
+          createPlainParagraph(item.awarder, {
+            spacingBefore: 0,
+            spacingAfter: 30,
+            italics: true
+          })
+        );
 
-    paragraphs.push(...createBulletParagraphs(item.summary));
-    return paragraphs;
-  });
-  pushSection('awards', resume.sections.awards.name, resume.sections.awards.visible, awardParagraphs);
+        paragraphs.push(...createBulletParagraphs(item.summary));
+        return paragraphs;
+      });
+      pushSection('awards', resume.sections.awards.name, resume.sections.awards.visible, awardParagraphs);
+    },
 
-  // Activities
-  const activityParagraphs: Array<Paragraph | null> = resume.sections.activities.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.name,
-        right: item.location,
-        leftBold: true,
-        rightBold: true,
-        spacingBefore: idx === 0 ? 160 : 220,
-        spacingAfter: 20
-      })
-    );
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.role,
-        right: item.date,
-        leftItalic: true,
-        spacingBefore: 0,
-        spacingAfter: 30
-      })
-    );
-    paragraphs.push(...createBulletParagraphs(item.summary));
-    return paragraphs;
-  });
-  pushSection('activities', resume.sections.activities.name, resume.sections.activities.visible, activityParagraphs);
+    activities: () => {
+      const activityParagraphs: Array<Paragraph | null> = resume.sections.activities.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.name,
+            right: item.location,
+            leftBold: true,
+            rightBold: true,
+            spacingBefore: idx === 0 ? 160 : 220,
+            spacingAfter: 20
+          })
+        );
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.role,
+            right: item.date,
+            leftItalic: true,
+            spacingBefore: 0,
+            spacingAfter: 30
+          })
+        );
+        paragraphs.push(...createBulletParagraphs(item.summary));
+        return paragraphs;
+      });
+      pushSection('activities', resume.sections.activities.name, resume.sections.activities.visible, activityParagraphs);
+    },
 
-  // Languages
-  const languageParagraphs: Array<Paragraph | null> = resume.sections.languages.items.map((item, idx) =>
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: toPlainText(item.name),
-          font: FONT_FAMILY,
-          bold: true,
-          size: BASE_FONT_SIZE
-        }),
-        ...(item.description
-          ? [
-              new TextRun({
-                text: ` – ${toPlainText(item.description)}`,
-                font: FONT_FAMILY,
-                size: BASE_FONT_SIZE
-              })
-            ]
-          : [])
-      ],
-      spacing: { before: idx === 0 ? 160 : 120, after: 40 }
-    })
-  );
-  pushSection('languages', resume.sections.languages.name, resume.sections.languages.visible, languageParagraphs);
+    languages: () => {
+      const languageParagraphs: Array<Paragraph | null> = resume.sections.languages.items.map((item, idx) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: toPlainText(item.name),
+              font: FONT_FAMILY,
+              bold: true,
+              size: BASE_FONT_SIZE
+            }),
+            ...(item.description
+              ? [
+                  new TextRun({
+                    text: ` – ${toPlainText(item.description)}`,
+                    font: FONT_FAMILY,
+                    size: BASE_FONT_SIZE
+                  })
+                ]
+              : [])
+          ],
+          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+        })
+      );
+      pushSection('languages', resume.sections.languages.name, resume.sections.languages.visible, languageParagraphs);
+    },
 
-  // Certifications
-  const certificationParagraphs: Array<Paragraph | null> = resume.sections.certifications.items.flatMap((item, idx) => {
-    const paragraphs: Paragraph[] = [];
-    appendIfTruthy(
-      paragraphs,
-      createAlignedParagraph({
-        left: item.name,
-        right: item.date,
-        leftBold: true,
-        spacingBefore: idx === 0 ? 160 : 220,
-        spacingAfter: 20
-      })
-    );
-    appendIfTruthy(
-      paragraphs,
-      createPlainParagraph(item.issuer, {
-        spacingBefore: 0,
-        spacingAfter: 30,
-        italics: true
-      })
-    );
-    paragraphs.push(...createBulletParagraphs(item.summary));
-    return paragraphs;
-  });
-  pushSection('certifications', resume.sections.certifications.name, resume.sections.certifications.visible, certificationParagraphs);
+    certifications: () => {
+      const certificationParagraphs: Array<Paragraph | null> = resume.sections.certifications.items.flatMap((item, idx) => {
+        const paragraphs: Paragraph[] = [];
+        appendIfTruthy(
+          paragraphs,
+          createAlignedParagraph({
+            left: item.name,
+            right: item.date,
+            leftBold: true,
+            spacingBefore: idx === 0 ? 160 : 220,
+            spacingAfter: 20
+          })
+        );
+        appendIfTruthy(
+          paragraphs,
+          createPlainParagraph(item.issuer, {
+            spacingBefore: 0,
+            spacingAfter: 30,
+            italics: true
+          })
+        );
+        paragraphs.push(...createBulletParagraphs(item.summary));
+        return paragraphs;
+      });
+      pushSection('certifications', resume.sections.certifications.name, resume.sections.certifications.visible, certificationParagraphs);
+    },
 
-  // References
-  const referenceParagraphs: Array<Paragraph | null> = resume.sections.references.items.map((item, idx) =>
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: toPlainText(item.name),
-          font: FONT_FAMILY,
-          bold: true,
-          size: BASE_FONT_SIZE
-        }),
-        ...(item.description
-          ? [
-              new TextRun({
-                text: ` – ${toPlainText(item.description)}`,
-                font: FONT_FAMILY,
-                size: BASE_FONT_SIZE
-              })
-            ]
-          : []),
-        ...(item.url?.href
-          ? [
-              new TextRun({
-                text: ` (${toPlainText(item.url.href)})`,
-                font: FONT_FAMILY,
-                size: BASE_FONT_SIZE
-              })
-            ]
-          : [])
-      ],
-      spacing: { before: idx === 0 ? 160 : 120, after: 40 }
-    })
-  );
-  pushSection('references', resume.sections.references.name, resume.sections.references.visible, referenceParagraphs);
+    references: () => {
+      const referenceParagraphs: Array<Paragraph | null> = resume.sections.references.items.map((item, idx) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: toPlainText(item.name),
+              font: FONT_FAMILY,
+              bold: true,
+              size: BASE_FONT_SIZE
+            }),
+            ...(item.description
+              ? [
+                  new TextRun({
+                    text: ` – ${toPlainText(item.description)}`,
+                    font: FONT_FAMILY,
+                    size: BASE_FONT_SIZE
+                  })
+                ]
+              : []),
+            ...(item.url?.href
+              ? [
+                  new TextRun({
+                    text: ` (${toPlainText(item.url.href)})`,
+                    font: FONT_FAMILY,
+                    size: BASE_FONT_SIZE
+                  })
+                ]
+              : [])
+          ],
+          spacing: { before: idx === 0 ? 160 : 120, after: 40 }
+        })
+      );
+      pushSection('references', resume.sections.references.name, resume.sections.references.visible, referenceParagraphs);
+    }
+  };
+
+  // 默认模块顺序
+  const DEFAULT_SECTION_ORDER = [
+    'summary', 'experience', 'education', 'projects',
+    'skills', 'awards', 'activities', 'languages',
+    'certifications', 'references'
+  ];
+
+  // 获取实际顺序：使用 layoutOrder 或默认顺序
+  const sectionOrder = options.layoutOrder ?? DEFAULT_SECTION_ORDER;
+
+  // 用于追踪已生成的模块，避免重复
+  const generatedSections = new Set<string>();
+
+  // 按顺序生成模块
+  for (const section of sectionOrder) {
+    if (!generatedSections.has(section) && sectionGenerators[section]) {
+      sectionGenerators[section]();
+      generatedSections.add(section);
+    }
+  }
+
+  // 生成 layoutOrder 中未包含但在默认顺序中的模块（追加到末尾）
+  for (const section of DEFAULT_SECTION_ORDER) {
+    if (!generatedSections.has(section) && sectionGenerators[section]) {
+      sectionGenerators[section]();
+      generatedSections.add(section);
+    }
+  }
 
   if (docChildren.length === 0) {
     docChildren.push(

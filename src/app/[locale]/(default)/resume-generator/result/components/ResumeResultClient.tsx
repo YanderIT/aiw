@@ -70,6 +70,16 @@ import { DittoTemplate } from "../../components/templates/ditto";
 import { TemplateSelector } from "../../components/TemplateSelector";
 import { useAutoSaveResume } from "@/hooks/useAutoSaveResume";
 
+// layoutConfiguration 中的名称 → StandardResumeData section key 映射
+const SECTION_KEY_MAP: Record<string, string> = {
+  'workExperience': 'experience',
+  'education': 'education',
+  'research': 'projects',
+  'activities': 'activities',
+  'awards': 'awards',
+  'skillsLanguage': 'skills',
+};
+
 export interface ResumeModule {
   id: string;
   title: string;
@@ -720,9 +730,15 @@ function ResumeResultContent() {
           id: toastId,
         });
 
+        // 将 layoutConfiguration 的模块名映射为 StandardResumeData 的 section key
+        const layoutOrder = data.layoutConfiguration.mainSections.map(
+          (section: string) => SECTION_KEY_MAP[section] || section
+        );
+
         await exportResumeDocx(standardResumeData, {
           filename: `${baseFilename}.docx`,
           themePrimary: themePalette.primary,
+          layoutOrder,
         });
 
         toast.success("Word 导出成功！您可以继续在本地修改该文件。", {

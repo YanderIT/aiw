@@ -233,12 +233,21 @@ const Sidebar = ({
     const lowerUrl = url.toLowerCase();
 
     if (lowerName.includes("linkedin") || lowerUrl.includes("linkedin")) {
-      const username = url.split("/").pop() || name;
-      return `${username}`;
+      // Extract username (handle full URL or plain username input)
+      let username = url;
+      if (url.includes("linkedin.com")) {
+        // Extract username part from URL - protocol is optional: (https?:\/\/)?
+        username = url.replace(/(https?:\/\/)?(www\.)?linkedin\.com\/in\/?/i, "").replace(/\/$/, "");
+      }
+      return `linkedin.com/in/${username}`;
     }
     if (lowerName.includes("github") || lowerUrl.includes("github")) {
-      const username = url.split("/").pop() || name;
-      return `${username}`;
+      let username = url;
+      if (url.includes("github.com")) {
+        // Protocol is optional: (https?:\/\/)?
+        username = url.replace(/(https?:\/\/)?(www\.)?github\.com\/?/i, "").replace(/\/$/, "");
+      }
+      return `github.com/${username}`;
     }
     return name;
   };
@@ -262,18 +271,9 @@ const Sidebar = ({
               </h3>
               <div className="space-y-2">
                 {basics.customFields?.map((field) => (
-                  <div key={field.id} className="flex items-center gap-2">
-                    <span style={{ color: theme.primary }}>
-                      {getSocialIcon(field.value, field.name)}
-                    </span>
-                    <div style={{ fontSize: "14px" }}>
-                      <div
-                        className="text-lg font-semibold"
-                        style={{ color: "#333333" }}
-                      >
-                        {getSocialDisplayName(field.value, field.name)}
-                      </div>
-                      <div style={{ color: "#666666" }}>{field.value}</div>
+                  <div key={field.id} style={{ fontSize: "14px" }}>
+                    <div style={{ color: "#333333" }}>
+                      {getSocialDisplayName(field.value, field.name)}
                     </div>
                   </div>
                 ))}
