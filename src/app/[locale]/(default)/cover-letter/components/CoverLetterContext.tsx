@@ -135,6 +135,7 @@ interface CoverLetterContextType {
   startWorkflowStatusPolling: () => void;
   stopWorkflowStatusPolling: () => void;
   fillMockData: () => void; // 填充模拟数据
+  clearCache: () => void;
   setLanguagePreference: (lang: 'English' | 'Chinese') => void;
   // 版本管理
   versions: DocumentVersion[];
@@ -610,6 +611,30 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     return getRevisionCount() >= 1;
   };
 
+  // 清除所有缓存和状态
+  const clearCache = () => {
+    try {
+      localStorage.removeItem('coverLetter_form_data');
+      localStorage.removeItem('coverLetter_generated_content');
+      localStorage.removeItem('coverLetter_generated_at');
+      localStorage.removeItem('coverLetter_language_preference');
+      setData(defaultCoverLetterData);
+      setGenerationState({
+        isGenerating: false,
+        generatedContent: '',
+        error: null,
+        workflowRunId: null,
+        taskId: null,
+        workflowStatus: null,
+        languagePreference: 'English'
+      });
+      setVersions([]);
+      setCurrentVersionId(null);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+    }
+  };
+
   // 清理定时器
   useEffect(() => {
     return () => {
@@ -646,6 +671,7 @@ export function CoverLetterProvider({ children }: { children: ReactNode }) {
     startWorkflowStatusPolling,
     stopWorkflowStatusPolling,
     fillMockData,
+    clearCache,
     setLanguagePreference,
     // 版本管理
     versions,

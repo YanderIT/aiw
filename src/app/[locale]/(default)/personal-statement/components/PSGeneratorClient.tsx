@@ -21,7 +21,8 @@ import {
   Globe,
   Wand2,
   User,
-  BookOpen
+  BookOpen,
+  Trash2
 } from "lucide-react";
 import { toast } from 'sonner';
 import { PSProvider, usePS } from "./PSContext";
@@ -45,6 +46,7 @@ function PSForm() {
     data, 
     updateField,
     updateData,
+    clearCache,
     generationState,
     setGenerationLoading,
     setGenerationError,
@@ -156,6 +158,24 @@ function PSForm() {
             </Button>
           </div>
         )}
+
+        {/* 一键清空按钮 */}
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (window.confirm('确定要清空所有已填写的内容吗？此操作无法恢复。')) {
+                clearCache();
+                toast.success('已清空所有内容');
+              }
+            }}
+            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+          >
+            <Trash2 className="w-4 h-4" />
+            一键清空
+          </Button>
+        </div>
       </div>
 
       {/* 申请目标 */}

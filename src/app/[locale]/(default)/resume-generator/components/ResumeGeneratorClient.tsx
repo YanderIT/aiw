@@ -612,7 +612,7 @@ function ResumeGeneratorContent() {
                     className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    清空内容
+                    一键清空
                   </Button>
                 </div>
               </div>

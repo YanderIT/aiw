@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe, Trash2 } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 
@@ -291,7 +291,7 @@ function RecommendationLetterGeneratorContent() {
   const [activeModule, setActiveModule] = useState("basicInfo");
   const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
   const [showDevMode, setShowDevMode] = useState(false);
-  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, saveToCache } = useRecommendationLetter();
+  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, clearCache, saveToCache } = useRecommendationLetter();
   
   // 检查是否为开发环境
   useEffect(() => {
@@ -382,8 +382,22 @@ function RecommendationLetterGeneratorContent() {
               </p>
             </div>
             
-            {/* 开发模式开关 */}
             <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (window.confirm('确定要清空所有已填写的内容吗？此操作无法恢复。')) {
+                    clearCache();
+                    toast.success('已清空所有内容');
+                  }
+                }}
+                className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+              >
+                <Trash2 className="w-4 h-4" />
+                一键清空
+              </Button>
+            {/* 开发模式开关 */}
               {showDevMode && (
                 <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
                   <Code2 className="w-4 h-4 text-muted-foreground" />

@@ -194,9 +194,13 @@ export function PSProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // 自动保存到缓存
+  // 自动保存到缓存（1秒防抖，避免初始空数据覆盖缓存）
   useEffect(() => {
-    saveToCache();
+    const timeoutId = setTimeout(() => {
+      saveToCache();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
   }, [data, generationState]);
 
   // 初始加载缓存

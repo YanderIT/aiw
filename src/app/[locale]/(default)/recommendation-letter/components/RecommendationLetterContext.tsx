@@ -655,6 +655,18 @@ export function RecommendationLetterProvider({ children }: { children: ReactNode
       localStorage.removeItem('recommendationLetter_generated_at');
       localStorage.removeItem('recommendationLetter_versions');
       localStorage.removeItem('recommendationLetter_currentVersionId');
+      setData(defaultRecommendationLetterData);
+      setGenerationState({
+        isGenerating: false,
+        generatedContent: '',
+        error: null,
+        workflowRunId: null,
+        taskId: null,
+        workflowStatus: null,
+        languagePreference: 'English'
+      });
+      setVersions([]);
+      setCurrentVersionId(null);
     } catch (error) {
       console.error('Error clearing cache:', error);
     }

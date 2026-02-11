@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
@@ -277,7 +277,7 @@ function CoverLetterGeneratorContent() {
   const [activeModule, setActiveModule] = useState("basicInfo");
   const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
   const [showDevMode, setShowDevMode] = useState(false);
-  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, saveToCache } = useCoverLetter();
+  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, clearCache, saveToCache } = useCoverLetter();
   
   // Auto-show dev mode in development environment
   const isDevEnvironment = process.env.NODE_ENV === 'development';
@@ -373,6 +373,20 @@ function CoverLetterGeneratorContent() {
                 分模块填写您的信息，自由选择要包含的内容
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (window.confirm('确定要清空所有已填写的内容吗？此操作无法恢复。')) {
+                  clearCache();
+                  toast.success('已清空所有内容');
+                }
+              }}
+              className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+            >
+              <Trash2 className="w-4 h-4" />
+              一键清空
+            </Button>
           </div>
         </div>
       </div>
