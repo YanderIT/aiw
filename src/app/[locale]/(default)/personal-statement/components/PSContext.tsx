@@ -177,7 +177,10 @@ export function PSProvider({ children }: { children: ReactNode }) {
       if (cachedGenState) {
         try {
           const parsed = JSON.parse(cachedGenState);
-          setGenerationState(parsed);
+          setGenerationState({
+            ...parsed,
+            isGenerating: false // 重置生成状态，避免残留的 loading 状态
+          });
         } catch (e) {
           console.error('Failed to parse cached generation state:', e);
         }
