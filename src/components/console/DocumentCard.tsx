@@ -1,0 +1,183 @@
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { Document, DocumentType } from "@/models/document";
+import { formatDocumentDate, getDocumentTypeDisplayName } from "@/services/document";
+import { 
+  RecommendationLetterIcon, 
+  CoverLetterIcon, 
+  PersonalStatementIcon, 
+  ResumeIcon, 
+  SOPIcon,
+  StudyAbroadConsultationIcon,
+  DocumentIcon 
+} from "./icons/DocumentIcons";
+
+interface DocumentCardProps {
+  document: Document;
+  onDelete?: (uuid: string) => void;
+  onDownload?: (document: Document) => void;
+  onClick?: (document: Document) => void;
+  paymentStatus?: string;
+}
+
+const getDocumentIcon = (type: DocumentType) => {
+  const iconMap: Record<DocumentType, React.ComponentType<{ className?: string }>> = {
+    [DocumentType.RecommendationLetter]: RecommendationLetterIcon,
+    [DocumentType.Resume]: ResumeIcon,
+    [DocumentType.CoverLetter]: CoverLetterIcon,
+    [DocumentType.SOP]: SOPIcon,
+    [DocumentType.PersonalStatement]: PersonalStatementIcon,
+    [DocumentType.StudyAbroadConsultation]: StudyAbroadConsultationIcon,
+  };
+  
+  return iconMap[type] || DocumentIcon;
+};
+
+export const DocumentCard: React.FC<DocumentCardProps> = ({
+  document,
+  onDelete,
+  onDownload,
+  onClick,
+  paymentStatus,
+}) => {
+  const Icon = getDocumentIcon(document.document_type);
+  const displayDate = formatDocumentDate(document.created_at || '');
+  
+  // 获取前两三行的内容预览
+  const getContentPreview = (content: string | undefined, maxLength: number = 120) => {
+    // 特殊处理留学咨询文档
+    if (document.document_type === DocumentType.StudyAbroadConsultation && document.form_data) {
+      const formData = document.form_data;
+      const parts = [];
+      
+      if (formData.basicInfo?.full_name) {
+        parts.push(`姓名: ${formData.basicInfo.full_name}`);
+      }
+      if (formData.targetProgram?.target_country) {
+        parts.push(`目标国家: ${formData.targetProgram.target_country}`);
+      }
+      if (formData.targetProgram?.target_degree) {
+        parts.push(`申请学位: ${formData.targetProgram.target_degree}`);
+      }
+      if (formData.consultationNeeds?.main_concerns) {
+        parts.push(`关注点: ${formData.consultationNeeds.main_concerns}`);
+      }
+      
+      const preview = parts.join(' | ');
+      return preview.length > maxLength 
+        ? preview.substring(0, maxLength) + "..."
+        : preview;
+    }
+    
+    // 特殊处理简历文档
+    if (document.document_type === DocumentType.Resume && document.form_data) {
+      const formData = document.form_data;
+      const parts = [];
+      
+      // 添加模板名称
+      const template = formData.template || formData.resumeData?.selectedTemplate;
+      if (template) {
+        const templateName = template === 'kakuna' ? 'Kakuna模板' : 
+                           template === 'ditto' ? 'Ditto模板' : 
+                           `${template}模板`;
+        parts.push(templateName);
+      }
+      
+      // 添加姓名
+      if (formData.resumeData?.header?.full_name) {
+        parts.push(`姓名: ${formData.resumeData.header.full_name}`);
+      }
+      
+      // 添加教育信息
+      if (formData.resumeData?.education?.school_name) {
+        let eduInfo = formData.resumeData.education.school_name;
+        if (formData.resumeData.education.degree) {
+          eduInfo = `${eduInfo} - ${formData.resumeData.education.degree.split(' ')[0]}`;
+        }
+        parts.push(eduInfo);
+      }
+      
+      // 添加位置信息
+      if (formData.resumeData?.header?.city || formData.resumeData?.header?.country) {
+        const location = [];
+        if (formData.resumeData.header.city) location.push(formData.resumeData.header.city);
+        if (formData.resumeData.header.country) location.push(formData.resumeData.header.country);
+        if (location.length > 0) parts.push(location.join(', '));
+      }
+      
+      const preview = parts.join(' | ');
+      return preview.length > maxLength 
+        ? preview.substring(0, maxLength) + "..."
+        : preview;
+    }
+    
+    if (!content) return "";
+    const cleanContent = content.replace(/[#*`\[\]()]/g, '').trim();
+    return cleanContent.length > maxLength 
+      ? cleanContent.substring(0, maxLength) + "..."
+      : cleanContent;
+  };
+  
+  return (
+    <Card 
+      className="hover:shadow-md transition-all duration-200 cursor-pointer group bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden h-auto flex flex-col"
+      onClick={() => onClick?.(document)}
+    >
+      <div className="p-4 flex-1 flex flex-col">
+        {/* 日期 */}
+        <div className="text-sm text-gray-400 dark:text-gray-500 mb-2">
+          {displayDate}
+        </div>
+        
+        {/* 标题 */}
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 line-clamp-1 flex-1">
+            {document.title || "未命名文档"}
+          </h3>
+          {document.document_type === DocumentType.StudyAbroadConsultation && paymentStatus && (
+            paymentStatus === "paid" ? (
+              <Badge className="bg-green-100 text-green-700 hover:bg-green-100 shrink-0 text-xs">已支付</Badge>
+            ) : (
+              <Badge variant="outline" className="text-yellow-600 border-yellow-300 shrink-0 text-xs">待支付</Badge>
+            )
+          )}
+        </div>
+        
+        {/* 内容预览 - 3行 */}
+        <p className="text-sm text-gray-400 dark:text-gray-500 line-clamp-3 leading-relaxed">
+          {getContentPreview(document.content) || "暂无内容"}
+        </p>
+      </div>
+      
+      {/* 分割线和底部操作区 */}
+      <div className="border-t border-gray-100 dark:border-gray-800 mt-3">
+        <div className="px-4 py-3 flex items-center justify-between">
+          {/* 字数统计 - 留学咨询和简历不显示 */}
+          {document.document_type !== DocumentType.StudyAbroadConsultation && document.document_type !== DocumentType.Resume ? (
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              {document.word_count || 0} 字
+            </span>
+          ) : (
+            <span></span>
+          )}
+          
+          {/* 删除按钮 */}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(document.uuid);
+            }}
+          >
+            <Trash2 className="w-4 h-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};

@@ -1,0 +1,163 @@
+{
+  "help": {
+    "name": "help",
+    "label": "帮助中心",
+    "title": "简历功能使用教程",
+    "description": "全面了解如何使用 Essmote AI 简历生成功能，从填写信息到导出简历的完整教程。",
+    "sections": {
+      "getting_started": {
+        "title": "开始使用",
+        "description": "请先点击页面右上角",
+        "image": "/imgs/help/chuangzuozhongxin.png",
+        "image_alt": "创作中心按钮",
+        "after_image": "进入简历编辑页面。"
+      },
+      "personal_info": {
+        "title": "个人背景",
+        "description": "填写你的基本信息即可，如姓名、城市、邮箱、电话等。",
+        "tips": [
+          "可选项如 LinkedIn、GitHub 如有可填，没有可留空",
+          "照片为可选，不影响简历生成"
+        ]
+      },
+      "education": {
+        "title": "教育经历",
+        "description": "填写你的学校、专业、时间和成绩。如有多个学历，点击上方：",
+        "image": "/imgs/help/tianjiajiaoyu.png",
+        "image_alt": "添加教育经历按钮",
+        "after_image": "即可增加新的学校记录。课程可用中文或英文填写。"
+      },
+      "work_experience": {
+        "title": "实习/工作经历",
+        "description": "填写你做过的工作或实习经历。每段经历建议写清：",
+        "tips": [
+          "做了什么",
+          "用了什么工具或方法",
+          "带来了什么结果（如有）"
+        ],
+        "after_tips": "如果不会写英文，可以直接用中文输入，再点击右侧的",
+        "image": "/imgs/help/aibutton.png",
+        "image_alt": "AI生成按钮",
+        "after_image": "系统会帮你自动转成英文描述。**AI 可反复生成，不限制次数**，可以一直生成到你满意为止，选择比较满意的版本后再手动微调即可。如有多份工作，点击：",
+        "image2": "/imgs/help/tianjiagongzuo.png",
+        "image2_alt": "添加工作经历按钮",
+        "after_image2": "继续填写。"
+      },
+      "research_projects": {
+        "title": "科研/项目经历",
+        "description": "如有科研、课题、项目，可在此填写。可以填写：",
+        "tips": [
+          "项目名称",
+          "项目时间",
+          "项目目标",
+          "你做了什么"
+        ],
+        "after_tips": "同样支持中文输入，点击：",
+        "image": "/imgs/help/aibutton.png",
+        "image_alt": "AI生成按钮",
+        "after_image": "可自动转为专业英文描述。没有科研经历可跳过。**AI 生成同样支持多次使用**，直到出现你满意的版本。"
+      },
+      "activities": {
+        "title": "活动经历",
+        "description": "用于填写：",
+        "tips": [
+          "社团",
+          "志愿活动",
+          "比赛",
+          "校园项目"
+        ],
+        "after_tips": "有多段经历请点击：",
+        "image": "/imgs/help/addActivity.png",
+        "image_alt": "添加活动经历按钮",
+        "after_image": "添加更多内容。活动内容支持中文输入，点击：",
+        "image2": "/imgs/help/aibutton.png",
+        "image2_alt": "AI生成按钮",
+        "after_image2": "自动生成英文履历表述，**可多次生成选择最优版本**。"
+      },
+      "module_selection": {
+        "title": "内容模块勾选",
+        "description": "左侧是你的简历结构模块。你可以：",
+        "tips": [
+          "✅ 勾选：想在简历中显示的内容",
+          "❌ 不勾选：不需要显示的部分"
+        ],
+        "after_tips": "例如：",
+        "extra_tips": [
+          "不想显示科研 → 取消勾选即可",
+          "只做求职 → 勾选「工作经历 + 技能」即可"
+        ],
+        "image": "/imgs/help/mokuai.png",
+        "image_alt": "内容模块勾选界面",
+        "after_image": "系统会根据你的勾选内容，自动生成简历结构。"
+      },
+      "preview_edit": {
+        "title": "预览与编辑",
+        "description": "在这个页面你依然可以修改教育经历、工作/实习经历、项目/科研、活动经历。",
+        "warning": "此页面不支持再次使用 AI 生成。如果你想重新让 AI 帮你写内容，请返回填写页面点击「AI 生成」。"
+      },
+      "template_selection": {
+        "title": "简历模板选择",
+        "description": "你可以在右侧选择不同简历模板。",
+        "tips": [
+          "每套模板只影响：排版方式、字体风格、模块位置视觉效果",
+          "内容本身不会改变"
+        ]
+      },
+      "layout_management": {
+        "title": "布局管理",
+        "description": "在「布局管理」中，你可以调整：",
+        "tips": [
+          "✅ 模块顺序"
+        ],
+        "after_tips": "通过拖动模块，可自由调整简历中显示顺序，例如：",
+        "extra_tips": [
+          "教育 → 放最前",
+          "工作 → 第一位",
+          "活动 → 放最后"
+        ],
+        "image": "/imgs/help/buju.png",
+        "image_alt": "布局管理界面",
+        "after_image": "✅ 左右布局\n\n可设置哪些内容显示在：",
+        "extra_tips2": [
+          "主体区域",
+          "侧边栏"
+        ],
+        "final_text": "实现更个性化排版。"
+      },
+      "theme_color": {
+        "title": "主题颜色",
+        "description": "可自由选择简历主色调，点击颜色即可预览效果，满意后保留即可。",
+        "colors": [
+          { "name": "红色", "style": "偏商务" },
+          { "name": "蓝色", "style": "偏学术" },
+          { "name": "绿色", "style": "科技感" },
+          { "name": "灰色", "style": "极简风" }
+        ]
+      },
+      "export": {
+        "title": "导出简历",
+        "description": "右上角支持导出 PDF 和 Word 格式。",
+        "formats": {
+          "pdf": {
+            "title": "PDF",
+            "suitable_for": ["投递公司", "正式提交", "不希望他人修改"]
+          },
+          "word": {
+            "title": "Word",
+            "suitable_for": ["想自己再修改", "交给中介/老师改", "个性微调内容"]
+          }
+        },
+        "tip": "如果你还想改内容 —— 推荐选择 Word 格式"
+      }
+    },
+    "quick_tips": {
+      "title": "快速提示",
+      "items": [
+        "AI 生成不限次数，可反复使用直到满意",
+        "中文输入 + AI 生成 = 专业英文描述",
+        "模块可自由勾选、排序、调整布局",
+        "多种模板和主题颜色任选"
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+import "@/app/globals.css";
+
+import { setRequestLocale } from "next-intl/server";
+import { locales } from "@/i18n/locale";
+import { cn } from "@/lib/utils";
+import NextTopLoader from "nextjs-toploader";
+
+export default async function RootLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}>) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const webUrl = process.env.NEXT_PUBLIC_WEB_URL || "";
+  const googleAdsenseCode = process.env.NEXT_PUBLIC_GOOGLE_ADCODE || "";
+
+  return (
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {googleAdsenseCode && (
+          <meta name="google-adsense-account" content={googleAdsenseCode} />
+        )}
+
+        <link rel="icon" href="/favicon.ico" />
+
+        {locales &&
+          locales.map((loc) => (
+            <link
+              key={loc}
+              rel="alternate"
+              hrefLang={loc}
+              href={`${webUrl}${loc === "en" ? "" : `/${loc}`}/`}
+            />
+          ))}
+        <link rel="alternate" hrefLang="x-default" href={webUrl} />
+      </head>
+      <body className={cn("min-h-screen overflow-x-hidden")}>
+        <NextTopLoader
+          color="#22c55e"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #22c55e,0 0 5px #22c55e"
+        />
+        {children}
+      </body>
+    </html>
+  );
+}

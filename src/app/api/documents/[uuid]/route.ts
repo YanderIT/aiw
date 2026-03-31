@@ -1,0 +1,95 @@
+import { NextResponse, NextRequest } from "next/server";
+import { headers } from "next/headers";
+import { customAuth } from "@/lib/auth";
+import { findUserByUuid } from "@/models/user";
+import { getDocumentDetail } from "@/services/document";
+import { updateDocument, DocumentStatus } from "@/models/document";
+
+interface RouteParams {
+  params: Promise<{
+    uuid: string;
+  }>;
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  try {
+    const session = await customAuth.api.getSession({ headers: await headers() });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await findUserByUuid(session.user.uuid!);
+    if (!user) {
+      return NextResponse.json({
+        error: "Session expired, please sign in again",
+        code: "SESSION_EXPIRED"
+      }, { status: 401 });
+    }
+
+    const { uuid } = await params;
+    const document = await getDocumentDetail(uuid);
+
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Verify document belongs to user
+    if (document.user_uuid !== user.uuid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: document
+    });
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch document" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const session = await customAuth.api.getSession({ headers: await headers() });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await findUserByUuid(session.user.uuid!);
+    if (!user) {
+      return NextResponse.json({
+        error: "Session expired, please sign in again",
+        code: "SESSION_EXPIRED"
+      }, { status: 401 });
+    }
+
+    const { uuid } = await params;
+    const document = await getDocumentDetail(uuid);
+
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Verify document belongs to user
+    if (document.user_uuid !== user.uuid) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Soft delete - update status to deleted
+    await updateDocument(uuid, { status: DocumentStatus.Deleted });
+
+    return NextResponse.json({
+      success: true,
+      message: "Document deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    return NextResponse.json(
+      { error: "Failed to delete document" },
+      { status: 500 }
+    );
+  }
+}

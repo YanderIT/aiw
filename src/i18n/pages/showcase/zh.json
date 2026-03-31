@@ -1,0 +1,126 @@
+{
+  "showcase": {
+    "name": "showcase",
+    "title": "我们的服务",
+    "description": "选择您需要的服务，开始您的留学申请之旅。",
+    "items": [
+      {
+        "title": "个人陈述",
+        "description": "AI辅助生成个性化的个人陈述。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/ps/400/300"
+        }
+      },
+      {
+        "title": "个人陈述评估",
+        "description": "AI深度评估您的个人陈述，提供改进建议。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/ps-eval/400/300"
+        }
+      },
+      {
+        "title": "个人陈述润色",
+        "description": "专家级AI润色，提升文书质量。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/ps-polish/400/300"
+        }
+      },
+      {
+        "title": "推荐信",
+        "description": "为您的推荐人生成强有力的推荐信草稿。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/rl/400/300"
+        }
+      },
+      {
+        "title": "推荐信评估",
+        "description": "评估推荐信草稿，确保内容有力。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/rl-eval/400/300"
+        }
+      },
+      {
+        "title": "推荐信润色",
+        "description": "AI润色推荐信，使其更具说服力。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/rl-polish/400/300"
+        }
+      },
+      {
+        "title": "简历",
+        "description": "根据目标院校和专业，智能生成简历。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/cv/400/300"
+        }
+      },
+      {
+        "title": "简历评估",
+        "description": "AI评估您的简历，突出您的优势。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/cv-eval/400/300"
+        }
+      },
+      {
+        "title": "简历润色",
+        "description": "优化简历内容与格式，提升竞争力。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/cv-polish/400/300"
+        }
+      },
+      {
+        "title": "目的陈述",
+        "description": "清晰阐述您的学术和职业目标。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/sop/400/300"
+        }
+      },
+      {
+        "title": "目的陈述评估",
+        "description": "评估您的目的陈述，使其更具深度。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/sop-eval/400/300"
+        }
+      },
+      {
+        "title": "目的陈述润色",
+        "description": "润色目的陈述，使其逻辑更严谨。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/sop-polish/400/300"
+        }
+      },
+      {
+        "title": "选校指导",
+        "description": "AI根据您的背景，推荐合适的院校。",
+        "url": "#",
+        "target": "_self",
+        "image": {
+          "src": "https://picsum.photos/seed/school/400/300"
+        }
+      }
+    ]
+  }
+}

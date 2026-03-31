@@ -1,0 +1,558 @@
+{
+  "template": "Essmote AI-template-one",
+  "theme": "light",
+  "header": {
+    "brand": {
+      "title": "Essmote AI",
+      "logo": {
+        "src": "/logo.png",
+        "alt": "Essmote AI"
+      },
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "Features",
+          "url": "/#feature",
+          "icon": "RiSparkling2Line"
+        },
+        {
+          "title": "Pricing",
+          "url": "/pricing",
+          "icon": "RiMoneyDollarCircleLine"
+        },
+        {
+          "title": "Showcase",
+          "url": "/showcase",
+          "icon": "RiApps2Line"
+        },
+        {
+          "title": "Help",
+          "url": "/help",
+          "icon": "RiBookOpenLine"
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "title": "Get Essmote AI",
+        "url": "https://Essmote AI.ai",
+        "target": "_blank",
+        "variant": "link",
+        "icon": "RiArrowRightUpLine"
+      }
+    ],
+    "show_sign": true,
+    "show_theme": false,
+    "show_locale": false
+  },
+  "hero": {
+    "title": "Ship Any AI Startups in hours, not days",
+    "highlight_text": "Ship Any",
+    "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups.<br/>Ship Fast with a variety of templates and components.",
+    "announcement": {
+      "label": "2025",
+      "title": "🎉 Happy New Year",
+      "url": "/#pricing"
+    },
+    "tip": "🎁 50% off before 2025",
+    "buttons": [
+      {
+        "title": "Get Started",
+        "icon": "RiFlashlightFill",
+        "url": "/creation-center",
+        "target": "_self",
+        "variant": "default"
+      },
+      {
+        "title": "Join Discord",
+        "icon": "RiDiscordFill",
+        "url": "https://discord.gg/HQNnrzjZQS",
+        "target": "_blank",
+        "variant": "outline"
+      }
+    ],
+    "show_happy_users": true,
+    "show_badge": false
+  },
+  "branding": {
+    "title": "Essmote AI is built on the shoulders of giants",
+    "items": [
+      {
+        "title": "Next.js",
+        "image": {
+          "src": "/imgs/logos/nextjs.svg",
+          "alt": "Next.js"
+        }
+      },
+      {
+        "title": "React",
+        "image": {
+          "src": "/imgs/logos/react.svg",
+          "alt": "React"
+        }
+      },
+      {
+        "title": "TailwindCSS",
+        "image": {
+          "src": "/imgs/logos/tailwindcss.svg",
+          "alt": "TailwindCSS"
+        }
+      },
+      {
+        "title": "Shadcn/UI",
+        "image": {
+          "src": "/imgs/logos/shadcn.svg",
+          "alt": "Shadcn/UI"
+        }
+      },
+      {
+        "title": "Vercel",
+        "image": {
+          "src": "/imgs/logos/vercel.svg",
+          "alt": "Vercel"
+        }
+      }
+    ]
+  },
+  "introduce": {
+    "name": "introduce",
+    "title": "What is Essmote AI",
+    "label": "Introduce",
+    "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups. Built in a variety of templates and components.",
+    "image": {
+      "src": "/imgs/features/1.png"
+    },
+    "items": [
+      {
+        "title": "Ready-to-use Templates",
+        "description": "Choose from dozens of production-ready AI SaaS templates to quickly start your project.",
+        "icon": "RiNextjsFill"
+      },
+      {
+        "title": "Infrastructure Setup",
+        "description": "Get instant access to scalable infrastructure with best practices built-in.",
+        "icon": "RiDatabase2Line"
+      },
+      {
+        "title": "Quick Deployment",
+        "description": "Deploy your AI SaaS application to production in hours, not days.",
+        "icon": "RiCloudyFill"
+      }
+    ]
+  },
+  "benefit": {
+    "name": "benefit",
+    "title": "Why Choose Essmote AI",
+    "label": "Benefits",
+    "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
+    "items": [
+      {
+        "title": "Complete Framework",
+        "description": "Built on Next.js with authentication, payments, and AI integration - everything works out of the box.",
+        "icon": "RiNextjsFill",
+        "image": {
+          "src": "/imgs/features/2.png"
+        }
+      },
+      {
+        "title": "Rich Templates Library",
+        "description": "Choose from various AI SaaS templates to kickstart your project - chatbots, image generation, and more.",
+        "icon": "RiClapperboardAiLine",
+        "image": {
+          "src": "/imgs/features/3.png"
+        }
+      },
+      {
+        "title": "Technical Guidance",
+        "description": "Get dedicated support and join our developer community to ensure your successful launch.",
+        "icon": "RiCodeFill",
+        "image": {
+          "src": "/imgs/features/4.png"
+        }
+      }
+    ]
+  },
+  "usage": {
+    "name": "usage",
+    "title": "How to Launch with Essmote AI",
+    "description": "Get your AI SaaS startup running in three simple steps:",
+    "image": {
+      "src": "/imgs/features/1.png"
+    },
+    "image_position": "left",
+    "text_align": "center",
+    "items": [
+      {
+        "title": "Get Essmote AI",
+        "description": "Buy Essmote AI with a one-time payment. Check your email for the code and documentation.",
+        "image": {
+          "src": "/imgs/features/5.png"
+        }
+      },
+      {
+        "title": "Start Your Project",
+        "description": "Read the documentation and clone the code of Essmote AI. Start building your AI SaaS startup.",
+        "image": {
+          "src": "/imgs/features/6.png"
+        }
+      },
+      {
+        "title": "Customize Your Project",
+        "description": "Modify the template with your data and contents. Specific AI functionality needs.",
+        "image": {
+          "src": "/imgs/features/7.png"
+        }
+      },
+      {
+        "title": "Deploy to Production",
+        "description": "Deploy your project to production with a few steps and start serving customers immediately.",
+        "image": {
+          "src": "/imgs/features/8.png"
+        }
+      }
+    ]
+  },
+  "features": {
+    "sectionTitle": "Core Features",
+    "sectionSubtitle": "AI-powered application document services tailored for your success",
+    "personalStatement": {
+      "title": "Personal Statement (PS) Generator",
+      "description": "From brainstorming to final draft, AI-assisted throughout to create a personal statement that showcases your unique strengths."
+    },
+    "resume": {
+      "title": "Resume (CV) Generator",
+      "description": "Intelligently adjust resume content and format based on target positions and schools, ensuring every resume perfectly matches requirements."
+    },
+    "coverLetterSop": {
+      "title": "Cover Letter/SOP Generator",
+      "description": "Professional cover letter and statement of purpose generator to help you clearly express your motivation and demonstrate your fit."
+    },
+    "nativeTeacher": {
+      "title": "Native English Teacher Review",
+      "description": "Experienced native English teachers provide professional polishing to ensure your documents are authentic, fluent, and academically appropriate."
+    },
+    "freeRevision": {
+      "title": "One Free Revision per Document",
+      "description": "We promise one free revision service for each document, striving for perfection and excellence."
+    },
+    "aiHumanPolish": {
+      "title": "AI + Human Dual Polish",
+      "description": "Combining AI intelligent analysis with professional human review, double assurance of document quality for the best application materials."
+    },
+    "startNow": "Start Now"
+  },
+  "feature": {
+    "name": "feature",
+    "title": "Key Features of Essmote AI",
+    "description": "Everything you need to launch your AI SaaS startup quickly and efficiently.",
+    "items": [
+      {
+        "title": "Next.js Boilerplate",
+        "description": "Production-ready Next.js templates with SEO-friendly structure and i18n support.",
+        "icon": "RiNextjsFill"
+      },
+      {
+        "title": "Authentication & Payments",
+        "description": "Integrated Google OAuth, one-tap login, and Stripe payment processing.",
+        "icon": "RiKey2Fill"
+      },
+      {
+        "title": "Data Infrastructure",
+        "description": "Built-in Supabase integration for reliable and scalable data storage.",
+        "icon": "RiDatabase2Line"
+      },
+      {
+        "title": "One-Click Deployment",
+        "description": "Seamless deployment to Vercel or Cloudflare with automated setup.",
+        "icon": "RiCloudy2Fill"
+      },
+      {
+        "title": "Business Analytics",
+        "description": "Integrated Google Analytics and Search Console for tracking growth.",
+        "icon": "RiBarChart2Line"
+      },
+      {
+        "title": "AI-Ready Infrastructure",
+        "description": "Pre-configured AI integration with built-in credits system and API sales.",
+        "icon": "RiRobot2Line"
+      }
+    ]
+  },
+  "stats": {
+    "name": "stats",
+    "label": "Stats",
+    "title": "Our Impact in Numbers",
+    "description": "Data speaks louder than words.",
+    "icon": "FaRegHeart",
+    "items": [
+      {
+        "title": "Documents Generated",
+        "label": "21000+",
+        "description": "Total documents"
+      },
+      {
+        "title": "User Satisfaction",
+        "label": "98.7%",
+        "description": "Satisfaction rate"
+      },
+      {
+        "title": "AI Polish Users",
+        "label": "6500+",
+        "description": "Used AI polishing"
+      },
+      {
+        "title": "Draft Generation",
+        "label": "3",
+        "description": "Minutes average"
+      },
+      {
+        "title": "Native Editors",
+        "label": "10+",
+        "description": "English native speakers"
+      }
+    ]
+  },
+  "testimonial": {
+    "name": "testimonial",
+    "label": "Testimonial",
+    "title": "What Users Say About Essmote AI",
+    "description": "Hear from developers and founders who launched their AI startups with Essmote AI.",
+    "icon": "GoThumbsup",
+    "items": [
+      {
+        "title": "David Chen",
+        "label": "Founder of AIWallpaper.shop",
+        "description": "Essmote AI saved us months of development time. We launched our AI wallpaper business in just 2 days and got our first paying customer within a week!",
+        "image": {
+          "src": "/imgs/users/1.png"
+        }
+      },
+      {
+        "title": "Rachel Kim",
+        "label": "CTO at HeyBeauty.ai",
+        "description": "The pre-built AI infrastructure is a game-changer. We didn't have to worry about architecture - just focused on our AI beauty tech and went live fast.",
+        "image": {
+          "src": "/imgs/users/2.png"
+        }
+      },
+      {
+        "title": "Marcus Thompson",
+        "label": "Solo Developer",
+        "description": "As a solo developer, Essmote AI gave me everything I needed - auth, payments, AI integration, and beautiful UI. Launched my SaaS in a weekend!",
+        "image": {
+          "src": "/imgs/users/3.png"
+        }
+      },
+      {
+        "title": "Sofia Garcia",
+        "label": "CEO of Melodisco",
+        "description": "The templates are production-ready and highly customizable. We built our AI music platform in hours instead of months. Incredible time-to-market!",
+        "image": {
+          "src": "/imgs/users/4.png"
+        }
+      },
+      {
+        "title": "James Wilson",
+        "label": "Tech Lead at GPTs.works",
+        "description": "Essmote AI's infrastructure is rock-solid. We scaled from 0 to 10k users without touching the backend. Best investment for our AI startup.",
+        "image": {
+          "src": "/imgs/users/5.png"
+        }
+      },
+      {
+        "title": "Anna Zhang",
+        "label": "Startup Founder",
+        "description": "From idea to launch in 3 days! Essmote AI's templates and deployment tools made it possible to test our AI business concept incredibly fast.",
+        "image": {
+          "src": "/imgs/users/6.png"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "name": "faq",
+    "label": "FAQ",
+    "title": "Frequently Asked Questions About Essmote AI",
+    "description": "Have another question? Contact us anytime.",
+    "items": [
+      {
+        "title": "Is it safe to use AI for essay writing? Will it be detected?",
+        "description": "We provide an assistive tool rather than a replacement for writing. Essmote AI helps you organize your thoughts and optimize expression, while the final document remains created by you, ensuring originality and uniqueness. We also implement anti-AI detection optimization to minimize risks."
+      },
+      {
+        "title": "What's the difference between Essmote AI and general LLMs like ChatGPT?",
+        "description": "Essmote AI is deeply optimized for study abroad application scenarios, with a rich database of successful essays and proprietary algorithms. Compared to general models, our output is more professional, more aligned with application logic, more natural in expression, and better meets admissions officers' expectations."
+      },
+      {
+        "title": "What if I'm not satisfied with the generated content?",
+        "description": "Each document comes with one free revision. After generation, you can submit revision requests and we'll optimize and polish based on your feedback. Note: Generation quality depends on how specific and complete your input is. We recommend providing detailed background, experiences, and goals for better results."
+      },
+      {
+        "title": "How does human editing work?",
+        "description": "We have professional essay editors familiar with North American and UK university application standards. They adjust tone, logic, and details to make essays more natural, fluent, and aligned with admissions officers' reading preferences."
+      },
+      {
+        "title": "Is my essay data secure?",
+        "description": "We take data security seriously. All essays are encrypted for storage and won't be accessed or leaked without authorization. Users can delete their essays at any time to ensure complete privacy control."
+      },
+      {
+        "title": "Which schools and programs does Essmote AI support?",
+        "description": "Essmote AI covers mainstream study abroad countries and most common schools and programs. Our model has strong generalization capabilities and can generate customized content based on your specific requirements."
+      },
+      {
+        "title": "Can I control the direction of generation?",
+        "description": "Yes. You can specify writing style and highlight specific experiences or achievements you want to showcase. The AI will adjust according to your instructions to generate content that better meets your needs."
+      },
+      {
+        "title": "Can I use both AI generation and human editing together?",
+        "description": "Yes. You can first use AI to quickly generate a draft, then have human editors provide secondary optimization, creating a dual guarantee of \"AI efficiency + human quality.\""
+      },
+      {
+        "title": "Can I just use human editing without AI?",
+        "description": "Absolutely. Our human editing service is independent. You can directly submit your existing drafts or essays for teacher editing and optimization."
+      },
+      {
+        "title": "Are the editors native speakers?",
+        "description": "Yes. Our editors are all native professionals familiar with North American and UK university writing and admission standards. They provide optimizations that best match target institutions in terms of language habits, logical structure, and cultural expression."
+      }
+    ]
+  },
+  "cta": {
+    "name": "cta",
+    "title": "Ship your first AI SaaS Startup",
+    "description": "Start from here, ship with Essmote AI.",
+    "buttons": [
+      {
+        "title": "Get Essmote AI",
+        "url": "https://Essmote AI.ai",
+        "target": "_blank",
+        "icon": "GoArrowUpRight"
+      },
+      {
+        "title": "Read Document",
+        "url": "https://docs.Essmote AI.ai",
+        "target": "_blank",
+        "variant": "outline"
+      }
+    ]
+  },
+  "footer": {
+    "name": "footer",
+    "brand": {
+      "title": "Essmote AI",
+      "description": "Essmote AI is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
+      "logo": {
+        "src": "/logo.png",
+        "alt": "Essmote AI"
+      },
+      "url": "/"
+    },
+    "copyright": "© 2025 • Essmote AI All rights reserved.",
+    "nav": {
+      "items": [
+        {
+          "title": "About",
+          "children": [
+            {
+              "title": "Features",
+              "url": "/#feature",
+              "target": "_self"
+            },
+            {
+              "title": "Showcases",
+              "url": "/#showcase",
+              "target": "_self"
+            },
+            {
+              "title": "Pricing",
+              "url": "/#pricing",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Resources",
+          "children": [
+            {
+              "title": "Documents",
+              "url": "https://docs.Essmote AI.ai",
+              "target": "_blank"
+            },
+            {
+              "title": "Components",
+              "url": "https://Essmote AI.ai/components",
+              "target": "_blank"
+            },
+            {
+              "title": "Templates",
+              "url": "https://Essmote AI.ai/templates",
+              "target": "_blank"
+            }
+          ]
+        },
+        {
+          "title": "Friends",
+          "children": [
+            {
+              "title": "ThinkAny",
+              "url": "https://thinkany.ai",
+              "target": "_blank"
+            },
+            {
+              "title": "HeyBeauty",
+              "url": "https://heybeauty.ai",
+              "target": "_blank"
+            },
+            {
+              "title": "Pagen",
+              "url": "https://pagen.so",
+              "target": "_blank"
+            }
+          ]
+        }
+      ]
+    },
+    "social": {
+      "items": [
+        {
+          "title": "X",
+          "icon": "RiTwitterXFill",
+          "url": "https://x.com/Essmote AIai",
+          "target": "_blank"
+        },
+        {
+          "title": "Github",
+          "icon": "RiGithubFill",
+          "url": "https://github.com/Essmote AIai",
+          "target": "_blank"
+        },
+        {
+          "title": "Discord",
+          "icon": "RiDiscordFill",
+          "url": "https://discord.gg/HQNnrzjZQS",
+          "target": "_blank"
+        },
+        {
+          "title": "Email",
+          "icon": "RiMailLine",
+          "url": "mailto:support@Essmote AI.ai",
+          "target": "_self"
+        }
+      ]
+    },
+    "agreement": {
+      "items": [
+        {
+          "title": "Privacy Policy",
+          "url": "/privacy-policy"
+        },
+        {
+          "title": "Terms of Service",
+          "url": "/terms-of-service"
+        }
+      ]
+    }
+  }
+}

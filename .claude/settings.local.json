@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/ssssllll/item、/aiw-main/aiw-main/src/app -path *auth* -type f)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(find /d/ssssllll/item、/aiw-main/aiw-main -path *forgot* -o -path *password-reset*)",
+      "Bash(grep -E \"src/.*\\\\.\\(tsx|ts\\)$\")",
+      "Bash(pnpm add:*)"
+    ]
+  }
+}

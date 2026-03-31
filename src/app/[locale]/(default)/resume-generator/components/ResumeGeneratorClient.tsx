@@ -1,0 +1,757 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
+import { Progress } from "@/components/ui/progress";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Bug, Code2, Wand2, Trash2, BookOpen } from "lucide-react";
+import { useRouter } from '@/i18n/navigation';
+import { GlobalLoading } from "@/components/ui/loading";
+import { toast } from "sonner";
+
+// Import context
+import { ResumeProvider, useResume } from "./ResumeContext";
+
+// Import module components
+import HeaderModule from "./modules/HeaderModule";
+import EducationModule from "./modules/EducationModule";
+import WorkExperienceModule from "./modules/WorkExperienceModule";
+import ResearchModule from "./modules/ResearchModule";
+import ActivitiesModule from "./modules/ActivitiesModule";
+import AwardsModule from "./modules/AwardsModule";
+import SkillsLanguageModule from "./modules/SkillsLanguageModule";
+
+// Import SVG icons
+import HeaderIcon from "./icons/HeaderIcon";
+import EducationIcon from "./icons/EducationIcon";
+import WorkExperienceIcon from "./icons/WorkExperienceIcon";
+import ResearchIcon from "./icons/ResearchIcon";
+import ActivitiesIcon from "./icons/ActivitiesIcon";
+import AwardsIcon from "./icons/AwardsIcon";
+import SkillsLanguageIcon from "./icons/SkillsLanguageIcon";
+
+export interface ResumeModule {
+  id: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  component: React.ComponentType;
+}
+
+// 确认页面组件
+function ConfirmationPage() {
+  const t = useTranslations();
+  const router = useRouter();
+  const { 
+    data,
+    getConfirmationData, 
+    getIncompleteSelections, 
+    canGenerate, 
+    toggleModuleSelection, 
+    isModuleRequired,
+    generationState,
+    setGenerationLoading,
+    setLanguagePreference
+  } = useResume();
+
+  // 开发调试功能 - 打印整体 JSON
+  const handleDebugPrint = () => {
+    console.log('=== Resume Data JSON ===');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('=== Resume Data Object ===');
+    console.log(data);
+  };
+  
+  // 处理生成按钮点击
+  const handleGenerate = async () => {
+    // 设置loading状态
+    setGenerationLoading(true);
+
+    try {
+      // 检查并扣除配额
+      const quotaRes = await fetch('/api/user/deduct-quota', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ function_type: 'resume-generator' }),
+      });
+      const quotaData = await quotaRes.json();
+      if (quotaData.code !== 0) {
+        toast.error(quotaData.message || '简历次数不足，请先购买套餐');
+        setGenerationLoading(false);
+        return;
+      }
+
+      // Create a new resume document
+      const response = await fetch('/api/documents/resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resumeData: data,
+          template: data.selectedTemplate,
+          themeColor: data.themeColor,
+          layoutConfiguration: data.layoutConfiguration,
+          moduleSelection: data.moduleSelection
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create resume document');
+      }
+
+      const result = await response.json();
+      
+      if (result.data?.uuid) {
+        // Redirect to edit page with the new document UUID
+        router.push(`resume-generator/edit/${result.data.uuid}`);
+      } else {
+        throw new Error('No document UUID returned');
+      }
+    } catch (error) {
+      console.error('Error creating resume:', error);
+      setGenerationLoading(false);
+      // You might want to show an error toast here
+    }
+  };
+  
+  const confirmationData = getConfirmationData();
+  const incompleteSelections = getIncompleteSelections();
+  const selectedItems = confirmationData.filter(item => item.isChecked);
+
+  // 获取所有可用的模块数据（包括选中和未选中的）
+  const allModuleItems = confirmationData;
+
+  // 处理模块ID映射
+  const getModuleKey = (moduleId: string) => {
+    if (moduleId === 'work-experience') return 'workExperience';
+    if (moduleId === 'skills-language') return 'skillsLanguage';
+    return moduleId;
+  };
+
+  return (
+    <>
+      <GlobalLoading isVisible={generationState.isGenerating} />
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-semibold text-foreground mb-2">确认简历内容</h2>
+          <p className="text-muted-foreground">请确认您要包含在简历中的内容，点击复选框可以切换选择</p>
+        </div>
+
+      {/* 开发调试按钮 - 仅在开发环境显示 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="flex justify-center mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDebugPrint}
+            className="bg-yellow-50 dark:bg-yellow-950/30 border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+          >
+            <Bug className="w-4 h-4 mr-2" />
+            打印简历 JSON (开发调试)
+          </Button>
+        </div>
+      )}
+
+      {/* 语言选择器 */}
+      {/* <div className="bg-muted/30 rounded-xl p-6">
+        <div className="flex items-center gap-4">
+          <Globe className="w-5 h-5 text-muted-foreground" />
+          <Label htmlFor="language-select" className="text-base font-medium">
+            简历语言 / Resume Language
+          </Label>
+          <Select
+            value={generationState.languagePreference}
+            onValueChange={(value: 'English' | 'Chinese') => setLanguagePreference(value)}
+          >
+            <SelectTrigger id="language-select" className="w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="English">English (英文)</SelectItem>
+              <SelectItem value="Chinese">中文 (Chinese)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 ml-9">
+          选择简历的生成语言 / Select the language for the resume
+        </p>
+      </div> */}
+
+      {/* 所有模块的可选择列表 */}
+      <div className="bg-muted/30 rounded-xl p-6">
+        <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-muted-foreground" />
+          文书模块：
+        </h3>
+        <ul className="space-y-3">
+          {allModuleItems.map((item) => {
+            const moduleKey = getModuleKey(item.moduleId);
+            const isRequired = isModuleRequired(moduleKey as any);
+            return (
+              <li key={item.moduleId} className="flex items-center gap-3 group">
+                <button
+                  className={`p-1 rounded-md transition-all duration-200 ${
+                    isRequired
+                      ? "text-red-500 cursor-not-allowed"
+                      : item.isChecked 
+                      ? "text-primary hover:text-primary/80 hover:scale-110" 
+                      : "text-muted-foreground hover:text-foreground hover:scale-110"
+                  }`}
+                  onClick={() => {
+                    if (!isRequired) {
+                      toggleModuleSelection(moduleKey as any);
+                    }
+                  }}
+                  disabled={isRequired}
+                  title={isRequired ? "此模块为必选，无法取消" : undefined}
+                >
+                  {item.isChecked ? (
+                    <CheckSquare className="w-5 h-5" />
+                  ) : (
+                    <Square className="w-5 h-5" />
+                  )}
+                </button>
+                <span className={`text-foreground flex-1 ${item.isChecked ? 'font-medium' : ''}`}>
+                  {item.title}
+                  {isRequired && (
+                    <span className="text-xs text-red-500 font-medium ml-2">必选</span>
+                  )}
+                </span>
+                {item.isChecked && item.hasContent && (
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">已填写</Badge>
+                )}
+                {item.isChecked && !item.hasContent && (
+                  <Badge variant="outline" className="border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-400">未填写</Badge>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* 选中内容的汇总 */}
+      {selectedItems.length > 0 && (
+        <div className="bg-primary/5 rounded-xl p-6">
+          <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-primary" />
+            已选择的内容汇总 ({selectedItems.length} 项)：
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            {selectedItems.map((item) => (
+              <div key={item.moduleId} className="flex items-center gap-2 text-sm">
+                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                <span className="text-foreground">{item.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 未完成的选择警告 */}
+      {incompleteSelections.length > 0 && (
+        <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+          <h3 className="text-lg font-medium text-yellow-800 dark:text-yellow-200 mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            需要完善的内容：
+          </h3>
+          <div className="space-y-4">
+            {incompleteSelections.map((item) => (
+              <div key={item.moduleId} className="bg-background rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                  <span className="text-yellow-800 dark:text-yellow-200 font-medium">{item.title}</span>
+                  <Badge variant="outline" className="border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-400">未填写</Badge>
+                </div>
+                {item.missingFields.length > 0 && (
+                  <div className="ml-8">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-2">缺少以下字段：</p>
+                    <div className="grid grid-cols-2 gap-1">
+                      {item.missingFields.map((field, index) => (
+                        <div key={index} className="flex items-center gap-1 text-sm">
+                          <div className="w-1 h-1 bg-yellow-500 dark:bg-yellow-400 rounded-full"></div>
+                          <span className="text-yellow-800 dark:text-yellow-200">{field}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-4">
+            请返回相应模块完善内容，或取消勾选不需要的模块。
+          </p>
+        </div>
+      )}
+
+      {/* 生成按钮 */}
+      <div className="flex justify-center pt-6">
+        <Button 
+          size="lg" 
+          className="bg-primary hover:bg-primary/90 px-8 py-3"
+          disabled={!canGenerate() || generationState.isGenerating}
+          onClick={handleGenerate}
+        >
+          {generationState.isGenerating ? (
+            <>
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              正在生成简历...
+            </>
+          ) : (
+            <>
+              生成简历 ({selectedItems.filter(item => item.hasContent).length} 项内容)
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+    </>
+  );
+}
+
+function ResumeGeneratorContent() {
+  const t = useTranslations();
+  const locale = useLocale();
+  const [activeModule, setActiveModule] = useState("header");
+  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
+  const [showDevMode, setShowDevMode] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const {
+    isModuleSelected,
+    isModuleRequired,
+    toggleModuleSelection,
+    getCompletedModulesCount,
+    getConfirmationData,
+    fillMockData,
+    clearAllData,
+    saveToCache
+  } = useResume();
+  const isDevEnvironment = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        setShowDevMode((prev) => {
+          const next = !prev;
+          if (next) {
+            setIsDevelopmentMode(true);
+          }
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
+
+  useEffect(() => {
+    const shouldEnableDevTools =
+      isDevEnvironment ||
+      (typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1"));
+
+    if (shouldEnableDevTools) {
+      setShowDevMode(true);
+      setIsDevelopmentMode(true);
+    }
+  }, [isDevEnvironment]);
+
+  const modules: ResumeModule[] = [
+    {
+      id: "header",
+      title: "个人背景",
+      icon: HeaderIcon,
+      component: HeaderModule,
+    },
+    {
+      id: "education",
+      title: "教育经历",
+      icon: EducationIcon,
+      component: EducationModule,
+    },
+    {
+      id: "work-experience",
+      title: "实习/工作经历",
+      icon: WorkExperienceIcon,
+      component: WorkExperienceModule,
+    },
+    {
+      id: "research",
+      title: "学术研究兴趣",
+      icon: ResearchIcon,
+      component: ResearchModule,
+    },
+    {
+      id: "activities",
+      title: "活动经历",
+      icon: ActivitiesIcon,
+      component: ActivitiesModule,
+    },
+    {
+      id: "awards",
+      title: "获奖情况",
+      icon: AwardsIcon,
+      component: AwardsModule,
+    },
+    {
+      id: "skills-language",
+      title: "技能语言",
+      icon: SkillsLanguageIcon,
+      component: SkillsLanguageModule,
+    },
+  ];
+
+  // 添加确认页面到模块列表
+  const allModules = [
+    ...modules,
+    {
+      id: "confirmation",
+      title: "确认页面",
+      icon: CheckCircle,
+      component: ConfirmationPage,
+    }
+  ];
+
+  const activeModuleData = allModules.find(module => module.id === activeModule);
+  const ActiveComponent = activeModuleData?.component || HeaderModule;
+
+  // 获取选中模块的数量和总数
+  const selectedCount = getConfirmationData().filter(item => item.isChecked && item.hasContent).length;
+  const totalModules = modules.length;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5">
+      {/* Header */}
+      <div className="bg-background/80 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">简历模块</h1>
+              <p className="text-muted-foreground mt-2 text-lg">
+                分模块填写您的信息，自由选择要包含的内容
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left Sidebar - Module Navigation */}
+          <div className="col-span-3">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+              {(showDevMode || isDevEnvironment) && (
+                <div className="mb-6 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">开发者工具</span>
+                    </div>
+                    {!isDevEnvironment && (
+                      <button
+                        onClick={() => setShowDevMode(false)}
+                        className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300"
+                        aria-label="关闭开发者工具"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+
+                  {isDevEnvironment ? (
+                    <Button
+                      onClick={() => {
+                        fillMockData();
+                        toast.success("已填充简历测试数据");
+                        saveToCache();
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="w-full gap-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700"
+                    >
+                      <Wand2 className="w-3 h-3" />
+                      一键填充测试数据
+                    </Button>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-muted-foreground">开发模式</span>
+                        <button
+                          onClick={() => setIsDevelopmentMode((prev) => !prev)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                            isDevelopmentMode ? "bg-primary" : "bg-muted"
+                          }`}
+                          aria-label="切换开发模式"
+                        >
+                          <span
+                            className={`${
+                              isDevelopmentMode ? "translate-x-5" : "translate-x-1"
+                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                          />
+                        </button>
+                      </div>
+
+                      {isDevelopmentMode && (
+                        <Button
+                          onClick={() => {
+                            fillMockData();
+                            toast.success("已填充简历测试数据");
+                            saveToCache();
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-2"
+                        >
+                          <Wand2 className="w-3 h-3" />
+                          一键填充测试数据
+                        </Button>
+                      )}
+                    </>
+                  )}
+
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {isDevEnvironment
+                      ? "开发环境：点击按钮快速加入示例数据"
+                      : "提示：使用 Ctrl/Cmd + Shift + D 切换开发者工具"}
+                  </div>
+                </div>
+              )}
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
+                简历模块
+              </h3>
+              <div className="space-y-3">
+                {modules.map((module) => {
+                  const Icon = module.icon;
+                  const moduleKey = module.id === 'work-experience' ? 'workExperience' : 
+                                   module.id === 'skills-language' ? 'skillsLanguage' : module.id;
+                  const isSelected = isModuleSelected(moduleKey as any);
+                  const isRequired = isModuleRequired(moduleKey as any);
+                  
+                  return (
+                    <div key={module.id} className="group">
+                      <div
+                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 relative cursor-pointer ${
+                          activeModule === module.id
+                            ? "bg-primary text-primary-foreground shadow-lg"
+                            : isSelected
+                            ? "bg-primary/10 text-primary hover:bg-primary/20"
+                            : "hover:bg-muted/50 text-foreground"
+                        }`}
+                        onClick={() => setActiveModule(module.id)}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <div className="font-medium text-sm">{module.title}</div>
+                          {isRequired && (
+                            <div className="text-xs text-red-500 font-medium"></div>
+                          )}
+                        </div>
+                        
+                        {/* 集成的选择按钮 */}
+                        <button
+                          className={`p-1.5 rounded-lg transition-all duration-200 ${
+                            isRequired 
+                              ? "bg-gray-100 text-red-300 cursor-not-allowed" 
+                              : isSelected 
+                              ? "bg-primary text-primary-foreground shadow-sm hover:scale-110" 
+                              : "bg-muted text-muted-foreground hover:bg-muted/80 hover:scale-110"
+                          } ${activeModule === module.id && !isRequired ? "bg-primary-foreground/20 text-primary-foreground" : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isRequired) {
+                              toggleModuleSelection(moduleKey as any);
+                            }
+                          }}
+                          disabled={isRequired}
+                          title={isRequired ? "此模块为必选，无法取消" : undefined}
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="w-4 h-4" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* 确认页面按钮 */}
+                <div className="pt-6 border-t border-border mt-6">
+                  <button
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ${
+                      activeModule === "confirmation"
+                        ? "bg-secondary text-secondary-foreground shadow-lg"
+                        : "bg-gradient-to-r from-secondary/20 to-secondary/10 text-foreground hover:from-secondary/30 hover:to-secondary/20"
+                    }`}
+                    onClick={() => setActiveModule("confirmation")}
+                  >
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-sm">确认并生成简历</div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 flex-shrink-0 opacity-60" />
+                  </button>
+                </div>
+
+                {/* 清空内容按钮 */}
+                <div className="pt-4 mt-4">
+                  <Button
+                    onClick={() => setShowClearDialog(true)}
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    一键清空
+                  </Button>
+                </div>
+              </div>
+
+              {/* Progress Summary */}
+              {/* <div className="mt-8 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl border border-primary/20">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-foreground">整体进度</span>
+                  <span className="text-sm font-semibold text-primary">
+                    {selectedCount}/{totalModules}
+                  </span>
+                </div>
+                <Progress 
+                  value={(selectedCount / totalModules) * 100} 
+                  className="h-2.5"
+                />
+                <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                  <span>已完成模块</span>
+                  <span>{Math.round((selectedCount / totalModules) * 100)}%</span>
+                </div>
+              </div> */}
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="col-span-9">
+            <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-8 shadow-sm min-h-[600px]">
+              <div className="flex items-center gap-4 mb-8">
+                {activeModuleData && (
+                  <>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      activeModule === "confirmation" ? "bg-secondary/20" : "bg-primary/20"
+                    }`}>
+                      <activeModuleData.icon className={`w-5 h-5 ${
+                        activeModule === "confirmation" ? "text-secondary" : "text-primary"
+                      }`} />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-foreground">{activeModuleData.title}</h2>
+                    <Link href={`/${locale}/help`} className="ml-auto">
+                      <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-primary">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="text-sm">{locale === 'zh' ? '查看教程' : 'View Tutorial'}</span>
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+              
+              {/* Active Module Component */}
+              <div className="min-h-[400px]">
+                <ActiveComponent />
+              </div>
+
+              {/* Module Navigation Footer - 只在非确认页面显示 */}
+              {activeModule !== "confirmation" && (
+                <div className="flex justify-between pt-8 mt-8 border-t border-border">
+                  <Button
+                    variant="outline"
+                    className="bg-background hover:bg-muted"
+                    onClick={() => {
+                      const currentIndex = modules.findIndex(m => m.id === activeModule);
+                      if (currentIndex > 0) {
+                        setActiveModule(modules[currentIndex - 1].id);
+                      }
+                    }}
+                    disabled={modules.findIndex(m => m.id === activeModule) === 0}
+                  >
+                    上一步
+                  </Button>
+                  
+                  <Button
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => {
+                      const currentIndex = modules.findIndex(m => m.id === activeModule);
+                      if (currentIndex < modules.length - 1) {
+                        setActiveModule(modules[currentIndex + 1].id);
+                      } else {
+                        // 最后一个模块，跳转到确认页面
+                        setActiveModule("confirmation");
+                      }
+                    }}
+                  >
+                    {modules.findIndex(m => m.id === activeModule) === modules.length - 1
+                      ? "确认内容"
+                      : "下一步"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 清空内容确认对话框 */}
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认清空所有内容</AlertDialogTitle>
+            <AlertDialogDescription>
+              此操作将清空所有已填写的内容，无法恢复。确定要继续吗？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                clearAllData();
+                toast.success("已清空所有内容");
+                setActiveModule("header"); // 重置到第一个模块
+                setShowClearDialog(false); // 关闭对话框
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              确认清空
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+export default function ResumeGeneratorClient() {
+  return (
+    <ResumeProvider>
+      <ResumeGeneratorContent />
+    </ResumeProvider>
+  );
+} 

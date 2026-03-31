@@ -1,0 +1,163 @@
+{
+  "help": {
+    "name": "help",
+    "label": "Help Center",
+    "title": "Resume Generator Tutorial",
+    "description": "Learn how to use Essmote AI resume generator - from filling information to exporting your resume.",
+    "sections": {
+      "getting_started": {
+        "title": "Getting Started",
+        "description": "Click the button in the top right corner",
+        "image": "/imgs/help/chuangzuozhongxin.png",
+        "image_alt": "Creation Center button",
+        "after_image": "to enter the resume editor page."
+      },
+      "personal_info": {
+        "title": "Personal Information",
+        "description": "Fill in your basic information such as name, city, email, phone, etc.",
+        "tips": [
+          "Optional fields like LinkedIn and GitHub can be filled if available, or left empty",
+          "Photo is optional and doesn't affect resume generation"
+        ]
+      },
+      "education": {
+        "title": "Education",
+        "description": "Fill in your school, major, dates, and grades. For multiple degrees, click the button above:",
+        "image": "/imgs/help/tianjiajiaoyu.png",
+        "image_alt": "Add education button",
+        "after_image": "to add new school records. Courses can be filled in Chinese or English."
+      },
+      "work_experience": {
+        "title": "Work / Internship Experience",
+        "description": "Fill in your work or internship experiences. For each experience, clearly describe:",
+        "tips": [
+          "What you did",
+          "Tools or methods used",
+          "Results achieved (if any)"
+        ],
+        "after_tips": "If you can't write in English, enter in Chinese and click the",
+        "image": "/imgs/help/aibutton.png",
+        "image_alt": "AI Generate button",
+        "after_image": "button to auto-convert to English. **AI generation is unlimited** - keep generating until you're satisfied. Choose the best version and fine-tune manually. For multiple jobs, click:",
+        "image2": "/imgs/help/tianjiagongzuo.png",
+        "image2_alt": "Add work experience button",
+        "after_image2": "to continue."
+      },
+      "research_projects": {
+        "title": "Research / Projects",
+        "description": "Fill in research, coursework, or project experiences if any. You can include:",
+        "tips": [
+          "Project name",
+          "Timeline",
+          "Objectives",
+          "Your contributions"
+        ],
+        "after_tips": "Supports Chinese input - click:",
+        "image": "/imgs/help/aibutton.png",
+        "image_alt": "AI Generate button",
+        "after_image": "to convert to professional English. Skip if you have no research experience. **AI generation can be used multiple times** until satisfied."
+      },
+      "activities": {
+        "title": "Activities",
+        "description": "For:",
+        "tips": [
+          "Clubs",
+          "Volunteer work",
+          "Competitions",
+          "Campus projects"
+        ],
+        "after_tips": "For multiple activities, click:",
+        "image": "/imgs/help/addActivity.png",
+        "image_alt": "Add activity button",
+        "after_image": "to add more. Activity content supports Chinese input, click:",
+        "image2": "/imgs/help/aibutton.png",
+        "image2_alt": "AI Generate button",
+        "after_image2": "to auto-generate English descriptions. **Generate multiple times to choose the best version**."
+      },
+      "module_selection": {
+        "title": "Module Selection",
+        "description": "The left panel shows your resume structure modules. You can:",
+        "tips": [
+          "✅ Check: content you want to display in resume",
+          "❌ Uncheck: sections you don't need"
+        ],
+        "after_tips": "For example:",
+        "extra_tips": [
+          "Don't want to show research → just uncheck it",
+          "Job seeking only → check 'Work Experience + Skills'"
+        ],
+        "image": "/imgs/help/mokuai.png",
+        "image_alt": "Module selection interface",
+        "after_image": "System automatically generates resume structure based on your selections."
+      },
+      "preview_edit": {
+        "title": "Preview & Edit",
+        "description": "On this page you can still modify education, work/internship, projects/research, and activities.",
+        "warning": "This page doesn't support AI regeneration. To have AI rewrite content, return to the input page and click 'AI Generate'."
+      },
+      "template_selection": {
+        "title": "Template Selection",
+        "description": "Select different resume templates on the right side.",
+        "tips": [
+          "Each template only affects: layout style, font style, and module positions",
+          "Content itself remains unchanged"
+        ]
+      },
+      "layout_management": {
+        "title": "Layout Management",
+        "description": "In 'Layout Management', you can adjust:",
+        "tips": [
+          "✅ Module Order"
+        ],
+        "after_tips": "Drag modules to freely adjust display order in resume, for example:",
+        "extra_tips": [
+          "Education → first",
+          "Work → top position",
+          "Activities → last"
+        ],
+        "image": "/imgs/help/buju.png",
+        "image_alt": "Layout management interface",
+        "after_image": "✅ Left-Right Layout\n\nSet which content displays in:",
+        "extra_tips2": [
+          "Main area",
+          "Sidebar"
+        ],
+        "final_text": "for personalized layout."
+      },
+      "theme_color": {
+        "title": "Theme Color",
+        "description": "Freely choose your resume's main color. Click to preview, keep what you like.",
+        "colors": [
+          { "name": "Red", "style": "Business" },
+          { "name": "Blue", "style": "Academic" },
+          { "name": "Green", "style": "Tech" },
+          { "name": "Gray", "style": "Minimalist" }
+        ]
+      },
+      "export": {
+        "title": "Export Resume",
+        "description": "Export to PDF or Word format from the top right corner.",
+        "formats": {
+          "pdf": {
+            "title": "PDF",
+            "suitable_for": ["Submitting to companies", "Formal submissions", "Prevent modifications"]
+          },
+          "word": {
+            "title": "Word",
+            "suitable_for": ["Further self-editing", "Send to agents/teachers", "Fine-tune content"]
+          }
+        },
+        "tip": "If you still want to edit content — Word format is recommended"
+      }
+    },
+    "quick_tips": {
+      "title": "Quick Tips",
+      "items": [
+        "AI generation is unlimited - use repeatedly until satisfied",
+        "Chinese input + AI generate = Professional English descriptions",
+        "Modules can be freely selected, ordered, and laid out",
+        "Multiple templates and theme colors available"
+      ]
+    }
+  }
+}
