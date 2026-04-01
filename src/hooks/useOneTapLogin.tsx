@@ -1,10 +1,11 @@
 "use client";
 
-import { authClient, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 import { useEffect } from "react";
 
 export default function useOneTapLogin() {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending } = useCustomSession();
 
   useEffect(() => {
     // Only trigger One Tap if not loading and not authenticated

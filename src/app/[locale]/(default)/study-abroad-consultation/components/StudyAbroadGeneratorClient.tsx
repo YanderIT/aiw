@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Square, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, User, GraduationCap, Target, Trophy, HelpCircle, FileText } from "lucide-react";
+import { CheckCircle, Square, ArrowRight, AlertTriangle, RefreshCw, User, GraduationCap, Target, Trophy, HelpCircle, FileText } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 
@@ -236,18 +236,7 @@ function ConfirmationPage() {
 
 function StudyAbroadGeneratorContent() {
   const [activeModule, setActiveModule] = useState("basicInfo");
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
-  const [showDevMode, setShowDevMode] = useState(false);
-  const { data, fillMockData, isSubmitting } = useStudyAbroad();
-  
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const devMode = urlParams.get('dev') === 'true';
-    if (devMode || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      setShowDevMode(true);
-      setIsDevelopmentMode(true);
-    }
-  }, []);
+  const { data, isSubmitting } = useStudyAbroad();
 
   const modules: StudyAbroadModule[] = [
     {
@@ -335,38 +324,6 @@ function StudyAbroadGeneratorContent() {
             </div>
             
             <div className="flex items-center gap-4">
-              {showDevMode && (
-                <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
-                  <Code2 className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">开发模式</span>
-                  <button
-                    onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      isDevelopmentMode ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  >
-                    <span
-                      className={`${
-                        isDevelopmentMode ? 'translate-x-5' : 'translate-x-1'
-                      } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                    />
-                  </button>
-                </div>
-              )}
-              
-              {showDevMode && isDevelopmentMode && (
-                <Button
-                  onClick={() => {
-                    fillMockData();
-                    toast.success('已填充模拟数据');
-                  }}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Wand2 className="w-4 h-4" />
-                  一键填充模拟数据
-                </Button>
-              )}
             </div>
           </div>
         </div>

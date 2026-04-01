@@ -7,12 +7,12 @@ import HeroBg from "./bg";
 import { Hero as HeroType } from "@/types/blocks/hero";
 import Icon from "@/components/icon";
 import { Link } from "@/i18n/navigation";
-import { useSession } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
 
 export default function Hero({ hero }: { hero: HeroType }) {
-  const { data: session } = useSession();
+  const { data: session } = useCustomSession();
   const { setShowSignModal } = useAppContext();
   const router = useRouter();
 

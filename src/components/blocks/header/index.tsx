@@ -31,14 +31,14 @@ import { Menu } from "lucide-react";
 import SignToggle from "@/components/sign/toggle";
 import ThemeToggle from "@/components/theme/toggle";
 import { cn } from "@/lib/utils";
-import { useSession } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 import { useAppContext } from "@/contexts/app";
 import { useRouter } from "@/i18n/navigation";
 import { GlobalLoading } from "@/components/ui/loading";
 import { useState } from "react";
 
 export default function Header({ header }: { header: HeaderType }) {
-  const { data: session } = useSession();
+  const { data: session } = useCustomSession();
   const { setShowSignModal } = useAppContext();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

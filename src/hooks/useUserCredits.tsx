@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 
 export function useUserCredits() {
-  const { data: session } = useSession();
+  const { data: session } = useCustomSession();
   const [credits, setCredits] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

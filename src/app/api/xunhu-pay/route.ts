@@ -24,6 +24,7 @@ export async function POST(req: Request) {
       cancel_url,
       discount_code,
       document_uuid,
+      payment_method,
     } = await req.json();
 
     if (!cancel_url) {
@@ -147,10 +148,14 @@ export async function POST(req: Request) {
     }
 
     const webUrl = process.env.NEXT_PUBLIC_WEB_URL || "";
+    const defaultPaymentUrl = process.env.XUNHU_PAYMENT_URL || "https://api.xunhupay.com/payment/do.html";
+    const wechatPaymentUrl = process.env.XUNHU_WECHAT_PAYMENT_URL || "https://api2.xunhupay.com/payment/do.html";
+    const paymentUrl = payment_method === "wechat" ? wechatPaymentUrl : defaultPaymentUrl;
+
     const payment = await xunhuSdk.createPayment({
       appid: process.env.XUNHU_APP_ID,
       appSecret: process.env.XUNHU_APP_SECRET,
-      paymentUrl: process.env.XUNHU_PAYMENT_URL,
+      paymentUrl,
       plugins: process.env.XUNHU_PLUGINS,
       order_id: order_no,
       money: (finalAmount / 100).toFixed(2),

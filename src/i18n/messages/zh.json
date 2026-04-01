@@ -110,16 +110,37 @@
     }
   },
   "my_credits": {
-    "title": "剩余次数",
+    "title": "我的次数",
     "left_tip": "剩余次数: {left_credits}",
-    "no_credits": "没有积分记录",
+    "no_credits": "暂无次数记录",
+    "no_quota": "暂无可用次数，请购买套餐",
     "recharge": "充值",
+    "remaining": "剩余次数",
+    "remaining_unit": "剩余次数",
+    "unit": "次",
+    "expired": "已过期",
     "table": {
+      "service_type": "服务类型",
+      "remaining": "剩余次数",
+      "expired_at": "到期时间",
+      "created_at": "获得时间",
       "trans_no": "交易号",
       "trans_type": "交易类型",
       "credits": "次数",
       "updated_at": "更新时间",
       "status": "状态"
+    },
+    "service_types": {
+      "recommendation": "推荐信",
+      "resume": "简历",
+      "universal": "通用"
+    },
+    "trans_types": {
+      "new_user": "注册赠送",
+      "order_pay": "购买套餐",
+      "system_add": "系统赠送",
+      "ping": "接口调用",
+      "doc_gen": "文档生成"
     }
   },
   "api_keys": {

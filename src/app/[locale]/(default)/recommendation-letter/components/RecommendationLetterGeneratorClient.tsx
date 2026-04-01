@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe, Trash2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Trash2 } from "lucide-react";
 import { toast } from 'sonner';
 import { GlobalLoading } from "@/components/ui/loading";
 
@@ -302,21 +302,7 @@ function ConfirmationPage() {
 function RecommendationLetterGeneratorContent() {
   const t = useTranslations();
   const [activeModule, setActiveModule] = useState("basicInfo");
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
-  const [showDevMode, setShowDevMode] = useState(false);
-  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, clearCache, saveToCache } = useRecommendationLetter();
-  
-  // 检查是否为开发环境
-  useEffect(() => {
-    // 可以通过URL参数启用开发模式
-    const urlParams = new URLSearchParams(window.location.search);
-    const devMode = urlParams.get('dev') === 'true';
-    if (devMode || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      setShowDevMode(true);
-      // 在开发环境下默认开启开发模式
-      setIsDevelopmentMode(true);
-    }
-  }, []);
+  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, clearCache, saveToCache } = useRecommendationLetter();
 
   const modules: RecommendationLetterModule[] = [
     {
@@ -410,40 +396,6 @@ function RecommendationLetterGeneratorContent() {
                 <Trash2 className="w-4 h-4" />
                 一键清空
               </Button>
-            {/* 开发模式开关 */}
-              {showDevMode && (
-                <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
-                  <Code2 className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">开发模式</span>
-                  <button
-                    onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      isDevelopmentMode ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  >
-                    <span
-                      className={`${
-                        isDevelopmentMode ? 'translate-x-5' : 'translate-x-1'
-                      } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                    />
-                  </button>
-                </div>
-              )}
-              
-              {/* 一键填充按钮 */}
-              {showDevMode && isDevelopmentMode && (
-                <Button
-                  onClick={() => {
-                    fillMockData();
-                    toast.success('已填充模拟数据');
-                  }}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Wand2 className="w-4 h-4" />
-                  一键填充模拟数据
-                </Button>
-              )}
             </div>
           </div>
         </div>

@@ -1,11 +1,9 @@
 import Empty from "@/components/blocks/empty";
 import TableSlot from "@/components/console/slots/table";
 import { Table as TableSlotType } from "@/types/slots/table";
-import { getCreditsByUserUuid } from "@/models/credit";
 import { getTranslations } from "next-intl/server";
-import { getUserCredits } from "@/services/credit";
 import { getUserUuid } from "@/services/user";
-import { getUserQuotaSummary } from "@/models/service-quota";
+import { getUserQuotaSummary, getQuotaRecordsByUserUuid } from "@/models/service-quota";
 import moment from "moment";
 
 export default async function () {
@@ -17,29 +15,28 @@ export default async function () {
     return <Empty message="no auth" />;
   }
 
-  const data = await getCreditsByUserUuid(user_uuid, 1, 100);
-  const userCredits = await getUserCredits(user_uuid);
   const quotaSummary = await getUserQuotaSummary(user_uuid);
+  const quotaRecords = await getQuotaRecordsByUserUuid(user_uuid, 1, 100);
 
   const serviceLabels: Record<string, string> = {
     ps_sop: "PS/SOP",
-    recommendation: "推荐信",
+    recommendation: t("my_credits.service_types.recommendation"),
     cover_letter: "Cover Letter",
-    resume: "简历",
-    universal: "通用",
+    resume: t("my_credits.service_types.resume"),
+    universal: t("my_credits.service_types.universal"),
   };
 
   const quotaDisplay = Object.entries(quotaSummary)
     .filter(([_, count]) => count > 0)
-    .map(([type, count]) => `${serviceLabels[type] || type}: ${count}次`)
+    .map(([type, count]: [string, number]) => `${serviceLabels[type] || type}: ${count}${t("my_credits.unit")}`)
     .join("  |  ");
 
   const table: TableSlotType = {
     title: t("my_credits.title"),
     tip: {
       title: quotaDisplay
-        ? `剩余次数 — ${quotaDisplay}`
-        : "暂无可用次数，请购买套餐",
+        ? `${t("my_credits.remaining")} — ${quotaDisplay}`
+        : t("my_credits.no_quota"),
     },
     toolbar: {
       items: [
@@ -53,26 +50,42 @@ export default async function () {
     },
     columns: [
       {
-        title: t("my_credits.table.trans_no"),
-        name: "trans_no",
+        title: t("my_credits.table.service_type"),
+        name: "service_type",
+        callback: (v: any) => {
+          return serviceLabels[v.service_type] || v.service_type;
+        },
       },
       {
-        title: t("my_credits.table.trans_type"),
-        name: "trans_type",
+        title: t("my_credits.table.remaining"),
+        name: "remaining",
+        callback: (v: any) => {
+          return `${v.remaining}${t("my_credits.unit")}`;
+        },
       },
       {
-        title: t("my_credits.table.credits"),
-        name: "credits",
+        title: t("my_credits.table.expired_at"),
+        name: "expired_at",
+        callback: (v: any) => {
+          if (!v.expired_at) return "-";
+          const expDate = moment(v.expired_at);
+          const isExpired = expDate.isBefore(moment());
+          const formatted = expDate.format("YYYY-MM-DD");
+          if (isExpired) {
+            return `${formatted} (${t("my_credits.expired")})`;
+          }
+          return formatted;
+        },
       },
       {
-        title: t("my_credits.table.updated_at"),
+        title: t("my_credits.table.created_at"),
         name: "created_at",
         callback: (v: any) => {
           return moment(v.created_at).format("YYYY-MM-DD HH:mm:ss");
         },
       },
     ],
-    data,
+    data: quotaRecords,
     empty_message: t("my_credits.no_credits"),
   };
 
@@ -89,7 +102,7 @@ export default async function () {
             <p className="text-2xl font-bold">
               {quotaSummary[type as keyof typeof quotaSummary] || 0}
             </p>
-            <p className="text-xs text-muted-foreground">剩余次数</p>
+            <p className="text-xs text-muted-foreground">{t("my_credits.remaining_unit")}</p>
           </div>
         ))}
       </div>

@@ -14,7 +14,9 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
     return null;
   }
 
-  const pricingItems = pricing.items ?? [];
+  const pricingItems = (pricing.items ?? []).filter(
+    (item) => item.group !== "hidden"
+  );
 
   const groupsWithItems = useMemo(() => {
     if (pricing.groups && pricing.groups.length > 0) {
@@ -176,11 +178,16 @@ export default function Pricing({ pricing }: { pricing: PricingType }) {
                             </span>
                             <span className="text-foreground/60">-&gt;</span>
                             <DiscountCheckoutModal item={item} cnPay={true}>
-                              <div className="inline-block rounded-md p-1.5 transition-all hover:cursor-pointer hover:bg-muted/60">
+                              <div className="inline-flex items-center gap-1.5 rounded-md p-1.5 transition-all hover:cursor-pointer hover:bg-muted/60">
                                 <img
-                                  src="/imgs/cnpay.png"
-                                  alt="cnpay"
-                                  className="h-8 w-16 rounded"
+                                  src="/imgs/weixinzhifu.svg"
+                                  alt="微信支付"
+                                  className="h-7 w-7 rounded"
+                                />
+                                <img
+                                  src="/imgs/zhifubao.svg"
+                                  alt="支付宝"
+                                  className="h-7 w-7 rounded"
                                 />
                               </div>
                             </DiscountCheckoutModal>

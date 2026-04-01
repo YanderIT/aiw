@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Code2, Wand2, Globe, Trash2 } from "lucide-react";
+import { CheckCircle, Square, CheckSquare, ArrowRight, AlertTriangle, RefreshCw, Globe, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
@@ -288,26 +288,7 @@ function ConfirmationPage() {
 function CoverLetterGeneratorContent() {
   const t = useTranslations();
   const [activeModule, setActiveModule] = useState("basicInfo");
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(false);
-  const [showDevMode, setShowDevMode] = useState(false);
-  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, fillMockData, clearCache, saveToCache } = useCoverLetter();
-  
-  // Auto-show dev mode in development environment
-  const isDevEnvironment = process.env.NODE_ENV === 'development';
-
-  // 检测键盘快捷键
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + Shift + D 显示开发模式
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        setShowDevMode(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  const { isModuleSelected, toggleModuleSelection, getCompletedModulesCount, getConfirmationData, generationState, clearCache, saveToCache } = useCoverLetter();
 
   const modules: CoverLetterModule[] = [
     {
@@ -412,84 +393,6 @@ function CoverLetterGeneratorContent() {
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-6">
                 文书模块
               </h3>
-              
-              {/* 开发模式控制 - 在开发环境中默认显示 */}
-              {(showDevMode || isDevEnvironment) && (
-                <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Code2 className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                      <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">开发者工具</span>
-                    </div>
-                    {!isDevEnvironment && (
-                      <button
-                        onClick={() => setShowDevMode(false)}
-                        className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                  
-                  {/* 在开发环境中直接显示填充按钮 */}
-                  {isDevEnvironment ? (
-                    <Button
-                      onClick={() => {
-                        fillMockData();
-                        toast.success('测试数据已填充');
-                        saveToCache();
-                      }}
-                      size="sm"
-                      variant="outline"
-                      className="w-full gap-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700"
-                    >
-                      <Wand2 className="w-3 h-3" />
-                      一键填充测试数据
-                    </Button>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm text-muted-foreground">开发模式</span>
-                        <button
-                          onClick={() => setIsDevelopmentMode(!isDevelopmentMode)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                            isDevelopmentMode ? 'bg-primary' : 'bg-muted'
-                          }`}
-                        >
-                          <span
-                            className={`${
-                              isDevelopmentMode ? 'translate-x-5' : 'translate-x-1'
-                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                          />
-                        </button>
-                      </div>
-                      
-                      {/* 一键填充按钮 */}
-                      {isDevelopmentMode && (
-                        <Button
-                          onClick={() => {
-                            fillMockData();
-                            toast.success('测试数据已填充');
-                            saveToCache();
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="w-full gap-2"
-                        >
-                          <Wand2 className="w-3 h-3" />
-                          一键填充测试数据
-                        </Button>
-                      )}
-                    </>
-                  )}
-                  
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    {isDevEnvironment 
-                      ? '开发环境：点击按钮填充测试数据' 
-                      : '提示：使用 Ctrl/Cmd + Shift + D 可以快速切换开发者工具'}
-                  </div>
-                </div>
-              )}
               
               <div className="space-y-3">
                 {modules.map((module) => {

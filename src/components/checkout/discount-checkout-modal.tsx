@@ -13,11 +13,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, CreditCard, Loader2, Wallet } from "lucide-react";
+import { ShoppingCart, CreditCard, Loader2, Wallet, Check } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { useAppContext } from "@/contexts/app";
 import DiscountCodeInput from "./discount-code-input";
+
+type PaymentMethod = "wechat" | "alipay";
 
 interface DiscountCheckoutModalProps {
   item: PricingItem;
@@ -43,6 +45,7 @@ export default function DiscountCheckoutModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [discountData, setDiscountData] = useState<DiscountData | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("alipay");
 
   const useXunhuPay = cnPay || item.currency?.toLowerCase() === "cny";
   const originalAmount = useXunhuPay
@@ -59,6 +62,11 @@ export default function DiscountCheckoutModal({
         return;
       }
 
+      if (useXunhuPay && paymentMethod === "wechat") {
+        toast.error("微信支付暂未开通，请选择支付宝支付");
+        return;
+      }
+
       const endpoint = useXunhuPay ? "/api/xunhu-pay" : "/api/checkout";
       const params = {
         product_id: item.product_id,
@@ -69,6 +77,7 @@ export default function DiscountCheckoutModal({
         currency: useXunhuPay ? "cny" : item.currency,
         valid_months: item.valid_months,
         discount_code: discountData?.code || undefined,
+        ...(useXunhuPay ? { payment_method: paymentMethod } : {}),
         ...extraParams,
       };
 
@@ -273,13 +282,55 @@ export default function DiscountCheckoutModal({
           <div className="space-y-3">
             {useXunhuPay && (
               <div className="space-y-2">
-                <p className="text-sm text-gray-600">Payment method</p>
-                <div className="flex gap-2">
-                  <img
-                    src="/imgs/cnpay.png"
-                    alt="cnpay"
-                    className="h-10 w-20 rounded-lg"
-                  />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">选择支付方式</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("wechat")}
+                    className={`relative flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all duration-200 cursor-pointer ${
+                      paymentMethod === "wechat"
+                        ? "border-green-500 bg-green-50 dark:bg-green-950/30 shadow-sm"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 ${
+                        paymentMethod === "wechat"
+                          ? "border-green-500 bg-green-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      {paymentMethod === "wechat" && (
+                        <Check className="h-3 w-3 text-white" />
+                      )}
+                    </div>
+                    <img src="/imgs/weixinzhifu.svg" alt="微信支付" className="h-6 w-6 shrink-0" />
+                    <span className="text-sm font-medium">微信支付</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("alipay")}
+                    className={`relative flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all duration-200 cursor-pointer ${
+                      paymentMethod === "alipay"
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-sm"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200 ${
+                        paymentMethod === "alipay"
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    >
+                      {paymentMethod === "alipay" && (
+                        <Check className="h-3 w-3 text-white" />
+                      )}
+                    </div>
+                    <img src="/imgs/zhifubao.svg" alt="支付宝" className="h-6 w-6 shrink-0" />
+                    <span className="text-sm font-medium">支付宝</span>
+                  </button>
                 </div>
               </div>
             )}

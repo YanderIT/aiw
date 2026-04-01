@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "@/lib/auth-client";
+import { useCustomSession } from "@/hooks/useCustomSession";
 import { useAppContext } from "@/contexts/app";
 import NewcomerPopup from "./newcomer-popup";
 import NewcomerBanner from "./newcomer-banner";
@@ -11,7 +11,7 @@ const NEWCOMER_POPUP_DISMISSED_KEY = "newcomer_popup_dismissed";
 const NEWCOMER_BANNER_DISMISSED_KEY = "newcomer_banner_dismissed";
 
 export default function NewcomerManager() {
-  const { data: session } = useSession();
+  const { data: session } = useCustomSession();
   const { user } = useAppContext();
   const [showPopup, setShowPopup] = useState(false);
   const [showBanner, setShowBanner] = useState(false);

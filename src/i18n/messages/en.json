@@ -92,14 +92,35 @@
   "my_credits": {
     "title": "My Credits",
     "left_tip": "left credits: {left_credits}",
-    "no_credits": "No credits records",
+    "no_credits": "No credit records",
+    "no_quota": "No available credits, please purchase a package",
     "recharge": "Recharge",
+    "remaining": "Remaining",
+    "remaining_unit": "remaining",
+    "unit": "",
+    "expired": "expired",
     "table": {
+      "service_type": "Service Type",
+      "remaining": "Remaining",
+      "expired_at": "Expires",
+      "created_at": "Acquired",
       "trans_no": "Trans No",
       "trans_type": "Trans Type",
       "credits": "Credits",
       "updated_at": "Updated At",
       "status": "Status"
+    },
+    "service_types": {
+      "recommendation": "Recommendation Letter",
+      "resume": "Resume",
+      "universal": "Universal"
+    },
+    "trans_types": {
+      "new_user": "Sign-up Bonus",
+      "order_pay": "Package Purchase",
+      "system_add": "System Bonus",
+      "ping": "API Call",
+      "doc_gen": "Document Generation"
     }
   },
   "api_keys": {

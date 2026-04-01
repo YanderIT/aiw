@@ -1,21 +1,20 @@
 import { getUsers } from "@/models/user";
-import { getUserCredits } from "@/services/credit";
+import { getUserQuotaSummary, ServiceType } from "@/models/service-quota";
 import UsersManagement from "./components/users-management";
 
 export default async function AdminUsersPage() {
   const users = await getUsers(1, 50);
 
-  const creditsMap: Record<string, number> = {};
+  const quotasMap: Record<string, Record<ServiceType, number>> = {};
   if (users && users.length > 0) {
     await Promise.all(
       users.map(async (user: any) => {
         if (user.uuid) {
-          const credits = await getUserCredits(user.uuid);
-          creditsMap[user.uuid] = credits.left_credits;
+          quotasMap[user.uuid] = await getUserQuotaSummary(user.uuid);
         }
       })
     );
   }
 
-  return <UsersManagement users={users || []} userCreditsMap={creditsMap} />;
+  return <UsersManagement users={users || []} userQuotasMap={quotasMap} />;
 }

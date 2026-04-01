@@ -129,6 +129,49 @@ export async function deductQuota(
 }
 
 /**
+ * 管理员手动增加指定服务类型的配额
+ */
+export async function addAdminQuota(
+  userUuid: string,
+  serviceType: ServiceType,
+  amount: number,
+  expiredAt: string
+): Promise<void> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.from("service_quotas").insert({
+    user_uuid: userUuid,
+    service_type: serviceType,
+    remaining: amount,
+    order_no: "admin_manual",
+    expired_at: expiredAt,
+  });
+  if (error) {
+    console.error("管理员添加配额失败:", JSON.stringify(error));
+    throw error;
+  }
+}
+
+/**
+ * 获取用户所有配额记录（含已用完和未过期的）
+ */
+export async function getQuotaRecordsByUserUuid(
+  userUuid: string,
+  page: number = 1,
+  limit: number = 100
+): Promise<ServiceQuota[]> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("service_quotas")
+    .select("*")
+    .eq("user_uuid", userUuid)
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+
+  if (error || !data) return [];
+  return data;
+}
+
+/**
  * 获取用户所有服务类型的剩余次数汇总
  */
 export async function getUserQuotaSummary(

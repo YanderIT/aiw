@@ -19,7 +19,6 @@ import {
   ChartBar,
   Loader2,
   Globe,
-  Wand2,
   BookOpen,
   Trash2
 } from "lucide-react";
@@ -56,21 +55,6 @@ function SOPForm() {
   } = useSOP();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 开发模式下的示例数据
-  const fillSampleData = () => {
-    const sampleData = {
-      target: "I am applying for the PhD program in Computer Science at Stanford University, focusing on artificial intelligence and machine learning research. My goal is to contribute to the advancement of AI technologies that can solve real-world problems.",
-      education: "Bachelor of Science in Computer Science from Tsinghua University (2019-2023), GPA: 3.9/4.0. Relevant coursework includes: Advanced Algorithms, Machine Learning, Deep Learning, Natural Language Processing, Computer Vision, and Statistical Methods. Dean's List for 6 consecutive semesters.",
-      skill: "Programming Languages: Python, Java, C++, JavaScript, MATLAB. Machine Learning Frameworks: TensorFlow, PyTorch, Scikit-learn, Keras. Deep Learning: CNNs, RNNs, Transformers, GANs. Research Tools: LaTeX, Git, Docker, AWS. Publications: 3 papers in top-tier ML conferences (NeurIPS, ICML).",
-      research: "Research Assistant at Tsinghua AI Lab (2021-2023): Developed novel attention mechanisms for vision transformers, improving accuracy by 15% on ImageNet. Summer Research Intern at Microsoft Research Asia (2022): Worked on large language model optimization, reducing inference time by 30%. Published paper 'Efficient Attention Mechanisms for Vision Transformers' at NeurIPS 2023.",
-      workExperience: "Machine Learning Engineer Intern at ByteDance AI Lab (Summer 2022): Developed recommendation algorithms serving 100M+ users daily. Data Science Intern at Alibaba Cloud (Winter 2021): Built predictive models for cloud resource optimization, saving 20% in operational costs. Teaching Assistant for Machine Learning course (2022-2023): Mentored 50+ students in ML projects.",
-      plan: "My long-term goal is to become a leading researcher in AI safety and interpretability. During my PhD, I plan to focus on developing more transparent and reliable AI systems. After graduation, I aim to continue research in academia or industry research labs, working on ensuring AI systems are beneficial, safe, and aligned with human values. I believe Stanford's world-class faculty and resources will provide the perfect environment for achieving these goals."
-    };
-    
-    updateData(sampleData);
-    toast.success("已填充示例数据");
-  };
 
   const handleSubmit = async () => {
     if (!canGenerate()) {
@@ -156,21 +140,6 @@ function SOPForm() {
             </Button>
           </Link>
         </div>
-
-        {/* 开发模式下显示填充按钮 */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fillSampleData}
-              className="gap-2"
-            >
-              <Wand2 className="w-4 h-4" />
-              填充示例数据（开发模式）
-            </Button>
-          </div>
-        )}
 
         {/* 一键清空按钮 */}
         <div className="mt-4">

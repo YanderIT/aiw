@@ -1,5 +1,5 @@
 import SignForm from "@/components/sign/form";
-import { auth } from "@/lib/auth";
+import { customAuth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -10,8 +10,8 @@ export default async function SignInPage({
 }) {
   const { callbackUrl } = await searchParams;
 
-  // Get session using Better Auth
-  const session = await auth.api.getSession({
+  // Get session using custom auth (matches the session created by /api/auth/login)
+  const session = await customAuth.api.getSession({
     headers: await headers(),
   });
 

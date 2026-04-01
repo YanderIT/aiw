@@ -19,7 +19,6 @@ import {
   ChartBar,
   Loader2,
   Globe,
-  Wand2,
   User,
   BookOpen,
   Trash2
@@ -57,21 +56,6 @@ function PSForm() {
   } = usePS();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 开发模式下的示例数据
-  const fillSampleData = () => {
-    const sampleData = {
-      target: "I am applying for the Master's program in Data Science at MIT, with a focus on machine learning applications in healthcare. My goal is to develop AI-driven solutions that can improve patient outcomes and make healthcare more accessible.",
-      education: "Bachelor of Science in Computer Science from Peking University (2019-2023), GPA: 3.85/4.0. Relevant coursework includes: Data Structures, Algorithms, Machine Learning, Statistical Analysis, Database Systems, and Artificial Intelligence. Graduated with honors and received the Outstanding Student Award.",
-      skill: "Programming Languages: Python, R, SQL, Java, C++. Data Science Tools: pandas, NumPy, scikit-learn, TensorFlow, PyTorch. Data Visualization: Matplotlib, Seaborn, Tableau. Big Data: Spark, Hadoop. Cloud Platforms: AWS, Google Cloud. Statistical Software: SPSS, SAS.",
-      research: "Undergraduate Research Assistant at PKU AI Lab (2021-2023): Developed machine learning models for medical image analysis, achieving 92% accuracy in tumor detection. Published paper 'Deep Learning for Medical Diagnosis' in IEEE Medical Imaging Conference 2023. Collaborated with Beijing Hospital on a predictive model for patient readmission rates.",
-      workExperience: "Data Science Intern at Tencent Healthcare (Summer 2022): Built predictive models for disease progression analysis. Software Engineering Intern at Baidu (Winter 2021): Developed data pipeline for processing medical records. Teaching Assistant for Data Structures course (2022-2023): Helped 60+ students understand complex algorithms.",
-      reason: "I am passionate about leveraging AI to solve healthcare challenges because I witnessed firsthand how technology gaps affect patient care in rural areas. My unique combination of technical expertise and healthcare domain knowledge, coupled with MIT's world-class resources and faculty, will enable me to develop innovative solutions that bridge this gap and make quality healthcare accessible to all."
-    };
-    
-    updateData(sampleData);
-    toast.success("已填充示例数据");
-  };
 
   const handleSubmit = async () => {
     if (!canGenerate()) {
@@ -157,21 +141,6 @@ function PSForm() {
             </Button>
           </Link>
         </div>
-
-        {/* 开发模式下显示填充按钮 */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fillSampleData}
-              className="gap-2"
-            >
-              <Wand2 className="w-4 h-4" />
-              填充示例数据（开发模式）
-            </Button>
-          </div>
-        )}
 
         {/* 一键清空按钮 */}
         <div className="mt-4">
